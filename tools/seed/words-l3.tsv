@@ -1,0 +1,88 @@
+word	level	grade	pos	meaning	meaningAlt	synonyms	tags	freq	example	exampleKo	image
+shoulder	3	elementary_4	noun	어깨			body	mid	My shoulder hurts today.	오늘 내 어깨가 아프다.
+knee	3	elementary_4	noun	무릎			body	mid	He fell and hurt his knee.	그는 넘어져서 무릎을 다쳤다.
+finger	3	elementary_4	noun	손가락			body	mid	I point with my finger.	나는 손가락으로 가리킨다.
+toe	3	elementary_4	noun	발가락			body	low	My toe is very cold.	내 발가락이 매우 차갑다.
+tooth	3	elementary_4	noun	치아			body	mid	Brush every tooth well.	모든 치아를 잘 닦아라.
+tongue	3	elementary_4	noun	혀			body	low	The dog cools its tongue.	그 개는 혀를 식힌다.
+neck	3	elementary_4	noun	목			body	mid	A giraffe has a long neck.	기린은 긴 목을 가졌다.
+shirt	3	elementary_4	noun	셔츠			clothes	high	My shirt is blue and white.	내 셔츠는 파랗고 하얗다.
+pants	3	elementary_4	noun	바지			clothes	high	These pants are too long.	이 바지는 너무 길다.
+skirt	3	elementary_4	noun	치마			clothes	mid	Her skirt is very short.	그녀의 치마는 매우 짧다.
+coat	3	elementary_4	noun	외투			clothes	mid	Wear a warm coat today.	오늘 따뜻한 외투를 입어라.
+shoes	3	elementary_4	noun	신발			clothes	high	My new shoes are clean.	내 새 신발은 깨끗하다.
+socks	3	elementary_4	noun	양말			clothes	mid	I wash my socks every day.	나는 매일 양말을 빤다.
+hat	3	elementary_4	noun	모자			clothes	high	He wears a black hat.	그는 검은 모자를 쓴다.
+gloves	3	elementary_4	noun	장갑			clothes	mid	Wear gloves in the snow.	눈이 올 때 장갑을 껴라.
+cloud	3	elementary_4	noun	구름			weather	high	One cloud covers the sun.	구름 하나가 해를 가린다.
+wind	3	elementary_4	noun	바람			weather	high	The wind is very strong.	바람이 매우 강하다.
+storm	3	elementary_4	noun	폭풍			weather	mid	The storm broke the window.	폭풍이 창문을 깨뜨렸다.
+fog	3	elementary_4	noun	안개			weather	low	Thick fog covers the river.	짙은 안개가 강을 덮는다.
+rainbow	3	elementary_4	noun	무지개			weather	mid	A rainbow is in the sky.	무지개가 하늘에 있다.
+warm	3	elementary_4	adjective	따뜻한			temperature|weather	high	The soup is still warm.	그 수프는 아직 따뜻하다.
+cool	3	elementary_4	adjective	시원한			temperature|weather	high	The evening wind is cool.	저녁 바람이 시원하다.
+dry	3	elementary_4	adjective	마른			temperature|quality	mid	The towel is dry now.	그 수건은 이제 말랐다.
+wet	3	elementary_4	adjective	젖은			temperature|quality	mid	My shoes are wet again.	내 신발이 또 젖었다.
+bus	3	elementary_4	noun	버스			transport	high	I take the bus to school.	나는 버스를 타고 학교에 간다.
+train	3	elementary_4	noun	기차			transport	high	The train arrives at six.	그 기차는 여섯 시에 도착한다.
+subway	3	elementary_4	noun	지하철			transport	mid	The subway is very fast.	지하철은 매우 빠르다.
+airplane	3	elementary_4	noun	비행기			transport	mid	An airplane flies over us.	비행기가 우리 위로 난다.
+bicycle	3	elementary_4	noun	자전거			transport	high	I ride my bicycle daily.	나는 매일 자전거를 탄다.
+ship	3	elementary_4	noun	배(선박)			transport	mid	The ship carries fruit.	그 배는 과일을 나른다.
+taxi	3	elementary_4	noun	택시			transport	mid	We wait for a taxi.	우리는 택시를 기다린다.
+class	3	elementary_4	noun	수업			school	high	Our class starts at nine.	우리 수업은 아홉 시에 시작한다.
+homework	3	elementary_4	noun	숙제			school	high	I finish my homework early.	나는 숙제를 일찍 끝낸다.
+test	3	elementary_4	noun	시험			school	high	The test was easy today.	오늘 시험은 쉬웠다.
+question	3	elementary_4	noun	질문			school	high	I have one question.	나는 질문이 하나 있다.
+answer	3	elementary_4	noun	답			school	high	Your answer is correct.	네 답은 맞다.
+subject	3	elementary_4	noun	과목			school	mid	Math is my best subject.	수학은 내가 가장 잘하는 과목이다.
+notebook	3	elementary_4	noun	공책			school	high	Write it in your notebook.	그것을 공책에 써라.
+eraser	3	elementary_4	noun	지우개			school	mid	May I borrow your eraser?	네 지우개를 빌려도 될까?
+ruler	3	elementary_4	noun	자(문구)			school	mid	Draw a line with a ruler.	자로 선을 그어라.
+scissors	3	elementary_4	noun	가위			school	mid	Use the scissors carefully.	가위를 조심해서 써라.
+glue	3	elementary_4	noun	풀(접착제)			school	low	Put glue on the paper.	종이에 풀을 발라라.
+begin	3	elementary_4	verb	시작하다		start	daily	high	The show begins soon.	그 공연은 곧 시작한다.
+start	3	elementary_4	verb	출발하다		begin	daily	high	We start at seven.	우리는 일곱 시에 출발한다.
+finish	3	elementary_4	verb	끝내다			daily	high	Finish your lunch first.	점심을 먼저 끝내라.
+choose	3	elementary_4	verb	고르다			daily	high	Choose one book, please.	책 한 권을 골라 주세요.
+push	3	elementary_4	verb	밀다			motion	high	Push the door slowly.	문을 천천히 밀어라.
+pull	3	elementary_4	verb	당기다			motion	high	Pull the rope hard.	줄을 세게 당겨라.
+build	3	elementary_4	verb	짓다			daily	mid	They build a new school.	그들은 새 학교를 짓는다.
+break	3	elementary_4	verb	부수다			daily	mid	Do not break the plate.	접시를 부수지 마라.
+fix	3	elementary_4	verb	고치다			daily	mid	Dad can fix my bicycle.	아빠가 내 자전거를 고칠 수 있다.
+hide	3	elementary_4	verb	숨다			motion	mid	The cat hides under the desk.	그 고양이는 책상 아래에 숨는다.
+follow	3	elementary_4	verb	따라가다			motion	high	Follow me to the park.	공원까지 나를 따라와라.
+arrive	3	elementary_4	verb	도착하다			daily	high	We arrive at the beach.	우리는 해변에 도착한다.
+leave	3	elementary_4	verb	떠나다			daily	high	They leave in the morning.	그들은 아침에 떠난다.
+enter	3	elementary_4	verb	들어가다			motion	mid	Please enter the library quietly.	도서관에 조용히 들어가세요.
+return	3	elementary_4	verb	돌아오다			daily	mid	I return home at five.	나는 다섯 시에 집에 돌아온다.
+invite	3	elementary_4	verb	초대하다			daily	mid	I invite my friends today.	나는 오늘 친구들을 초대한다.
+borrow	3	elementary_4	verb	빌리다			daily	mid	Can I borrow this notebook?	이 공책을 빌릴 수 있을까?
+cross	3	elementary_4	verb	건너다			motion	mid	Cross the road carefully.	길을 조심해서 건너라.
+count	3	elementary_4	verb	세다			daily	high	Count the apples again.	사과를 다시 세어라.
+young	3	elementary_4	adjective	어린			quality	high	The young bird cannot fly.	그 어린 새는 날 수 없다.
+poor	3	elementary_4	adjective	가난한			quality	mid	The poor farmer works hard.	그 가난한 농부는 열심히 일한다.
+rich	3	elementary_4	adjective	부유한			quality	mid	The rich city has many parks.	그 부유한 도시에는 공원이 많다.
+wide	3	elementary_4	adjective	넓은			size	mid	The river is wide here.	그 강은 여기서 넓다.
+narrow	3	elementary_4	adjective	좁은			size	mid	This road is too narrow.	이 길은 너무 좁다.
+deep	3	elementary_4	adjective	깊은			size	mid	The water is very deep.	그 물은 매우 깊다.
+thick	3	elementary_4	adjective	두꺼운			size	mid	I read a thick book.	나는 두꺼운 책을 읽는다.
+thin	3	elementary_4	adjective	얇은			size	mid	The paper is very thin.	그 종이는 매우 얇다.
+soft	3	elementary_4	adjective	부드러운			quality	mid	The bread is soft and warm.	그 빵은 부드럽고 따뜻하다.
+fresh	3	elementary_4	adjective	신선한			quality	mid	We buy fresh fruit.	우리는 신선한 과일을 산다.
+sweet	3	elementary_4	adjective	달콤한			taste	high	This juice is very sweet.	이 주스는 매우 달콤하다.
+sour	3	elementary_4	adjective	신맛의			taste	mid	The lemon is very sour.	그 레몬은 매우 신맛이다.
+salty	3	elementary_4	adjective	짠			taste	mid	The soup is too salty.	그 수프는 너무 짜다.
+spicy	3	elementary_4	adjective	매운			taste	mid	This soup is spicy.	이 수프는 맵다.
+bitter	3	elementary_4	adjective	쓴맛의			taste	low	The medicine tastes bitter.	그 약은 쓴맛이 난다.
+parents	3	elementary_4	noun	부모			family	high	My parents work together.	우리 부모는 함께 일한다.
+cousin	3	elementary_4	noun	사촌			family	mid	My cousin visits us today.	내 사촌이 오늘 우리를 방문한다.
+uncle	3	elementary_4	noun	삼촌			family	mid	My uncle drives a taxi.	우리 삼촌은 택시를 운전한다.
+aunt	3	elementary_4	noun	이모			family	mid	My aunt teaches science.	우리 이모는 과학을 가르친다.
+baby	3	elementary_4	noun	아기			family	high	The baby sleeps quietly.	그 아기는 조용히 잔다.
+child	3	elementary_4	noun	아이			family	high	Every child needs sleep.	모든 아이는 잠이 필요하다.
+adult	3	elementary_4	noun	어른			family	mid	One adult waits outside.	어른 한 명이 밖에서 기다린다.
+neighbor	3	elementary_4	noun	이웃			family	mid	Our neighbor has two dogs.	우리 이웃은 개 두 마리를 기른다.
+tea	3	elementary_4	noun	차(음료)			food|drink	high	Grandmother drinks warm tea.	할머니는 따뜻한 차를 마신다.
+coffee	3	elementary_4	noun	커피			food|drink	high	Dad drinks coffee every morning.	아빠는 매일 아침 커피를 마신다.
+soda	3	elementary_4	noun	탄산음료			food|drink	mid	Too much soda is bad.	탄산음료를 너무 많이 마시면 나쁘다.

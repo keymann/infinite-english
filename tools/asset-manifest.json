@@ -1,0 +1,144 @@
+{
+  "$comment": [
+    "3D 에셋 화이트리스트. `npm run assets` 가 이 목록만 읽어 public/models/*.glb 로 병합한다.",
+    "원본 kit 폴더(총 168MB)는 절대 public/ 로 복사하지 않는다.",
+    "bundle 하나 = HTTP 요청 하나. 게임 시작에 필요 없는 것은 별도 bundle 로 빼서 lazy 로드한다.",
+    "런타임에서는 노드 이름으로 꺼내 쓴다 — assets.get('tree_default').",
+    "★ 스킨드 캐릭터(애니메이션 있는 모델)는 bundle 하나에 하나만. 본 이름이 중복되면",
+    "  three 가 _1 을 붙여 애니메이션 바인딩이 조용히 깨진다 — 파이프라인이 에러로 막는다."
+  ],
+
+  "bundles": [
+    {
+      "name": "player",
+      "when": "eager",
+      "note": "MVP 는 1캐릭터. 애니 32종 내장(idle/jump/die/emote-yes/emote-no …).",
+      "dir": "mini-characters/Models/GLB format",
+      "models": ["character-male-a"]
+    },
+    {
+      "name": "player-female-a",
+      "when": "lazy",
+      "note": "Phase 6 해금 캐릭터 예시. 캐릭터는 리그가 같아도 bundle 을 합칠 수 없다(위 ★).",
+      "dir": "mini-characters/Models/GLB format",
+      "models": ["character-female-a"]
+    },
+    {
+      "name": "pet-fox",
+      "when": "lazy",
+      "note": "콤보 응원·수집 보상. 애니 8종(idle/walk/run/eat/dance/gesture±) 내장.",
+      "dir": "cube-pets_1.0/Models/GLB format",
+      "models": ["animal-fox"]
+    },
+    {
+      "name": "pet-cat",
+      "when": "lazy",
+      "dir": "cube-pets_1.0/Models/GLB format",
+      "models": ["animal-cat"]
+    },
+    {
+      "name": "world-forest",
+      "when": "eager",
+      "note": "WORLD 1 Word Forest. nature-kit 은 텍스처 없이 머티리얼만 쓴다.",
+      "dir": "nature-kit/Models/GLTF format",
+      "models": [
+        "cliff_block_rock",
+        "cliff_blockHalf_rock",
+        "cliff_steps_rock",
+        "cliff_top_rock",
+        "tree_default",
+        "tree_pineRoundA",
+        "tree_pineTallA",
+        "tree_small",
+        "tree_thin",
+        "stump_round",
+        "rock_smallA",
+        "rock_smallD",
+        "rock_largeA",
+        "grass",
+        "grass_large",
+        "plant_bush",
+        "mushroom_red",
+        "flower_yellowA",
+        "log"
+      ]
+    },
+    {
+      "name": "world-castle",
+      "when": "lazy",
+      "note": "WORLD 3 Castle. 계단 본체 + 성벽·탑 프롭.",
+      "dir": "castle-kit/Models/GLB format",
+      "models": [
+        "stairs-stone",
+        "stairs-stone-square",
+        "wall-narrow-stairs",
+        "wall-narrow-stairs-rail",
+        "wall",
+        "wall-half",
+        "wall-pillar",
+        "wall-corner",
+        "gate",
+        "flag",
+        "flag-banner-long",
+        "tower-square-base",
+        "tower-square-mid",
+        "tower-square-top-roof"
+      ]
+    },
+    {
+      "name": "food",
+      "when": "lazy",
+      "note": "TYPE_C(영어→그림) 문제용. 단어 ↔ 3D 모델 1:1 매핑. 회전 프리뷰로 출제한다.",
+      "dir": "food-kit/Models/GLB format",
+      "models": [
+        "apple",
+        "banana",
+        "bread",
+        "burger",
+        "cake",
+        "carrot",
+        "cheese",
+        "cookie",
+        "corn",
+        "donut",
+        "egg",
+        "fish",
+        "grapes",
+        "hot-dog",
+        "ice-cream",
+        "lemon",
+        "mushroom",
+        "onion",
+        "orange",
+        "pizza",
+        "pumpkin",
+        "sandwich",
+        "strawberry",
+        "tomato",
+        "watermelon"
+      ]
+    },
+    {
+      "name": "boss-warrior",
+      "when": "lazy",
+      "note": "V2 보스. 캐릭터 glb 에는 애니메이션이 없다 — boss-anims 와 짝으로 쓴다(스파이크 A).",
+      "dir": "Skeletons_1.1_FREE/characters/gltf",
+      "models": ["Skeleton_Warrior"]
+    },
+    {
+      "name": "boss-minion",
+      "when": "lazy",
+      "note": "4종 모두 Rig_Medium(23본) 동일 — boss-anims 의 클립 26종을 그대로 재사용한다.",
+      "dir": "Skeletons_1.1_FREE/characters/gltf",
+      "models": ["Skeleton_Minion"]
+    },
+    {
+      "name": "boss-anims",
+      "when": "lazy",
+      "note": "애니메이션 클립 전용(26종). 메시·머티리얼은 프루닝하고 리그+클립만 남긴다.",
+      "dir": "Skeletons_1.1_FREE/Animations/gltf/Rig_Medium",
+      "models": ["Rig_Medium_General", "Rig_Medium_MovementBasic"],
+      "animationsOnly": true
+    }
+  ]
+}

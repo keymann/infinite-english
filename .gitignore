@@ -1,0 +1,23 @@
+node_modules
+dist
+.wrangler
+.DS_Store
+*.log
+
+# Playwright MCP 검증 산출물 (스크린샷·콘솔 로그)
+.playwright-mcp
+
+# ── 3D·사운드 원본 kit ──
+# 저장소에서 제외한다. 168MB · 8,631파일이고, 우리가 쓰지 않는 포맷(FBX/OBJ/DAE/STL)까지 들어 있다.
+# 게임이 실제로 읽는 것은 `npm run assets` 가 만든 public/models/*.glb (2.4MB) 이고 그쪽은 추적한다.
+# 따라서 클론만으로 실행·빌드·배포가 되고, 에셋 파이프라인을 다시 돌릴 때만 kit 을 내려받으면 된다.
+# 전부 CC0 무료배포다 — 출처는 README 참고.
+/castle-kit/
+/nature-kit/
+/mini-characters/
+/cube-pets_1.0/
+/food-kit/
+/tower-defense-kit/
+/impact-sounds/
+/Platformer_Pack_1.0_FREE/
+/Skeletons_1.1_FREE/

@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 0 스파이크 A/B — 영어계단</title>
+    <style>
+      body {
+        margin: 0;
+        background: #0d1117;
+        color: #e6edf3;
+        font:
+          14px/1.5 ui-monospace,
+          Menlo,
+          monospace;
+      }
+      #canvas-wrap {
+        height: 46vh;
+        border-bottom: 1px solid #30363d;
+      }
+      canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+      #report {
+        padding: 12px 16px;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+      td,
+      th {
+        text-align: left;
+        padding: 3px 10px 3px 0;
+        border-bottom: 1px solid #21262d;
+        vertical-align: top;
+      }
+      .pass {
+        color: #3fb950;
+      }
+      .fail {
+        color: #f85149;
+      }
+      h2 {
+        font-size: 15px;
+        margin: 18px 0 6px;
+      }
+      #verdict {
+        font-size: 16px;
+        padding: 8px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <!--
+      Phase 0 개발용 검증 페이지 (배포 대상 아님 — vite.config.ts 의 build.input 에 없다).
+        스파이크 A: Skeletons 캐릭터에 Rig_Medium_* 의 애니메이션 클립이 실제로 적용되는가
+        스파이크 B: 병합 glb 가 three.js 에서 로드되고 이름으로 조회되는가 + 렌더 비용
+      실행: npm run dev → http://localhost:5173/spikes/spike.html
+    -->
+    <div id="canvas-wrap"></div>
+    <div id="report">측정 중…</div>
+    <script type="module" src="./spike.js"></script>
+  </body>
+</html>

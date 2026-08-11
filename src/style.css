@@ -1,0 +1,410 @@
+:root {
+  --bg: #10151f;
+  --fg: #eaf0ff;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--fg);
+  font-family:
+    'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic',
+    sans-serif;
+  /* 계단 게임은 스크롤이 없다. 고무줄 스크롤이 조작을 먹으면 안 된다 */
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  /* 빠른 연타에서 더블탭 확대가 끼어들면 조작이 끊긴다 */
+  touch-action: manipulation;
+}
+
+#app {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* 3D 캔버스. safe-area 는 HUD 에만 주고 캔버스는 화면을 꽉 채운다 */
+.stage {
+  position: absolute;
+  inset: 0;
+}
+
+.stage canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.loading,
+.boot {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  gap: 0.5rem;
+  text-align: center;
+  background: var(--bg);
+}
+
+.boot h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.boot p,
+.loading {
+  margin: 0;
+  opacity: 0.65;
+}
+
+/* ── HUD ── */
+.hud {
+  position: absolute;
+  inset: 0;
+  /* HUD 는 입력을 가로채지 않는다 — 화면 어디를 눌러도 계단을 오를 수 있어야 한다 */
+  pointer-events: none;
+  padding: calc(env(safe-area-inset-top) + 10px) calc(env(safe-area-inset-right) + 12px)
+    calc(env(safe-area-inset-bottom) + 14px) calc(env(safe-area-inset-left) + 12px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.hud-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.hud-left,
+.hud-right {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.hud-right {
+  align-items: flex-end;
+}
+
+.hp {
+  display: flex;
+  gap: 2px;
+  font-size: 1.35rem;
+  line-height: 1;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.55);
+}
+
+.heart[data-on='true'] {
+  color: #ff5f6d;
+}
+
+.heart[data-on='false'] {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.combo {
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+
+.combo[data-level='normal'] {
+  color: #eaf0ff;
+}
+
+.combo[data-level='gold'] {
+  color: #ffd24a;
+}
+
+.combo[data-level='fire'] {
+  color: #ff8a3d;
+}
+
+.combo[data-level='lightning'] {
+  color: #7fd4ff;
+}
+
+.floor {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+  padding: 4px 12px 5px;
+  border-radius: 999px;
+  background: rgba(10, 18, 32, 0.42);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+.floor b {
+  font-size: 1.75rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.floor span {
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+.stats {
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: rgba(10, 18, 32, 0.42);
+  font:
+    11px/1.4 ui-monospace,
+    Menlo,
+    monospace;
+  opacity: 0.75;
+  text-align: right;
+}
+
+/* ── 퀴즈 패널 ──
+   화면 아래 고정. 계단(3D)은 위쪽, 손가락은 아래쪽 — 한 화면에서 문제를 푼다 (PRD 26장) */
+.panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 12px calc(env(safe-area-inset-right) + 12px) calc(env(safe-area-inset-bottom) + 12px)
+    calc(env(safe-area-inset-left) + 12px);
+  background: linear-gradient(to top, rgba(8, 14, 26, 0.92) 62%, rgba(8, 14, 26, 0));
+}
+
+.panel[hidden] {
+  display: none;
+}
+
+.q-head {
+  min-height: 1.1rem;
+}
+
+.q-tag {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.q-tag[data-kind='retry'] {
+  color: #ffd24a;
+}
+
+.q-tag[data-kind='revive'] {
+  color: #7fd4ff;
+}
+
+.q-text {
+  margin: 2px 0 10px;
+  font-size: 1.22rem;
+  font-weight: 700;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.choices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.choice {
+  /* 최소 48px — 손가락으로 눌러야 한다 */
+  min-height: 52px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 14px;
+  background: rgba(30, 44, 70, 0.92);
+  color: var(--fg);
+  font-family: inherit;
+  font-size: 1.02rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    transform 0.06s ease,
+    background 0.12s ease;
+}
+
+.choice:active {
+  transform: scale(0.97);
+}
+
+.choice[data-state='correct'] {
+  background: #1f8a4c;
+  border-color: #35d67f;
+}
+
+.choice[data-state='wrong'] {
+  background: #8c2b32;
+  border-color: #ff6b74;
+}
+
+.choice[data-state='dim'] {
+  opacity: 0.4;
+}
+
+/* 계단을 오르는 동안 문제 자리에 뜨는 방향 프롬프트 */
+.prompt {
+  min-height: 52px;
+  display: grid;
+  place-content: center;
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+}
+
+.prompt[data-kind='stumble'] {
+  color: #ff9aa2;
+}
+
+/* ── 콤보 배너 ── */
+.banner {
+  position: absolute;
+  top: 28%;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  pointer-events: none;
+  text-shadow: 0 4px 18px rgba(0, 0, 0, 0.6);
+}
+
+.banner[data-style='gold'] {
+  color: #ffd24a;
+}
+
+.banner[data-style='fire'] {
+  color: #ff8a3d;
+}
+
+.banner[data-style='lightning'] {
+  color: #7fd4ff;
+}
+
+.banner.pop {
+  animation: pop 0.9s ease-out;
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  25% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+  70% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) translateY(-14px);
+    opacity: 0;
+  }
+}
+
+/* ── 결과 화면 ── */
+.result {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  padding: 20px;
+  background: rgba(8, 14, 26, 0.82);
+}
+
+.result[hidden] {
+  display: none;
+}
+
+.result-card {
+  width: min(420px, 100%);
+  padding: 22px;
+  border-radius: 20px;
+  background: #16203a;
+  text-align: center;
+}
+
+.result-card h2 {
+  margin: 0 0 4px;
+  font-size: 1.9rem;
+}
+
+.result-sub {
+  margin: 0 0 16px;
+  opacity: 0.75;
+  font-size: 0.95rem;
+}
+
+.result-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 0 0 16px;
+}
+
+.result-stats div {
+  padding: 10px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.result-stats dt {
+  font-size: 0.72rem;
+  opacity: 0.7;
+}
+
+.result-stats dd {
+  margin: 2px 0 0;
+  font-size: 1.4rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.result-words {
+  margin-bottom: 18px;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(255, 210, 74, 0.1);
+}
+
+.result-words h3 {
+  margin: 0 0 4px;
+  font-size: 0.85rem;
+  color: #ffd24a;
+}
+
+.result-words p {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.again {
+  width: 100%;
+  min-height: 56px;
+  border: 0;
+  border-radius: 16px;
+  background: #2f6bff;
+  color: #fff;
+  font-family: inherit;
+  font-size: 1.15rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.again:active {
+  transform: scale(0.98);
+}

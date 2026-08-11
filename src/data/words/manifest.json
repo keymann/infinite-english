@@ -1,0 +1,31 @@
+{
+  "generated": "npm run words",
+  "total": 455,
+  "levels": [
+    {
+      "level": 1,
+      "count": 91,
+      "file": "level-1.json"
+    },
+    {
+      "level": 2,
+      "count": 108,
+      "file": "level-2.json"
+    },
+    {
+      "level": 3,
+      "count": 87,
+      "file": "level-3.json"
+    },
+    {
+      "level": 4,
+      "count": 85,
+      "file": "level-4.json"
+    },
+    {
+      "level": 5,
+      "count": 84,
+      "file": "level-5.json"
+    }
+  ]
+}
