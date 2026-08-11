@@ -52,6 +52,12 @@ export type SessionSummary = {
   floor: number;
   retryCorrect: number;
   retryTotal: number;
+  /** SPEED 능력치 근거 */
+  fastCorrect: number;
+  /** INT 능력치 근거 */
+  hardCorrect: number;
+  /** 이번 판에 Mastered 가 된 단어 수 (미션용) */
+  masteredCount: number;
 };
 
 export function dayKey(nowMs: number): string {

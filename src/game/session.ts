@@ -4,6 +4,7 @@ import type { WordBank } from '../learning/words';
 import { generateQuiz, isCorrect } from '../quiz/generator';
 import type { Quiz } from '../quiz/types';
 import type { SessionSummary } from '../progress/stats';
+import { FAST_ANSWER_MS, HARD_DIFFICULTY } from '../progress/player';
 import { COMBO_TIERS, RULES, type StepStyle } from './balance';
 
 /**
@@ -40,6 +41,11 @@ export type AnswerResult = {
   /** 단어 숙련도 단계 (0~5) */
   stage: number;
   word: string;
+  /** 성장 계산에 필요한 값 — 경험치는 난이도·속도를 반영한다 (progress/player.ts) */
+  difficulty: number;
+  /** 빠르게 맞혔는지 (SPEED 능력치) */
+  fast: boolean;
+  isRetry: boolean;
 };
 
 export type SessionStats = {
@@ -80,6 +86,8 @@ export class Session {
   private answerMsTotal = 0;
   private retryCorrect = 0;
   private retryTotal = 0;
+  private fastCorrect = 0;
+  private hardCorrect = 0;
   private readonly startedAt: number;
 
   constructor(bank: WordBank, engine: LearningEngine, rng: Rng, clock: () => number = Date.now) {
@@ -120,7 +128,11 @@ export class Session {
     const wasRevive = this.phase === 'revive';
 
     // 풀이 시간 — 평균 문제 풀이 시간(PRD 30장)과 SPEED 능력치(16장)의 근거
-    this.answerMsTotal += Math.min(30_000, this.clock() - this.shownAt);
+    const answerMs = Math.min(30_000, this.clock() - this.shownAt);
+    this.answerMsTotal += answerMs;
+    const fast = answerMs <= FAST_ANSWER_MS;
+    if (correct && fast) this.fastCorrect++;
+    if (correct && quiz.difficulty >= HARD_DIFFICULTY) this.hardCorrect++;
 
     // 학습 상태 반영은 게임 규칙보다 먼저 — 결과에 mastered 를 실어 보내야 한다
     const learned = this.engine.record(pick, correct);
@@ -135,6 +147,9 @@ export class Session {
       mastered: learned.mastered,
       stage: learned.stage,
       word: quiz.word,
+      difficulty: quiz.difficulty,
+      fast,
+      isRetry: quiz.isRetry,
     };
 
     if (correct) {
@@ -251,6 +266,21 @@ export class Session {
       floor,
       retryCorrect: this.retryCorrect,
       retryTotal: this.retryTotal,
+      fastCorrect: this.fastCorrect,
+      hardCorrect: this.hardCorrect,
+      masteredCount: this.masteredWords.length,
     };
+  }
+
+  /** 이어하기 — 중단된 판의 상태를 되돌린다 */
+  restore(run: { hp: number; combo: number; score: number; asked: number; correct: number; wrong: number }) {
+    this.hp = run.hp;
+    this.combo = run.combo;
+    this.bestCombo = Math.max(this.bestCombo, run.combo);
+    this.tierIndex = this.tierFor(run.combo);
+    this.score = run.score;
+    this.asked = run.asked;
+    this.correctCount = run.correct;
+    this.wrongCount = run.wrong;
   }
 }

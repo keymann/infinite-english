@@ -462,3 +462,421 @@ body {
 .again:active {
   transform: scale(0.98);
 }
+
+/* ── 전체 화면 (시작 · 부모) ──
+   3D 위에 얹는 카드. 게임 화면과 달리 스크롤을 허용한다 — 정보가 세로로 길다 */
+.screen {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: linear-gradient(180deg, rgba(8, 14, 26, 0.94), rgba(8, 14, 26, 0.99));
+  padding: calc(env(safe-area-inset-top) + 16px) 14px calc(env(safe-area-inset-bottom) + 20px);
+}
+
+.screen[hidden] {
+  display: none;
+}
+
+.screen-card {
+  width: min(460px, 100%);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.title h1 {
+  margin: 0;
+  font-size: 1.9rem;
+  letter-spacing: 0.02em;
+}
+
+.title .sub {
+  margin: 2px 0 0;
+  font-size: 0.86rem;
+  opacity: 0.65;
+}
+
+/* 레벨·경험치·골드 */
+.level-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas: 'lv exp gold' 'lv text gold';
+  align-items: center;
+  gap: 2px 10px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.level-row .lv {
+  grid-area: lv;
+  font-size: 1.05rem;
+}
+
+.level-row .lv b {
+  font-size: 1.6rem;
+}
+
+.level-row .exp {
+  grid-area: exp;
+  height: 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  overflow: hidden;
+}
+
+.level-row .exp i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #4dd6a1, #2f8bff);
+}
+
+.level-row .exp-text {
+  grid-area: text;
+  font-size: 0.72rem;
+  opacity: 0.6;
+  font-variant-numeric: tabular-nums;
+}
+
+.level-row .gold {
+  grid-area: gold;
+  font-weight: 800;
+  color: #ffd24a;
+}
+
+/* 능력치 4종 — 학습 성과를 게임 언어로 (PRD 16장) */
+.abilities {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.abilities div {
+  padding: 8px 4px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  text-align: center;
+}
+
+.abilities dt {
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
+  opacity: 0.7;
+}
+
+.abilities dd {
+  margin: 2px 0;
+  font-size: 1.3rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.abilities small {
+  display: block;
+  font-size: 0.58rem;
+  opacity: 0.5;
+  line-height: 1.2;
+}
+
+.primary,
+.secondary,
+.link {
+  min-height: 54px;
+  border: 0;
+  border-radius: 16px;
+  font-family: inherit;
+  font-size: 1.1rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.primary {
+  background: #2f6bff;
+  color: #fff;
+}
+
+.secondary {
+  min-height: 46px;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--fg);
+  font-size: 0.95rem;
+}
+
+.link {
+  min-height: 40px;
+  background: none;
+  color: var(--fg);
+  opacity: 0.6;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.primary:active,
+.secondary:active {
+  transform: scale(0.98);
+}
+
+.howto {
+  margin: 0;
+  padding: 12px 12px 12px 30px;
+  border-radius: 14px;
+  background: rgba(79, 214, 161, 0.12);
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+
+.block {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.block h2 {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+}
+
+.block h2 + h2 {
+  margin-top: 12px;
+}
+
+.chest,
+.shield {
+  color: #ffd24a;
+  font-size: 0.85rem;
+}
+
+.hint-text {
+  margin: 8px 0 0;
+  font-size: 0.78rem;
+  opacity: 0.6;
+  line-height: 1.5;
+}
+
+/* 오늘의 미션 */
+.missions {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.missions li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 3px 8px;
+  font-size: 0.86rem;
+}
+
+.missions li[data-done='true'] .m-label {
+  color: #4dd6a1;
+}
+
+.missions li[data-done='true'] .m-label::before {
+  content: '✓ ';
+}
+
+.m-count {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.7;
+  font-size: 0.78rem;
+}
+
+.m-bar {
+  grid-column: 1 / -1;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+}
+
+.m-bar i {
+  display: block;
+  height: 100%;
+  background: #4dd6a1;
+}
+
+/* 캐릭터·펫 선택 */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+  min-height: 42px;
+  padding: 6px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--fg);
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.chip[data-selected='true'] {
+  background: #2f6bff;
+  border-color: #6b9bff;
+}
+
+.chip:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.chip em {
+  margin-left: 6px;
+  font-size: 0.7rem;
+  font-style: normal;
+  opacity: 0.8;
+}
+
+/* 결과 화면 보상 */
+.reward-row {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.reward {
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(79, 214, 161, 0.16);
+  color: #7ef0a8;
+  font-weight: 800;
+}
+
+.reward.gold {
+  background: rgba(255, 210, 74, 0.16);
+  color: #ffd24a;
+}
+
+.levelup,
+.unlocked,
+.mission-done {
+  margin-bottom: 10px;
+  padding: 10px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.levelup {
+  background: rgba(47, 107, 255, 0.2);
+  color: #9dc0ff;
+}
+
+.unlocked {
+  background: rgba(255, 210, 74, 0.14);
+  color: #ffd24a;
+}
+
+.mission-done {
+  background: rgba(79, 214, 161, 0.14);
+  color: #7ef0a8;
+}
+
+.result-words.mastered {
+  background: rgba(79, 214, 161, 0.1);
+}
+
+.result-words.mastered h3 {
+  color: #7ef0a8;
+}
+
+/* HUD 레벨·경험치 */
+.hud-lv {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+.hud-exp {
+  display: block;
+  width: 54px;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.25);
+  overflow: hidden;
+}
+
+.hud-exp em {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: #4dd6a1;
+}
+
+/* 부모용 학습 기록 */
+.report {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 0;
+}
+
+.report div {
+  padding: 10px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.report div.wide {
+  grid-column: 1 / -1;
+  background: rgba(47, 107, 255, 0.16);
+}
+
+.report dt {
+  font-size: 0.7rem;
+  opacity: 0.65;
+}
+
+.report dd {
+  margin: 2px 0 0;
+  font-size: 1.2rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.weak {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.weak li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 3px 8px;
+  font-size: 0.9rem;
+  position: relative;
+  padding-bottom: 7px;
+}
+
+.weak li b {
+  color: #ff9aa2;
+  font-variant-numeric: tabular-nums;
+}
+
+.weak li i {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 4px;
+  border-radius: 999px;
+  background: #ff6b74;
+}

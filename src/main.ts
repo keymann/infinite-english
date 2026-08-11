@@ -9,16 +9,30 @@ import { Climb } from './game/climb';
 import { Session } from './game/session';
 import { LearningEngine } from './learning/engine';
 import { WordBank } from './learning/words';
-import { load as loadSave, saveNow } from './progress/save';
+import { characterOf, newlyUnlocked, petOf } from './progress/collection';
+import { applyProgress, allDone, defOf, ensureToday, rewardFor } from './progress/mission';
+import {
+  abilitiesOf,
+  addExp,
+  addGold,
+  expForAnswer,
+  expRatio,
+  goldForAnswer,
+  goldForCheckpoint,
+  type LevelUp,
+} from './progress/player';
+import { load as loadSave, save as saveSoon, saveNow, type RunState } from './progress/save';
 import { applySession, report } from './progress/stats';
+import { touch as touchStreak } from './progress/streak';
 import { Actor } from './three/actor';
 import { Assets } from './three/assets';
 import { FollowCamera } from './three/camera';
 import { resolveProfile } from './three/profile';
 import { Renderer } from './three/renderer';
 import { Hud } from './ui/hud';
-import { Overlays, praiseFor } from './ui/overlays';
+import { Overlays, praiseFor, type ResultReward } from './ui/overlays';
 import { QuizPanel } from './ui/quizPanel';
+import { ParentScreen, StartScreen } from './ui/screens';
 import { Pet } from './world/pet';
 import { Props } from './world/props';
 import { Mood, createBlobShadow } from './world/scene';
@@ -83,30 +97,44 @@ async function boot() {
   scene.add(stairs.group);
   scene.add(props.group);
 
-  const actor = new Actor(
-    assets.instance('player', 'character-male-a'),
-    assets.clips('player'),
+  // 저장본에서 학습 상태·성장을 복원한다. 판이 끝나도 남아야 한다
+  const saved = loadSave();
+  saved.missions = ensureToday(saved.missions, Date.now(), saved.player.level);
+
+  /* 캐릭터는 해금·선택으로 바뀐다. Actor 와 Climb 을 다시 만들어야 하므로 let 이다.
+     교체는 홈 화면에서만 일어나므로 판 도중에 갈리는 일은 없다. */
+  let character = characterOf(saved.collection, saved.player.level);
+  let actor = new Actor(
+    assets.instance(character.bundle, character.node),
+    assets.clips(character.bundle),
     PLAYER.height,
   );
   scene.add(actor.root);
-  const shadow = createBlobShadow(actor.height * 0.34);
+  let shadow = createBlobShadow(actor.height * 0.34);
   scene.add(shadow);
 
   /* 월드2(성)와 펫은 **첫 플레이를 막지 않고** 뒤에서 받는다.
      체크포인트에 닿았을 때 아직 안 왔으면 현재 세트로 계속 간다 — 로딩 때문에
      게임이 멈추는 것이 가장 나쁘다. */
   let pet: Pet | null = null;
+
+  const buildPet = () => {
+    const item = petOf(saved.collection, saved.player.level);
+    const petActor = new Actor(
+      assets.instance(item.bundle, item.node),
+      assets.clips(item.bundle),
+      PLAYER.height * 0.55,
+    );
+    if (pet) scene.remove(pet.root);
+    scene.add(petActor.root);
+    pet = new Pet(petActor, actor.root.position);
+  };
+
   void assets
-    .load(['world-castle', 'pet-fox'])
+    .load(['world-castle', petOf(saved.collection, saved.player.level).bundle])
     .then(() => {
       registerSet('castle');
-      const petActor = new Actor(
-        assets.instance('pet-fox', 'animal-fox'),
-        assets.clips('pet-fox'),
-        PLAYER.height * 0.55,
-      );
-      scene.add(petActor.root);
-      pet = new Pet(petActor, actor.root.position);
+      buildPet();
     })
     .catch((err: unknown) => {
       // 배경 로드 실패는 게임을 막지 않는다. 숲 월드로 끝까지 갈 수 있다
@@ -126,29 +154,36 @@ async function boot() {
     timer = setTimeout(fn, sec * 1000) as unknown as number;
   };
 
-  // 저장본에서 학습 상태를 복원한다. 학습 기록은 판이 끝나도 남아야 한다
-  const saved = loadSave();
-  let session: Session;
-  let engine: LearningEngine;
+  /* 홈 화면에서는 아직 판이 없다. 더미 Session 을 만들어 두면 난수 스트림이 헛돌고
+     나중에 "왜 첫 문제가 매번 다르지" 같은 버그로 돌아온다 — undefined 로 두고 가드한다. */
+  let session: Session | undefined;
+  let engine: LearningEngine | undefined;
+  let climb = makeClimb();
 
-  const climb = new Climb(stairs, actor, {
-    onLand: () => {
-      camera.shake(PLAYER.landShake);
-      sound.step();
-      const { done } = session.stepClimbed();
-      hud.setFloor(climb.floor);
-      onFloorReached(climb.floor);
-      if (done) {
-        // 구간을 다 올랐다 → 다음 문제
-        after(0.15, () => panel.show(session.next()));
-      }
-    },
-    onStumble: () => {
-      camera.shake(PLAYER.landShake * 1.6);
-      sound.stumble();
-      panel.showPrompt('앗! 반대쪽이었어', 'stumble');
-    },
-  });
+  function makeClimb(): Climb {
+    return new Climb(stairs, actor, {
+      onLand: () => {
+        if (!session) return;
+        camera.shake(PLAYER.landShake);
+        sound.step();
+        const { done } = session.stepClimbed();
+        hud.setFloor(climb.floor);
+        onFloorReached(climb.floor);
+        // 층을 올랐을 때도 스냅샷을 갱신한다 — 정답 시점에만 저장하면 이어하기가
+        // 한 구간(최대 4칸) 뒤처진 층에서 시작한다
+        snapshotRun();
+        if (done) {
+          // 구간을 다 올랐다 → 다음 문제
+          after(0.15, () => session && panel.show(session.next()));
+        }
+      },
+      onStumble: () => {
+        camera.shake(PLAYER.landShake * 1.6);
+        sound.stumble();
+        panel.showPrompt('앗! 반대쪽이었어', 'stumble');
+      },
+    });
+  }
 
   /* ── 층에 따른 배경 전환·체크포인트 ── */
   let theme: Theme = themeForFloor(0);
@@ -164,7 +199,10 @@ async function boot() {
       return;
     }
     if (floor > 0 && floor % CHECKPOINT_EVERY === 0) {
-      overlays.banner(`${floor}층 돌파!`, 'gold');
+      const gold = goldForCheckpoint(floor);
+      saved.player = addGold(saved.player, gold);
+      runGold += gold;
+      overlays.banner(`${floor}층 돌파! +${gold}🪙`, 'gold');
       sound.tierUp(1);
       camera.shake(PLAYER.landShake * 1.8);
     }
@@ -179,32 +217,101 @@ async function boot() {
     stairs.refresh(climb.floor);
   };
 
-  const startSession = () => {
+  /* ── 이번 판에 얻은 것 (결과 화면에서 보여 준다) ── */
+  let runExp = 0;
+  let runGold = 0;
+  let runLevelUp: LevelUp | null = null;
+  let runUnlocked: string[] = [];
+
+  /** 중단된 판을 저장한다 — 창을 닫아도 이어서 할 수 있다 (PRD 1장) */
+  const snapshotRun = () => {
+    if (!session || session.phase === 'over') return;
+    saved.run = {
+      seed,
+      floor: climb.floor,
+      hp: session.hp,
+      combo: session.combo,
+      score: session.score,
+      asked: session.asked,
+      correct: session.correctCount,
+      wrong: session.wrongCount,
+    };
+    saveSoon(saved);
+  };
+
+  /** 경험치·골드를 주고 레벨업·해금을 처리한다 */
+  const award = (exp: number, gold: number) => {
+    runExp += exp;
+    runGold += gold;
+    const before = saved.player.level;
+    const grown = addExp(saved.player, exp);
+    saved.player = addGold(grown.player, gold);
+    hud.setLevel(saved.player.level, expRatio(saved.player));
+
+    if (grown.levelUp) {
+      runLevelUp = { from: runLevelUp?.from ?? grown.levelUp.from, to: grown.levelUp.to };
+      overlays.banner(`LEVEL UP! Lv.${grown.levelUp.to}`, 'gold');
+      sound.tierUp(2);
+      pet?.cheer();
+
+      const opened = newlyUnlocked(before, grown.levelUp.to);
+      if (opened.length > 0) {
+        runUnlocked = [...runUnlocked, ...opened.map((o) => o.name)];
+        // 해금 알림은 결과 화면에서 다시 보여 준다. 여기서는 짧게만
+        after(1.0, () => overlays.praise(`🎉 ${opened[0].name} 해금!`, 'lightning'));
+      }
+    }
+  };
+
+  const startSession = (resume: RunState | null = null) => {
     // 학습 상태(숙련도·실력 추정)는 판마다 새로 만들지 않는다 — 누적되어야 한다
     engine = new LearningEngine(bank, createRng(seed ^ 0x5f3759df), () => Date.now(), {
       ability: saved.ability,
       progress: saved.progress,
     });
     session = new Session(bank, engine, createRng(seed ^ 0x9e3779b9));
-    climb.reset();
+    runExp = 0;
+    runGold = 0;
+    runLevelUp = null;
+    runUnlocked = [];
+
+    if (resume) {
+      climb.teleport(resume.floor);
+      session.restore(resume);
+    } else {
+      climb.reset();
+    }
     stairs.clearStyles();
-    stairs.refresh(0);
-    props.refresh(0, stairs);
-    theme = themeForFloor(0);
+    stairs.refresh(climb.floor);
+    props.refresh(climb.floor, stairs);
+    theme = themeForFloor(climb.floor);
     mood.applyTheme(theme, true);
     pet?.root.position.copy(actor.root.position);
     camera.snapTo(actor.root.position);
-    hud.setFloor(0);
+    hud.setFloor(climb.floor);
     hud.setHp(session.hp, RULES.hp);
-    hud.setCombo(0);
+    hud.setCombo(session.combo);
+    hud.setLevel(saved.player.level, expRatio(saved.player));
     overlays.hideResult();
     panel.reveal();
     panel.show(session.next());
+
+    // 연속 학습 기록은 판을 **시작할 때** 갱신한다 (PRD 22장)
+    const streak = touchStreak(saved.streak, Date.now());
+    saved.streak = streak.state;
+    if (streak.extended) {
+      const parts = [`연속 학습 ${streak.state.days}일`];
+      if (streak.shieldUsed) parts.push('🛡 방패로 지켰어요');
+      if (streak.shieldEarned) parts.push('🛡 방패 획득');
+      after(0.6, () => overlays.praise(parts.join(' · '), 'gold'));
+      if (streak.milestone) after(1.4, () => overlays.banner(`${streak.milestone}일 연속!`, 'lightning'));
+    }
+    saveSoon(saved);
   };
 
   panel.onAnswer((index) => {
     sound.unlock();
-    if (session.phase !== 'quiz' && session.phase !== 'revive') return;
+    if (!session || (session.phase !== 'quiz' && session.phase !== 'revive')) return;
 
     // answer() 뒤에는 다음 문제로 바뀔 수 있으므로 지금 잡아 둔다
     const wasRetry = session.quiz?.isRetry ?? false;
@@ -228,7 +335,13 @@ async function boot() {
         // 배너가 없을 때만 칭찬 문구를 띄운다 (PRD 28장)
         overlays.praise(praiseFor(session.combo, wasRetry), result.style);
       }
+      // 경험치는 **영어 문제를 맞혀야만** 오른다. 난이도와 콤보가 반영된다 (PRD 15장)
+      award(
+        expForAnswer({ difficulty: result.difficulty, combo: session.combo, isRetry: result.isRetry }),
+        goldForAnswer(result.isRetry),
+      );
       openSegment(result.segment, result.style);
+      snapshotRun();
       after(RULES.correctFeedbackSec, () => {
         panel.showPrompt(promptText());
       });
@@ -236,7 +349,9 @@ async function boot() {
     }
 
     sound.wrong();
+    snapshotRun();
     after(RULES.wrongFeedbackSec, () => {
+      if (!session) return;
       if (session.phase === 'revive') {
         sound.revive();
         panel.show(session.reviveQuiz(), { revive: true });
@@ -248,34 +363,169 @@ async function boot() {
     });
   });
 
-  const promptText = () =>
-    input.options.autoDir
-      ? `아무 곳이나 탭 · ${session.stepsLeft}칸`
+  const promptText = () => {
+    const left = session?.stepsLeft ?? 0;
+    return input.options.autoDir
+      ? `아무 곳이나 탭 · ${left}칸`
       : climb.nextDir < 0
-        ? `◀ 왼쪽 · ${session.stepsLeft}칸`
-        : `오른쪽 ▶ · ${session.stepsLeft}칸`;
+        ? `◀ 왼쪽 · ${left}칸`
+        : `오른쪽 ▶ · ${left}칸`;
+  };
 
   const endGame = () => {
+    if (!session || !engine) return;
     sound.gameOver();
     panel.hide();
 
     /* 판이 끝나는 시점은 놓치면 안 된다 — 디바운스를 기다리지 않고 즉시 저장한다.
        학습 기록(숙련도·복습 예정일)이 날아가면 아이가 처음부터 다시 시작하게 된다. */
     const now = Date.now();
+    const summary = session.summary(climb.floor);
+    const stats = session.stats(climb.floor);
+
     saved.ability = engine.ability;
     saved.progress = engine.progress;
-    saved.stats = applySession(saved.stats, session.summary(climb.floor), now);
+    saved.stats = applySession(saved.stats, summary, now);
+    // SPEED·INT 능력치의 근거는 누적 카운터다 (progress/player.ts)
+    saved.player = {
+      ...saved.player,
+      fastCorrect: saved.player.fastCorrect + summary.fastCorrect,
+      hardCorrect: saved.player.hardCorrect + summary.hardCorrect,
+    };
+
+    // 일일 미션 정산 — 완료분 골드 + 전부 완료 시 상자
+    saved.missions = ensureToday(saved.missions, now, saved.player.level);
+    const before = allDone(saved.missions);
+    const applied = applyProgress(saved.missions, {
+      answered: summary.questions,
+      retryCorrect: summary.retryCorrect,
+      bestCombo: summary.bestCombo,
+      floor: summary.floor,
+      masteredCount: summary.masteredCount,
+      accuracy: stats.accuracy,
+      plays: 1,
+    });
+    saved.missions = applied.state;
+    const chest = !before && allDone(saved.missions) && !saved.missions.chestClaimed;
+    if (chest) saved.missions.chestClaimed = true;
+    const missionGold = rewardFor(applied.completed, chest);
+    if (missionGold > 0) {
+      saved.player = addGold(saved.player, missionGold);
+      runGold += missionGold;
+    }
+
+    // 이 판은 끝났다 — 이어하기 대상에서 지운다
+    saved.run = null;
     saved.meta = { lastSeed: seed, lastPlayedAt: now };
     saveNow(saved);
     engine.endSession();
 
-    overlays.result(session.stats(climb.floor), () => {
-      panel.reveal();
-      startSession();
+    const reward: ResultReward = {
+      exp: runExp,
+      gold: runGold,
+      levelUp: runLevelUp,
+      unlocked: runUnlocked,
+      missionsDone: applied.completed.map((id) => defOf(id).label),
+      chest,
+    };
+    overlays.result(stats, reward, {
+      onRestart: () => {
+        panel.reveal();
+        startSession();
+      },
+      onHome: () => {
+        overlays.hideResult();
+        showHome();
+      },
     });
   };
 
-  startSession();
+  /* ── 홈 화면 ── */
+  const startScreen = new StartScreen(app);
+  const parentScreen = new ParentScreen(app, () => {
+    parentScreen.hide();
+    showHome();
+  });
+
+  const abilities = () =>
+    abilitiesOf({
+      bestCombo: saved.stats.bestCombo,
+      fastCorrect: saved.player.fastCorrect,
+      hardCorrect: saved.player.hardCorrect,
+      masteredWords: engine
+        ? engine.summary().mastered
+        : Object.values(saved.progress).filter((p) => p.stage >= 5).length,
+    });
+
+  /** 캐릭터·펫을 바꾼다. bundle 이 아직 없으면 받아 온다 */
+  const swap = async (kind: 'char' | 'pet', id: string) => {
+    if (kind === 'pet') {
+      saved.collection = { ...saved.collection, petId: id };
+      const item = petOf(saved.collection, saved.player.level);
+      await assets.load([item.bundle]);
+      buildPet();
+    } else {
+      saved.collection = { ...saved.collection, characterId: id };
+      character = characterOf(saved.collection, saved.player.level);
+      await assets.load([character.bundle]);
+      // Actor 를 새로 만들면 Climb 이 들고 있던 참조가 낡는다 — 같이 다시 만든다
+      scene.remove(actor.root);
+      scene.remove(shadow);
+      actor = new Actor(
+        assets.instance(character.bundle, character.node),
+        assets.clips(character.bundle),
+        PLAYER.height,
+      );
+      scene.add(actor.root);
+      shadow = createBlobShadow(actor.height * 0.34);
+      scene.add(shadow);
+      climb = makeClimb();
+      camera.snapTo(actor.root.position);
+    }
+    saveSoon(saved);
+    showHome();
+  };
+
+  function showHome() {
+    panel.hide();
+    startScreen.show(
+      {
+        player: saved.player,
+        abilities: abilities(),
+        missions: (saved.missions = ensureToday(saved.missions, Date.now(), saved.player.level)),
+        streak: saved.streak,
+        collection: saved.collection,
+        run: saved.run,
+        // 한 번도 문제를 푼 적이 없으면 조작 설명을 보여 준다
+        firstTime: saved.stats.questions === 0,
+      },
+      {
+        onStart: () => {
+          saved.run = null;
+          startScreen.hide();
+          startSession();
+        },
+        onResume: () => {
+          const run = saved.run;
+          startScreen.hide();
+          startSession(run);
+        },
+        onSelectCharacter: (id) => void swap('char', id),
+        onSelectPet: (id) => void swap('pet', id),
+        onOpenParent: () => {
+          startScreen.hide();
+          parentScreen.show(
+            report(saved.stats, saved.progress, saved.ability.theta, Date.now()),
+            (wordId) => bank.byId(wordId)?.word ?? wordId,
+          );
+        },
+      },
+    );
+  }
+
+  /* 첫 화면. 게임은 시작 버튼을 눌러야 시작한다 — 문제가 갑자기 뜨면
+     아이는 무엇을 하는 게임인지 모른 채 첫 문제를 틀린다. */
+  showHome();
 
   /* ── fps·렌더 통계 (0.5초 평균) ── */
   let frames = 0;
@@ -298,7 +548,7 @@ async function boot() {
     const dir = input.take();
     if (dir !== null) {
       sound.unlock();
-      if (session.phase === 'climbing' && session.stepsLeft > 0) climb.input(dir);
+      if (session?.phase === 'climbing' && session.stepsLeft > 0) climb.input(dir);
     }
 
     climb.update(dt);
@@ -314,7 +564,7 @@ async function boot() {
     mood.update(dt);
     pet?.update(dt, actor.root.position);
 
-    if (session.phase === 'climbing' && climb.state !== 'stumble') panel.showPrompt(promptText());
+    if (session?.phase === 'climbing' && climb.state !== 'stumble') panel.showPrompt(promptText());
   };
 
   const render = () => {
@@ -354,25 +604,25 @@ async function boot() {
       seed,
       profile,
       get phase() {
-        return session.phase;
+        return session?.phase ?? 'home';
       },
       get floor() {
         return climb.floor;
       },
       get hp() {
-        return session.hp;
+        return session?.hp ?? 0;
       },
       get combo() {
-        return session.combo;
+        return session?.combo ?? 0;
       },
       get score() {
-        return session.score;
+        return session?.score ?? 0;
       },
       get stepsLeft() {
-        return session.stepsLeft;
+        return session?.stepsLeft ?? 0;
       },
       get quiz() {
-        const q = session.quiz;
+        const q = session?.quiz;
         return q && {
           type: q.type,
           word: q.word,
@@ -393,26 +643,51 @@ async function boot() {
       },
       get stats() {
         return {
-          ...session.stats(climb.floor),
+          ...(session?.stats(climb.floor) ?? {}),
           fps,
           calls: renderer.gl.info.render.calls,
           triangles: renderer.gl.info.render.triangles,
           objects: scene.children.length,
           wordCount: bank.size,
-          learning: engine.summary(),
-          categories: engine.categoryCounts(),
+          learning: engine?.summary() ?? null,
+          categories: engine?.categoryCounts() ?? {},
         };
       },
       /** 학습 상태 조회 — 테스트·디버그용 */
       get learning() {
         return {
-          ...engine.summary(),
-          report: report(saved.stats, engine.progress, engine.ability.theta, Date.now()),
+          ...(engine?.summary() ?? {}),
+          report: report(saved.stats, saved.progress, saved.ability.theta, Date.now()),
         };
+      },
+      /** 성장 상태 — 레벨·골드·능력치·미션·스트릭·수집 */
+      get meta() {
+        return {
+          player: saved.player,
+          abilities: abilities(),
+          missions: saved.missions,
+          streak: saved.streak,
+          collection: saved.collection,
+          run: saved.run,
+          saveVersion: saved.v,
+        };
+      },
+      /** 화면 상태 */
+      get screen() {
+        return startScreen.visible
+          ? 'home'
+          : !document.querySelector('#parent-screen')?.hasAttribute('hidden')
+            ? 'parent'
+            : session?.phase === 'over'
+              ? 'result'
+              : 'game';
+      },
+      home() {
+        showHome();
       },
       progressFor(word: string) {
         const w = bank.get(word);
-        return w ? engine.progressFor(w.id) : null;
+        return w && engine ? engine.progressFor(w.id) : null;
       },
       /** 보기 클릭과 동일 경로 */
       answer(index: number) {
@@ -422,12 +697,13 @@ async function boot() {
       },
       /** 현재 문제의 정답을 고른다 */
       answerCorrect() {
-        this.answer(session.quiz!.correctIndex);
+        const q = session?.quiz;
+        if (q) this.answer(q.correctIndex);
       },
       /** 현재 문제의 오답 하나를 고른다 */
       answerWrong() {
-        const q = session.quiz!;
-        this.answer((q.correctIndex + 1) % q.choices.length);
+        const q = session?.quiz;
+        if (q) this.answer((q.correctIndex + 1) % q.choices.length);
       },
       tap(dir: -1 | 1) {
         climb.input(dir);
@@ -435,7 +711,7 @@ async function boot() {
       /** 열린 구간을 정답 방향으로 끝까지 오른다 */
       climbSegment() {
         const t = setInterval(() => {
-          if (session.phase !== 'climbing' || session.stepsLeft === 0) return clearInterval(t);
+          if (session?.phase !== 'climbing' || session.stepsLeft === 0) return clearInterval(t);
           if (climb.state === 'stand') climb.input(climb.nextDir);
         }, 16);
       },
