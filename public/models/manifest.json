@@ -1,0 +1,229 @@
+{
+  "bundles": [
+    {
+      "name": "player",
+      "when": "eager",
+      "file": "models/player.glb",
+      "nodes": [
+        "character-male-a"
+      ],
+      "counts": {
+        "meshes": 2,
+        "materials": 1,
+        "textures": 1,
+        "animations": 32,
+        "skins": 1
+      },
+      "bytes": 143928,
+      "gzip": 33466
+    },
+    {
+      "name": "player-female-a",
+      "when": "lazy",
+      "file": "models/player-female-a.glb",
+      "nodes": [
+        "character-female-a"
+      ],
+      "counts": {
+        "meshes": 2,
+        "materials": 1,
+        "textures": 1,
+        "animations": 32,
+        "skins": 1
+      },
+      "bytes": 162620,
+      "gzip": 36451
+    },
+    {
+      "name": "pet-fox",
+      "when": "lazy",
+      "file": "models/pet-fox.glb",
+      "nodes": [
+        "animal-fox"
+      ],
+      "counts": {
+        "meshes": 6,
+        "materials": 1,
+        "textures": 1,
+        "animations": 8,
+        "skins": 0
+      },
+      "bytes": 76264,
+      "gzip": 20911
+    },
+    {
+      "name": "pet-cat",
+      "when": "lazy",
+      "file": "models/pet-cat.glb",
+      "nodes": [
+        "animal-cat"
+      ],
+      "counts": {
+        "meshes": 7,
+        "materials": 1,
+        "textures": 1,
+        "animations": 8,
+        "skins": 0
+      },
+      "bytes": 87204,
+      "gzip": 21897
+    },
+    {
+      "name": "world-forest",
+      "when": "eager",
+      "file": "models/world-forest.glb",
+      "nodes": [
+        "cliff_block_rock",
+        "cliff_blockHalf_rock",
+        "cliff_steps_rock",
+        "cliff_top_rock",
+        "tree_default",
+        "tree_pineRoundA",
+        "tree_pineTallA",
+        "tree_small",
+        "tree_thin",
+        "stump_round",
+        "rock_smallA",
+        "rock_smallD",
+        "rock_largeA",
+        "grass",
+        "grass_large",
+        "plant_bush",
+        "mushroom_red",
+        "flower_yellowA",
+        "log"
+      ],
+      "counts": {
+        "meshes": 19,
+        "materials": 9,
+        "textures": 0,
+        "animations": 0,
+        "skins": 0
+      },
+      "bytes": 117912,
+      "gzip": 25553
+    },
+    {
+      "name": "world-castle",
+      "when": "lazy",
+      "file": "models/world-castle.glb",
+      "nodes": [
+        "stairs-stone",
+        "stairs-stone-square",
+        "wall-narrow-stairs",
+        "wall-narrow-stairs-rail",
+        "wall",
+        "wall-half",
+        "wall-pillar",
+        "wall-corner",
+        "gate",
+        "flag",
+        "flag-banner-long",
+        "tower-square-base",
+        "tower-square-mid",
+        "tower-square-top-roof"
+      ],
+      "counts": {
+        "meshes": 14,
+        "materials": 1,
+        "textures": 1,
+        "animations": 0,
+        "skins": 0
+      },
+      "bytes": 144552,
+      "gzip": 29912
+    },
+    {
+      "name": "food",
+      "when": "lazy",
+      "file": "models/food.glb",
+      "nodes": [
+        "apple",
+        "banana",
+        "bread",
+        "burger",
+        "cake",
+        "carrot",
+        "cheese",
+        "cookie",
+        "corn",
+        "donut",
+        "egg",
+        "fish",
+        "grapes",
+        "hot-dog",
+        "ice-cream",
+        "lemon",
+        "mushroom",
+        "onion",
+        "orange",
+        "pizza",
+        "pumpkin",
+        "sandwich",
+        "strawberry",
+        "tomato",
+        "watermelon"
+      ],
+      "counts": {
+        "meshes": 65,
+        "materials": 1,
+        "textures": 1,
+        "animations": 0,
+        "skins": 0
+      },
+      "bytes": 463668,
+      "gzip": 106611
+    },
+    {
+      "name": "boss-warrior",
+      "when": "lazy",
+      "file": "models/boss-warrior.glb",
+      "nodes": [
+        "Skeleton_Warrior"
+      ],
+      "counts": {
+        "meshes": 10,
+        "materials": 2,
+        "textures": 1,
+        "animations": 0,
+        "skins": 1
+      },
+      "bytes": 364252,
+      "gzip": 169818
+    },
+    {
+      "name": "boss-minion",
+      "when": "lazy",
+      "file": "models/boss-minion.glb",
+      "nodes": [
+        "Skeleton_Minion"
+      ],
+      "counts": {
+        "meshes": 9,
+        "materials": 2,
+        "textures": 1,
+        "animations": 0,
+        "skins": 1
+      },
+      "bytes": 315420,
+      "gzip": 144082
+    },
+    {
+      "name": "boss-anims",
+      "when": "lazy",
+      "file": "models/boss-anims.glb",
+      "nodes": [
+        "Rig_Medium_General"
+      ],
+      "counts": {
+        "meshes": 0,
+        "materials": 0,
+        "textures": 0,
+        "animations": 26,
+        "skins": 0
+      },
+      "bytes": 599000,
+      "gzip": 217944
+    }
+  ]
+}
