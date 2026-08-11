@@ -1,0 +1,92 @@
+word	level	grade	pos	meaning	meaningAlt	synonyms	tags	freq	example	exampleKo	image
+cat	1	elementary_3	noun	고양이			animal	high	My cat sleeps on the bed.	내 고양이는 침대에서 잔다.
+dog	1	elementary_3	noun	개			animal	high	The dog runs very fast.	그 개는 매우 빨리 달린다.
+bird	1	elementary_3	noun	새			animal	high	A bird sings in the tree.	새가 나무에서 노래한다.
+fish	1	elementary_3	noun	물고기			animal	high	The fish swims in the water.	물고기가 물에서 헤엄친다.	fish
+pig	1	elementary_3	noun	돼지			animal	mid	The pig is very big.	그 돼지는 매우 크다.
+cow	1	elementary_3	noun	소			animal	mid	The cow eats grass.	소가 풀을 먹는다.
+duck	1	elementary_3	noun	오리			animal	mid	A duck is in the pond.	오리가 연못에 있다.
+rabbit	1	elementary_3	noun	토끼			animal	mid	The rabbit jumps high.	토끼가 높이 뛰어오른다.
+apple	1	elementary_3	noun	사과			food|fruit	high	I eat an apple every day.	나는 매일 사과를 먹는다.	apple
+banana	1	elementary_3	noun	바나나			food|fruit	high	The banana is yellow.	그 바나나는 노랗다.	banana
+bread	1	elementary_3	noun	빵			food	high	I like warm bread.	나는 따뜻한 빵을 좋아한다.	bread
+milk	1	elementary_3	noun	우유			food|drink	high	She drinks milk every morning.	그녀는 매일 아침 우유를 마신다.
+egg	1	elementary_3	noun	달걀			food	high	I eat one egg for breakfast.	나는 아침으로 달걀 하나를 먹는다.	egg
+cake	1	elementary_3	noun	케이크			food	high	The cake is very sweet.	그 케이크는 매우 달다.	cake
+rice	1	elementary_3	noun	밥	쌀		food	high	We eat rice with soup.	우리는 밥을 국과 함께 먹는다.
+water	1	elementary_3	noun	물			food|drink	high	Please give me some water.	물 좀 주세요.
+red	1	elementary_3	adjective	빨간			color	high	I have a red bag.	나는 빨간 가방을 가지고 있다.
+blue	1	elementary_3	adjective	파란			color	high	The sky is blue today.	오늘 하늘이 파랗다.
+green	1	elementary_3	adjective	초록의			color	high	The leaves are green.	잎들이 초록색이다.
+yellow	1	elementary_3	adjective	노란			color	high	She has a yellow hat.	그녀는 노란 모자를 가지고 있다.
+black	1	elementary_3	adjective	검은			color	high	My shoes are black.	내 신발은 검다.
+white	1	elementary_3	adjective	흰			color	high	The snow is white.	눈은 하얗다.
+mom	1	elementary_3	noun	엄마			family	high	My mom cooks dinner.	우리 엄마는 저녁을 요리한다.
+dad	1	elementary_3	noun	아빠			family	high	My dad reads a book.	우리 아빠는 책을 읽는다.
+sister	1	elementary_3	noun	여자 형제			family	high	My sister is ten years old.	내 여자 형제는 열 살이다.
+brother	1	elementary_3	noun	남자 형제			family	high	I play with my brother.	나는 남자 형제와 함께 놀았다.
+grandmother	1	elementary_3	noun	할머니			family	mid	My grandmother makes cookies.	우리 할머니는 쿠키를 만드신다.
+grandfather	1	elementary_3	noun	할아버지			family	mid	My grandfather walks every day.	우리 할아버지는 매일 걷는다.
+hand	1	elementary_3	noun	손			body	high	Wash your hand before lunch.	점심 전에 손을 씻어라.
+foot	1	elementary_3	noun	발			body	high	My foot hurts a lot.	내 발이 많이 아프다.
+head	1	elementary_3	noun	머리			body	high	He puts a hat on his head.	그는 머리에 모자를 쓴다.
+eye	1	elementary_3	noun	눈(신체)			body	high	Close your eye and rest.	눈을 감고 쉬어라.
+nose	1	elementary_3	noun	코			body	high	The dog has a wet nose.	그 개는 코가 젖어 있다.
+mouth	1	elementary_3	noun	입			body	high	Open your mouth wide.	입을 크게 벌려라.
+ear	1	elementary_3	noun	귀			body	high	A rabbit has a long ear.	토끼는 긴 귀를 가졌다.
+hair	1	elementary_3	noun	머리카락			body	high	Her hair is very long.	그녀의 머리카락은 매우 길다.
+book	1	elementary_3	noun	책			school	high	This book is very funny.	이 책은 매우 재미있다.
+pencil	1	elementary_3	noun	연필			school	high	I write with a pencil.	나는 연필로 쓴다.
+bag	1	elementary_3	noun	가방			school	high	My bag is on the desk.	내 가방은 책상 위에 있다.
+desk	1	elementary_3	noun	책상			school	high	Put the book on the desk.	책을 책상 위에 놓아라.
+chair	1	elementary_3	noun	의자			school	high	She sits on the chair.	그녀는 의자에 앉는다.
+school	1	elementary_3	noun	학교			school|place	high	I go to school by bus.	나는 버스로 학교에 간다.
+teacher	1	elementary_3	noun	선생님			school|job	high	Our teacher is very kind.	우리 선생님은 매우 친절하다.
+student	1	elementary_3	noun	학생			school	high	Every student has a book.	모든 학생이 책을 가지고 있다.
+run	1	elementary_3	verb	달리다			motion	high	I run in the park.	나는 공원에서 달린다.
+jump	1	elementary_3	verb	뛰어오르다			motion	high	Frogs jump very high.	개구리는 매우 높이 뛰어오른다.
+walk	1	elementary_3	verb	걷다			motion	high	We walk to school together.	우리는 함께 학교에 걸어간다.
+sit	1	elementary_3	verb	앉다			motion	high	Please sit on this chair.	이 의자에 앉으세요.
+stand	1	elementary_3	verb	서다			motion	high	The children stand in line.	아이들이 줄을 서 있다.
+eat	1	elementary_3	verb	먹다			daily	high	We eat lunch at noon.	우리는 정오에 점심을 먹는다.
+drink	1	elementary_3	verb	마시다			daily	high	I drink water after running.	나는 달린 후에 물을 마신다.
+sleep	1	elementary_3	verb	자다			daily	high	Babies sleep a lot.	아기들은 많이 잔다.
+read	1	elementary_3	verb	읽다			daily	high	I read a book every night.	나는 매일 밤 책을 읽는다.
+write	1	elementary_3	verb	쓰다			daily	high	Please write your name here.	여기에 이름을 쓰세요.
+play	1	elementary_3	verb	놀다			daily	high	The children play outside.	아이들이 밖에서 논다.
+sing	1	elementary_3	verb	노래하다			daily	high	We sing a happy song.	우리는 즐거운 노래를 부른다.
+open	1	elementary_3	verb	열다			daily	high	Please open the window.	창문을 열어 주세요.
+close	1	elementary_3	verb	닫다			daily	high	Close the door, please.	문을 닫아 주세요.
+look	1	elementary_3	verb	보다		watch	daily	high	Look at the big tree.	그 큰 나무를 보아라.
+big	1	elementary_3	adjective	큰		large	size	high	An elephant is very big.	코끼리는 매우 크다.
+small	1	elementary_3	adjective	작은		little	size	high	This bag is too small.	이 가방은 너무 작다.
+tall	1	elementary_3	adjective	키가 큰			size	high	My brother is very tall.	내 남자 형제는 키가 매우 크다.
+short	1	elementary_3	adjective	짧은	키가 작은		size	high	Her hair is short now.	그녀의 머리카락은 이제 짧다.
+fast	1	elementary_3	adjective	빠른		quick	speed|quality	high	A cheetah is very fast.	치타는 매우 빠르다.
+slow	1	elementary_3	adjective	느린			speed|quality	high	The turtle is slow.	거북이는 느리다.
+hot	1	elementary_3	adjective	뜨거운			weather|temperature	high	The soup is very hot.	그 수프는 매우 뜨겁다.
+cold	1	elementary_3	adjective	차가운	추운		weather|temperature	high	The water is very cold.	그 물은 매우 차갑다.
+happy	1	elementary_3	adjective	행복한		glad	emotion	high	I am happy today.	나는 오늘 행복하다.
+sad	1	elementary_3	adjective	슬픈			emotion	high	She looks sad now.	그녀는 지금 슬퍼 보인다.
+good	1	elementary_3	adjective	좋은			quality	high	This is a good idea.	이것은 좋은 생각이다.
+bad	1	elementary_3	adjective	나쁜			quality	high	Too much candy is bad.	사탕을 너무 많이 먹는 것은 나쁘다.
+new	1	elementary_3	adjective	새로운			quality	high	I have a new pencil.	나는 새 연필이 있다.
+old	1	elementary_3	adjective	오래된	낡은|늙은		quality	high	This is an old house.	이것은 오래된 집이다.
+house	1	elementary_3	noun	집			place	high	Our house has a garden.	우리 집에는 정원이 있다.
+car	1	elementary_3	noun	자동차			thing	high	My dad washes the car.	우리 아빠는 자동차를 세차한다.
+ball	1	elementary_3	noun	공			thing	high	He kicks the ball hard.	그는 공을 세게 찬다.
+sun	1	elementary_3	noun	해(태양)			nature	high	The sun is very bright.	해가 매우 밝다.
+moon	1	elementary_3	noun	달(하늘)			nature	high	The moon is round tonight.	오늘 밤 달이 둥글다.
+star	1	elementary_3	noun	별			nature	high	I can see one star.	나는 별 하나를 볼 수 있다.
+tree	1	elementary_3	noun	나무			nature	high	The tree is very old.	그 나무는 매우 오래되었다.
+flower	1	elementary_3	noun	꽃			nature	high	This flower smells sweet.	이 꽃은 달콤한 냄새가 난다.
+rain	1	elementary_3	noun	비			weather	high	The rain falls all day.	비가 하루 종일 내린다.
+snow	1	elementary_3	noun	눈(날씨)			weather	high	The snow covers the road.	눈이 길을 덮는다.
+day	1	elementary_3	noun	하루	날		time	high	I read every day.	나는 매일 읽는다.
+night	1	elementary_3	noun	밤			time	high	Owls hunt at night.	올빼미는 밤에 사냥한다.
+little	1	elementary_3	adjective	작은		small	size	high	The little bird sings well.	그 작은 새는 노래를 잘한다.	
+toy	1	elementary_3	noun	장난감			thing	high	My toy is under the desk.	내 장난감은 책상 아래에 있다.	
+box	1	elementary_3	noun	상자			thing	high	The box is very heavy.	그 상자는 매우 무겁다.	
+clock	1	elementary_3	noun	시계			thing	high	The clock on the wall is new.	벽에 있는 시계는 새것이다.	
+door	1	elementary_3	noun	문			thing	high	Please close the door.	문을 닫아 주세요.	
+window	1	elementary_3	noun	창문			thing	high	Open the window, please.	창문을 열어 주세요.	

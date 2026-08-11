@@ -1,0 +1,109 @@
+word	level	grade	pos	meaning	meaningAlt	synonyms	tags	freq	example	exampleKo	image
+monkey	2	elementary_4	noun	원숭이			animal	mid	The monkey climbs the tree.	원숭이가 나무를 오른다.
+tiger	2	elementary_4	noun	호랑이			animal	mid	A tiger has strong legs.	호랑이는 튼튼한 다리를 가졌다.
+lion	2	elementary_4	noun	사자			animal	mid	The lion sleeps in the shade.	사자가 그늘에서 잔다.
+elephant	2	elementary_4	noun	코끼리			animal	mid	An elephant has a long nose.	코끼리는 긴 코를 가졌다.
+penguin	2	elementary_4	noun	펭귄			animal	mid	The penguin walks on the snow.	펭귄이 눈 위를 걷는다.
+spider	2	elementary_4	noun	거미			animal	mid	A spider makes a web.	거미가 거미줄을 만든다.
+butterfly	2	elementary_4	noun	나비			animal	mid	The butterfly sits on a flower.	나비가 꽃에 앉는다.
+strawberry	2	elementary_4	noun	딸기			food|fruit	mid	This strawberry tastes sweet.	이 딸기는 달콤한 맛이 난다.	strawberry
+watermelon	2	elementary_4	noun	수박			food|fruit	mid	We eat watermelon in summer.	우리는 여름에 수박을 먹는다.	watermelon
+tomato	2	elementary_4	noun	토마토			food	mid	The tomato is red and round.	토마토는 붉고 둥글다.	tomato
+carrot	2	elementary_4	noun	당근			food	mid	Rabbits like carrot very much.	토끼는 당근을 매우 좋아한다.	carrot
+potato	2	elementary_4	noun	감자			food	mid	My mom cooks potato soup.	우리 엄마는 감자 수프를 만든다.
+onion	2	elementary_4	noun	양파			food	mid	The onion makes me cry.	양파는 나를 울게 만든다.	onion
+cheese	2	elementary_4	noun	치즈			food	mid	I put cheese on the bread.	나는 빵에 치즈를 올린다.	cheese
+pizza	2	elementary_4	noun	피자			food	high	We share one pizza together.	우리는 피자 하나를 함께 나눈다.	pizza
+cookie	2	elementary_4	noun	쿠키			food	high	Grandmother bakes a cookie for me.	할머니가 나에게 쿠키를 구워 준다.	cookie
+juice	2	elementary_4	noun	주스			food|drink	high	I drink apple juice.	나는 사과 주스를 마신다.
+soup	2	elementary_4	noun	수프			food	mid	The soup is warm and salty.	그 수프는 따뜻하고 짜다.
+candy	2	elementary_4	noun	사탕			food	high	Too much candy hurts your teeth.	사탕을 너무 많이 먹으면 이가 아프다.
+breakfast	2	elementary_4	noun	아침 식사			meal	high	I eat breakfast at seven.	나는 일곱 시에 아침 식사를 한다.
+lunch	2	elementary_4	noun	점심 식사			meal	high	We have lunch at school.	우리는 학교에서 점심 식사를 한다.
+dinner	2	elementary_4	noun	저녁 식사			meal	high	Dinner is ready now.	저녁 식사가 지금 준비되었다.
+snack	2	elementary_4	noun	간식			meal	mid	I want a small snack.	나는 작은 간식을 원한다.
+spoon	2	elementary_4	noun	숟가락			tableware	mid	Eat the soup with a spoon.	수프를 숟가락으로 먹어라.
+fork	2	elementary_4	noun	포크			tableware	mid	He holds a fork in his hand.	그는 손에 포크를 들고 있다.
+knife	2	elementary_4	noun	칼			tableware	mid	Be careful with the knife.	칼을 조심해라.
+plate	2	elementary_4	noun	접시			tableware	mid	Put the cake on a plate.	케이크를 접시에 놓아라.
+cup	2	elementary_4	noun	컵			tableware	high	This cup is full of milk.	이 컵은 우유로 가득하다.
+bowl	2	elementary_4	noun	그릇			tableware	mid	The bowl has warm rice.	그 그릇에 따뜻한 밥이 있다.
+park	2	elementary_4	noun	공원			place	high	We play soccer in the park.	우리는 공원에서 축구를 한다.
+market	2	elementary_4	noun	시장			place	mid	My mom buys fish at the market.	우리 엄마는 시장에서 생선을 산다.
+hospital	2	elementary_4	noun	병원			place	mid	The hospital is near my house.	병원은 우리 집 근처에 있다.
+library	2	elementary_4	noun	도서관			place	mid	We read quietly in the library.	우리는 도서관에서 조용히 읽는다.
+kitchen	2	elementary_4	noun	부엌			place	mid	Dad cooks in the kitchen.	아빠가 부엌에서 요리한다.
+garden	2	elementary_4	noun	정원			place	mid	Flowers grow in our garden.	우리 정원에 꽃이 자란다.
+river	2	elementary_4	noun	강			nature	mid	The river is very wide.	그 강은 매우 넓다.
+mountain	2	elementary_4	noun	산			nature	mid	We climb the mountain together.	우리는 함께 산을 오른다.
+beach	2	elementary_4	noun	해변			nature	mid	The beach has warm sand.	그 해변에는 따뜻한 모래가 있다.
+forest	2	elementary_4	noun	숲			nature	mid	Many birds live in the forest.	많은 새가 숲에 산다.
+city	2	elementary_4	noun	도시			place	high	This city is very busy.	이 도시는 매우 분주하다.
+farm	2	elementary_4	noun	농장			place	mid	Cows live on the farm.	소들이 농장에 산다.
+doctor	2	elementary_4	noun	의사			job	high	The doctor helps sick people.	의사는 아픈 사람들을 돕는다.
+farmer	2	elementary_4	noun	농부			job	mid	The farmer grows rice.	농부가 쌀을 재배한다.
+nurse	2	elementary_4	noun	간호사			job	mid	The nurse is very kind.	그 간호사는 매우 친절하다.
+driver	2	elementary_4	noun	운전사			job	mid	The bus driver waits for us.	버스 운전사가 우리를 기다린다.
+singer	2	elementary_4	noun	가수			job	mid	My favorite singer is famous.	내가 가장 좋아하는 가수는 유명하다.
+cook	2	elementary_4	noun	요리사			job	mid	The cook makes good soup.	그 요리사는 좋은 수프를 만든다.
+spring	2	elementary_4	noun	봄			season	high	Flowers bloom in spring.	봄에 꽃이 핀다.
+summer	2	elementary_4	noun	여름			season	high	Summer is very hot here.	여기 여름은 매우 뜨겁다.
+autumn	2	elementary_4	noun	가을			season	mid	Leaves fall in autumn.	가을에 잎이 떨어진다.
+winter	2	elementary_4	noun	겨울			season	high	We ski in winter.	우리는 겨울에 스키를 탄다.
+morning	2	elementary_4	noun	아침			time	high	I run every morning.	나는 매일 아침 달린다.
+afternoon	2	elementary_4	noun	오후			time	high	We study in the afternoon.	우리는 오후에 공부한다.
+evening	2	elementary_4	noun	저녁			time	high	The family walks in the evening.	그 가족은 저녁에 산책한다.
+today	2	elementary_4	adverb	오늘			time	high	I feel great today.	나는 오늘 기분이 좋다.
+tomorrow	2	elementary_4	adverb	내일			time	high	We meet again tomorrow.	우리는 내일 다시 만난다.
+yesterday	2	elementary_4	adverb	어제			time	high	It rained yesterday.	어제 비가 왔다.
+week	2	elementary_4	noun	주(일주일)			time	high	I visit grandmother every week.	나는 매주 할머니를 방문한다.
+month	2	elementary_4	noun	달(개월)			time	high	February is a short month.	2월은 짧은 달이다.
+year	2	elementary_4	noun	해(1년)			time	high	I grew tall this year.	나는 올해 키가 자랐다.
+angry	2	elementary_4	adjective	화난			emotion	high	Dad looks angry now.	아빠는 지금 화나 보인다.
+tired	2	elementary_4	adjective	피곤한			emotion	high	I am tired after the game.	나는 경기 후에 피곤하다.
+hungry	2	elementary_4	adjective	배고픈			emotion	high	The baby is hungry again.	그 아기는 또 배고프다.
+thirsty	2	elementary_4	adjective	목마른			emotion	mid	I am thirsty after running.	나는 달린 후에 목마르다.
+scared	2	elementary_4	adjective	무서워하는			emotion	mid	The cat is scared of dogs.	그 고양이는 개를 무서워한다.
+excited	2	elementary_4	adjective	신나는			emotion	mid	We are excited about the trip.	우리는 여행에 신나 있다.
+clean	2	elementary_4	adjective	깨끗한			quality	high	Her room is very clean.	그녀의 방은 매우 깨끗하다.
+dirty	2	elementary_4	adjective	더러운			quality	high	My shoes are dirty.	내 신발은 더럽다.
+quiet	2	elementary_4	adjective	조용한			quality	high	The library is quiet.	도서관은 조용하다.
+noisy	2	elementary_4	adjective	시끄러운			quality	mid	The classroom is noisy today.	교실이 오늘 시끄럽다.
+easy	2	elementary_4	adjective	쉬운			quality	high	This question is easy.	이 문제는 쉽다.
+difficult	2	elementary_4	adjective	어려운		hard	quality	high	Math is difficult for me.	수학은 나에게 어렵다.
+strong	2	elementary_4	adjective	힘센	강한		quality	high	My brother is very strong.	내 남자 형제는 매우 힘이 세다.
+weak	2	elementary_4	adjective	약한			quality	mid	The weak plant needs water.	그 약한 식물은 물이 필요하다.
+heavy	2	elementary_4	adjective	무거운			quality	high	This bag is too heavy.	이 가방은 너무 무겁다.
+light	2	elementary_4	adjective	가벼운			quality	high	The box is light and small.	그 상자는 가볍고 작다.
+kind	2	elementary_4	adjective	친절한			quality	high	She is kind to everyone.	그녀는 모두에게 친절하다.
+brave	2	elementary_4	adjective	용감한			quality	mid	The brave boy helps others.	그 용감한 소년은 다른 사람을 돕는다.
+funny	2	elementary_4	adjective	재미있는			quality	high	This story is funny.	이 이야기는 재미있다.
+beautiful	2	elementary_4	adjective	아름다운			quality	high	The beach is beautiful.	그 해변은 아름답다.
+delicious	2	elementary_4	adjective	맛있는			quality	high	The pizza is delicious.	그 피자는 맛있다.
+large	2	elementary_4	adjective	커다란		big	size	high	They live in a large house.	그들은 커다란 집에 산다.
+quick	2	elementary_4	adjective	재빠른		fast	speed|quality	mid	The quick rabbit runs away.	그 재빠른 토끼가 달아난다.
+bring	2	elementary_4	verb	가져오다			daily	high	Please bring your book.	네 책을 가져오세요.
+carry	2	elementary_4	verb	나르다			daily	mid	I carry the heavy bag.	나는 무거운 가방을 나른다.
+catch	2	elementary_4	verb	잡다			motion	high	Catch the ball with two hands.	두 손으로 공을 잡아라.
+throw	2	elementary_4	verb	던지다			motion	high	Do not throw the knife.	칼을 던지지 마라.
+climb	2	elementary_4	verb	오르다			motion	mid	We climb the stairs slowly.	우리는 계단을 천천히 오른다.
+swim	2	elementary_4	verb	수영하다			motion	high	Fish swim in the river.	물고기가 강에서 수영한다.
+draw	2	elementary_4	verb	그리다			daily	high	I draw a big tree.	나는 큰 나무를 그린다.
+listen	2	elementary_4	verb	듣다			daily	high	Listen to the teacher.	선생님의 말을 들어라.
+learn	2	elementary_4	verb	배우다			daily	high	We learn English at school.	우리는 학교에서 영어를 배운다.
+teach	2	elementary_4	verb	가르치다			daily	high	My aunt teaches music.	우리 이모는 음악을 가르친다.
+help	2	elementary_4	verb	돕다			daily	high	I help my mom every day.	나는 매일 엄마를 돕는다.
+wash	2	elementary_4	verb	씻다			daily	high	Wash your hands now.	지금 손을 씻어라.
+buy	2	elementary_4	verb	사다			daily	high	I buy bread every morning.	나는 매일 아침 빵을 산다.
+sell	2	elementary_4	verb	팔다			daily	mid	They sell fresh fruit.	그들은 신선한 과일을 판다.
+find	2	elementary_4	verb	찾다			daily	high	I cannot find my pencil.	나는 내 연필을 찾을 수 없다.
+wait	2	elementary_4	verb	기다리다			daily	high	Please wait for me.	나를 기다려 주세요.
+visit	2	elementary_4	verb	방문하다			daily	mid	We visit the museum today.	우리는 오늘 박물관을 방문한다.
+share	2	elementary_4	verb	나누다			daily	mid	Let us share the cake.	케이크를 나누자.
+remember	2	elementary_4	verb	기억하다			daily	high	I remember your name.	나는 네 이름을 기억한다.
+forget	2	elementary_4	verb	잊다			daily	high	Do not forget your bag.	가방을 잊지 마라.
+practice	2	elementary_4	verb	연습하다			daily	mid	I practice the piano daily.	나는 매일 피아노를 연습한다.
+travel	2	elementary_4	verb	여행하다			daily	mid	We travel by train.	우리는 기차로 여행한다.
+watch	2	elementary_4	verb	지켜보다		look	daily	high	I watch the birds quietly.	나는 새들을 조용히 지켜본다.
+glad	2	elementary_4	adjective	기쁜		happy	emotion	mid	I am glad to see you.	나는 너를 만나서 기쁘다.	
+hard	2	elementary_4	adjective	단단한	어려운	difficult	quality	high	The ice is very hard.	그 얼음은 매우 단단하다.	

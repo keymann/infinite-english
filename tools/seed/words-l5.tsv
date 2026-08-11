@@ -1,0 +1,85 @@
+word	level	grade	pos	meaning	meaningAlt	synonyms	tags	freq	example	exampleKo	image
+culture	5	elementary_6	noun	문화			society	high	Every country has its culture.	모든 나라는 그 나라의 문화가 있다.
+history	5	elementary_6	noun	역사			subject	high	I like history class.	나는 역사 수업을 좋아한다.
+science	5	elementary_6	noun	과학			subject|science	high	Science explains the world.	과학은 세계를 설명한다.
+music	5	elementary_6	noun	음악			subject	high	Music makes me calm.	음악은 나를 침착하게 만든다.
+art	5	elementary_6	noun	미술			subject	high	Art class is after lunch.	미술 수업은 점심 후에 있다.
+math	5	elementary_6	noun	수학			subject	high	Math is my favorite subject.	수학은 내가 가장 좋아하는 과목이다.
+language	5	elementary_6	noun	언어			subject	high	English is a world language.	영어는 세계 언어다.
+country	5	elementary_6	noun	나라			society	high	This country has many islands.	이 나라에는 섬이 많다.
+village	5	elementary_6	noun	마을			place	mid	The village is near the hill.	그 마을은 언덕 근처에 있다.
+world	5	elementary_6	noun	세계			society	high	The world is very wide.	세계는 매우 넓다.
+nature	5	elementary_6	noun	자연			nature	high	We protect nature together.	우리는 함께 자연을 보호한다.
+environment	5	elementary_6	noun	환경			nature	high	Plastic hurts the environment.	플라스틱은 환경을 해친다.
+energy	5	elementary_6	noun	에너지			science|subject	high	The sun gives us energy.	해는 우리에게 에너지를 준다.
+machine	5	elementary_6	noun	기계			thing|science	mid	This machine washes clothes.	이 기계는 옷을 빤다.
+computer	5	elementary_6	noun	컴퓨터			thing|science	high	I use a computer at school.	나는 학교에서 컴퓨터를 쓴다.
+robot	5	elementary_6	noun	로봇			thing|science	mid	The robot carries heavy boxes.	그 로봇은 무거운 상자를 나른다.
+health	5	elementary_6	noun	건강			health	high	Exercise is good for health.	운동은 건강에 좋다.
+medicine	5	elementary_6	noun	약			health	high	Take this medicine after dinner.	저녁 식사 후에 이 약을 먹어라.
+exercise	5	elementary_6	noun	운동			health	high	Daily exercise makes you strong.	매일 운동은 너를 튼튼하게 만든다.
+safety	5	elementary_6	noun	안전			health	mid	Safety comes before speed.	안전이 속도보다 먼저다.
+danger	5	elementary_6	noun	위험			health	mid	The sign shows danger.	그 표지판은 위험을 알린다.
+information	5	elementary_6	noun	정보			study	high	This book has useful information.	이 책에는 유용한 정보가 있다.
+example	5	elementary_6	noun	예시			study	high	Give me one example, please.	예시 하나를 주세요.
+result	5	elementary_6	noun	결과			study	high	The test result was good.	시험 결과가 좋았다.
+difference	5	elementary_6	noun	차이			study	high	Find the difference between them.	그것들 사이의 차이를 찾아라.
+experience	5	elementary_6	noun	경험			study	high	The trip was a great experience.	그 여행은 훌륭한 경험이었다.
+opinion	5	elementary_6	noun	의견			study	high	Tell me your opinion.	네 의견을 말해라.
+choice	5	elementary_6	noun	선택			study	high	It is your choice.	그것은 네 선택이다.
+effort	5	elementary_6	noun	노력			study	mid	Your effort makes the difference.	네 노력이 차이를 만든다.
+success	5	elementary_6	noun	성공			study	mid	Practice leads to success.	연습은 성공으로 이어진다.
+mistake	5	elementary_6	noun	실수			study	high	A mistake helps you learn.	실수는 배우는 데 도움이 된다.
+habit	5	elementary_6	noun	습관			daily	mid	Reading is a good habit.	독서는 좋은 습관이다.
+tradition	5	elementary_6	noun	전통			society	mid	This festival is an old tradition.	이 축제는 오래된 전통이다.
+festival	5	elementary_6	noun	축제			society	high	The spring festival is popular.	봄 축제는 인기 있다.
+museum	5	elementary_6	noun	박물관			place	high	The museum opens at ten.	그 박물관은 열 시에 문을 연다.
+continue	5	elementary_6	verb	계속하다			study	high	Continue the story, please.	이야기를 계속해 주세요.
+improve	5	elementary_6	verb	향상시키다			study	high	Practice improves your English.	연습은 네 영어를 향상시킨다.
+increase	5	elementary_6	verb	늘리다			study	high	They increase the prize money.	그들은 상금을 늘린다.
+reduce	5	elementary_6	verb	줄이다			study	high	We reduce our plastic use.	우리는 플라스틱 사용을 줄인다.
+create	5	elementary_6	verb	창조하다			study	high	Artists create beautiful work.	예술가들은 아름다운 작품을 창조한다.
+produce	5	elementary_6	verb	생산하다			study	high	This farm produces fresh milk.	이 농장은 신선한 우유를 생산한다.
+provide	5	elementary_6	verb	제공하다			study	high	The school provides free lunch.	그 학교는 무료 점심을 제공한다.
+receive	5	elementary_6	verb	받다			daily	high	I receive a letter today.	나는 오늘 편지를 받는다.
+accept	5	elementary_6	verb	받아들이다			daily	high	Please accept my apology.	내 사과를 받아들여 주세요.
+refuse	5	elementary_6	verb	거절하다			daily	mid	She refuses the second cake.	그녀는 두 번째 케이크를 거절한다.
+allow	5	elementary_6	verb	허락하다			daily	high	My parents allow one hour.	우리 부모는 한 시간을 허락한다.
+avoid	5	elementary_6	verb	피하다			daily	high	Avoid the deep water.	깊은 물을 피해라.
+appear	5	elementary_6	verb	나타나다			daily	high	A rainbow appears after rain.	비가 온 뒤 무지개가 나타난다.
+disappear	5	elementary_6	verb	사라지다			daily	mid	The fog disappears in the morning.	안개는 아침에 사라진다.
+happen	5	elementary_6	verb	발생하다			daily	high	What happens next?	다음에 무슨 일이 발생하니?
+succeed	5	elementary_6	verb	성공하다			study	mid	You succeed after many tries.	너는 여러 번 시도한 후에 성공한다.
+cause	5	elementary_6	verb	일으키다			study	high	Storms cause many problems.	폭풍은 많은 문제를 일으킨다.
+express	5	elementary_6	verb	표현하다			study	mid	Express your idea clearly.	네 생각을 분명히 표현해라.
+respect	5	elementary_6	verb	존중하다			society	mid	We respect other cultures.	우리는 다른 문화를 존중한다.
+support	5	elementary_6	verb	지지하다			society	high	My family supports my dream.	우리 가족은 내 꿈을 지지한다.
+prevent	5	elementary_6	verb	막다			health	mid	Clean hands prevent sickness.	깨끗한 손은 병을 막는다.
+possible	5	elementary_6	adjective	가능한			quality	high	A perfect score is possible.	만점은 가능하다.
+impossible	5	elementary_6	adjective	불가능한			quality	high	Nothing is impossible today.	오늘은 불가능한 것이 없다.
+similar	5	elementary_6	adjective	비슷한			quality	high	These two words are similar.	이 두 단어는 비슷하다.
+different	5	elementary_6	adjective	다른			quality	high	Every child is different.	모든 아이는 다르다.
+common	5	elementary_6	adjective	흔한			quality	high	Rain is common in summer.	비는 여름에 흔하다.
+rare	5	elementary_6	adjective	드문			quality	mid	Snow is rare in this city.	눈은 이 도시에서 드물다.
+ancient	5	elementary_6	adjective	고대의			quality	mid	This is an ancient village.	이것은 고대의 마을이다.
+modern	5	elementary_6	adjective	현대의			quality	high	The museum has modern art.	그 박물관에는 현대 미술이 있다.
+natural	5	elementary_6	adjective	자연스러운			quality	high	Her smile is natural.	그녀의 미소는 자연스럽다.
+serious	5	elementary_6	adjective	심각한			quality	high	This problem is serious.	이 문제는 심각하다.
+polite	5	elementary_6	adjective	예의 바른			quality	mid	He is polite to his neighbor.	그는 이웃에게 예의 바르다.
+honest	5	elementary_6	adjective	정직한			quality	mid	An honest answer helps everyone.	정직한 답은 모두를 돕는다.
+patient	5	elementary_6	adjective	참을성 있는			quality	mid	A patient teacher waits quietly.	참을성 있는 선생님은 조용히 기다린다.
+curious	5	elementary_6	adjective	호기심 많은			quality	mid	The curious child asks questions.	그 호기심 많은 아이는 질문을 한다.
+creative	5	elementary_6	adjective	창의적인			quality	mid	Her idea is creative.	그녀의 생각은 창의적이다.
+active	5	elementary_6	adjective	활발한			quality	mid	The active puppy runs all day.	그 활발한 강아지는 하루 종일 달린다.
+healthy	5	elementary_6	adjective	건강한			health	high	Fresh food keeps you healthy.	신선한 음식은 너를 건강하게 유지한다.
+sick	5	elementary_6	adjective	아픈			health	high	The sick child stays home.	그 아픈 아이는 집에 있는다.
+get up	5	elementary_6	verb_phrase	일어나다			phrase|daily	high	I get up at six every day.	나는 매일 여섯 시에 일어난다.
+put on	5	elementary_6	verb_phrase	입다			phrase|clothes	high	Put on your warm coat.	따뜻한 외투를 입어라.
+take off	5	elementary_6	verb_phrase	벗다			phrase|clothes	high	Take off your wet socks.	젖은 양말을 벗어라.
+turn on	5	elementary_6	verb_phrase	켜다			phrase|daily	high	Turn on the computer, please.	컴퓨터를 켜 주세요.
+turn off	5	elementary_6	verb_phrase	끄다			phrase|daily	high	Turn off the light at night.	밤에 불을 꺼라.
+give up	5	elementary_6	verb_phrase	포기하다			phrase|study	high	Do not give up so soon.	그렇게 빨리 포기하지 마라.
+look after	5	elementary_6	verb_phrase	돌보다			phrase|family	high	She looks after her baby brother.	그녀는 아기 남동생을 돌본다.
+look for	5	elementary_6	verb_phrase	찾아보다			phrase|daily	high	I look for my lost ticket.	나는 잃어버린 표를 찾아본다.
+find out	5	elementary_6	verb_phrase	알아내다			phrase|study	high	We find out the answer together.	우리는 함께 답을 알아낸다.
+take care of	5	elementary_6	verb_phrase	보살피다			phrase|family	high	Please take care of my plant.	내 식물을 보살펴 주세요.
