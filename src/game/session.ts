@@ -6,6 +6,18 @@ import type { Quiz } from '../quiz/types';
 import type { SessionSummary } from '../progress/stats';
 import { FAST_ANSWER_MS, HARD_DIFFICULTY } from '../progress/player';
 import { COMBO_TIERS, RULES, type StepStyle } from './balance';
+import { hitBoss, missBoss, spawnBoss, type BossHit, type BossState } from './boss';
+import {
+  SPEED_LIMIT_SEC,
+  activate,
+  difficultyBonus,
+  rewardMultiplier,
+  rollEvent,
+  tickEvent,
+  type ActiveEvent,
+  type EventDef,
+  type EventId,
+} from './events';
 
 /**
  * 한 판의 진행 — 퀴즈 ↔ 계단 구간의 왕복.
@@ -46,6 +58,10 @@ export type AnswerResult = {
   /** 빠르게 맞혔는지 (SPEED 능력치) */
   fast: boolean;
   isRetry: boolean;
+  /** 이벤트 보상 배수 — main 이 경험치·골드에 곱한다 */
+  multiplier: number;
+  /** 보스전이었다면 타격 결과 */
+  bossHit: BossHit | null;
 };
 
 export type SessionStats = {
@@ -72,6 +88,12 @@ export class Session {
   quiz: Quiz | null = null;
   /** 남은 계단 칸 수 — 0 이 되면 다음 문제로 넘어간다 */
   stepsLeft = 0;
+  /** 보스전 중이면 보스 상태 (PRD 18장) */
+  boss: BossState | null = null;
+  /** 이번 문제에 붙은 이벤트 (PRD 20장) */
+  event: ActiveEvent | null = null;
+  /** 방금 새로 발생한 이벤트 — UI 가 배너를 띄운 뒤 비운다 */
+  pendingEvent: EventDef | null = null;
 
   private readonly bank: WordBank;
   private readonly engine: LearningEngine;
@@ -81,6 +103,11 @@ export class Session {
   private readonly masteredWords: string[] = [];
   private tierIndex = 0;
   private pick: Pick | null = null;
+  private lastEventId: EventId | null = null;
+  private currentFloor = 0;
+  /** 이벤트 판정 계측 — 왜 안 뜨는지 확인할 수 있어야 한다 */
+  eventRolls = 0;
+  eventsFired = 0;
   /** 문제가 화면에 뜬 시각 — 풀이 시간 측정 */
   private shownAt = 0;
   private answerMsTotal = 0;
@@ -98,9 +125,40 @@ export class Session {
     this.startedAt = clock();
   }
 
-  /** 다음 문제를 낸다 */
-  next(): Quiz {
-    this.pick = this.engine.next();
+  /**
+   * 다음 문제를 낸다.
+   *
+   * 층을 인자로 받는 이유: 이벤트 발생 확률과 종류가 층에 따라 달라진다 (PRD 20장).
+   * Session 이 계단 상태를 들고 있지 않으므로 호출하는 쪽이 알려 준다.
+   */
+  next(floor = this.currentFloor): Quiz {
+    this.currentFloor = floor;
+
+    // 지속형 이벤트(Double XP)의 남은 문제 수를 깎는다
+    this.event = tickEvent(this.event);
+
+    // 이벤트 판정 — 보스전 중에는 굴리지 않는다
+    if (!this.event) {
+      const decision = rollEvent({
+        asked: this.asked,
+        floor,
+        rng: this.rng,
+        lastId: this.lastEventId,
+        inBoss: this.boss !== null,
+      });
+      if (decision.attempted) this.eventRolls++;
+      if (decision.event) {
+        this.eventsFired++;
+        this.event = activate(decision.event);
+        this.pendingEvent = decision.event;
+        this.lastEventId = decision.event.id;
+      }
+    }
+
+    this.pick = this.engine.next({
+      boss: this.boss !== null,
+      difficultyBonus: difficultyBonus(this.event?.def ?? null),
+    });
     this.quiz = generateQuiz(this.pick.word, this.bank, this.pick.type, this.rng, {
       isRetry: this.pick.isRetry || this.pick.category === 'session-review',
     });
@@ -108,6 +166,20 @@ export class Session {
     this.asked++;
     this.shownAt = this.clock();
     return this.quiz;
+  }
+
+  /** 보스 등장 — 계단은 잠기고 정답이 보스 HP 를 깎는다 */
+  startBoss(floor: number): BossState {
+    this.boss = spawnBoss(floor);
+    this.stepsLeft = 0;
+    this.event = null;
+    return this.boss;
+  }
+
+  /** Escape 이벤트 등에서 콤보만 잃는다 — HP 는 영어 오답 전용이다 */
+  breakCombo() {
+    this.combo = 0;
+    this.tierIndex = 0;
   }
 
   private tierFor(combo: number): number {
@@ -131,6 +203,9 @@ export class Session {
     const answerMs = Math.min(30_000, this.clock() - this.shownAt);
     this.answerMsTotal += answerMs;
     const fast = answerMs <= FAST_ANSWER_MS;
+    // Speed 이벤트는 별도 기준(5초)을 쓴다
+    const inSpeedLimit = answerMs <= SPEED_LIMIT_SEC * 1000;
+    const multiplier = correct ? rewardMultiplier(this.event, inSpeedLimit) : 1;
     if (correct && fast) this.fastCorrect++;
     if (correct && quiz.difficulty >= HARD_DIFFICULTY) this.hardCorrect++;
 
@@ -150,6 +225,7 @@ export class Session {
       difficulty: quiz.difficulty,
       fast,
       isRetry: quiz.isRetry,
+      multiplier,
     };
 
     if (correct) {
@@ -169,6 +245,30 @@ export class Session {
         this.hp = 1;
       }
 
+      /* 보스전: 계단이 열리지 않는다. 정답이 보스 HP 를 깎고, 처치하면 계단이 다시 열린다.
+         같은 문제를 푸는데 의미가 달라지는 구간이다 (PRD 18장). */
+      if (this.boss) {
+        const hit = hitBoss(this.boss, quiz.difficulty, this.combo);
+        if (hit.defeated) {
+          this.boss = null;
+          this.stepsLeft = tier.segment;
+          this.phase = 'climbing';
+        } else {
+          this.phase = 'quiz';
+        }
+        return {
+          ...base,
+          correct: true,
+          segment: hit.defeated ? tier.segment : 0,
+          style: tier.style,
+          tierUp: this.tierIndex > prevTier,
+          comboLabel: tier.label,
+          hp: this.hp,
+          phase: this.phase,
+          bossHit: hit,
+        };
+      }
+
       this.stepsLeft = tier.segment;
       this.phase = 'climbing';
 
@@ -181,6 +281,7 @@ export class Session {
         comboLabel: tier.label,
         hp: this.hp,
         phase: this.phase,
+        bossHit: null,
       };
     }
 
@@ -201,6 +302,8 @@ export class Session {
       // HP 가 남았으면 phase 는 'quiz' 그대로 — UI 가 피드백을 보여 준 뒤 next() 를 부른다
     }
 
+    if (this.boss) missBoss(this.boss);
+
     return {
       ...base,
       correct: false,
@@ -210,6 +313,7 @@ export class Session {
       comboLabel: '',
       hp: this.hp,
       phase: this.phase,
+      bossHit: null,
     };
   }
 

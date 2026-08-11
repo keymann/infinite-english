@@ -880,3 +880,89 @@ body {
   border-radius: 999px;
   background: #ff6b74;
 }
+
+/* ── 보스 HP · 이벤트 타이머 ──
+   상단 중앙. 계단(가운데)과 퀴즈 패널(아래)을 가리지 않는 유일한 자리다 */
+.boss-bar,
+.timer-bar {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(340px, 76%);
+  pointer-events: none;
+  text-align: center;
+}
+
+.boss-bar {
+  top: calc(env(safe-area-inset-top) + 58px);
+}
+
+.timer-bar {
+  top: calc(env(safe-area-inset-top) + 104px);
+}
+
+.boss-bar[hidden],
+.timer-bar[hidden] {
+  display: none;
+}
+
+.boss-label,
+.timer-label {
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  margin-bottom: 3px;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+}
+
+.boss-label {
+  color: #ff8a3d;
+}
+
+.timer-label {
+  color: #7fd4ff;
+}
+
+.boss-track,
+.timer-track {
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(10, 18, 32, 0.55);
+  overflow: hidden;
+}
+
+.timer-track {
+  height: 6px;
+}
+
+.boss-track i,
+.timer-track i {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, #ff5f6d, #ff8a3d);
+  transition: width 0.25s ease-out;
+}
+
+.timer-track i {
+  background: linear-gradient(90deg, #7fd4ff, #2f8bff);
+  transition: width 0.1s linear;
+}
+
+.boss-track i[data-low='true'] {
+  background: linear-gradient(90deg, #ffd24a, #ff5f6d);
+}
+
+.timer-track i[data-low='true'] {
+  background: #ff5f6d;
+}
+
+.boss-clear {
+  margin-bottom: 10px;
+  padding: 10px;
+  border-radius: 12px;
+  background: rgba(255, 138, 61, 0.18);
+  color: #ffb37a;
+  font-size: 0.95rem;
+  font-weight: 800;
+}
