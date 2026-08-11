@@ -1,27 +1,82 @@
 import * as THREE from 'three';
+import type { Theme } from './theme';
 
 /**
- * 월드 1 — Word Forest 의 조명·대기.
+ * 씬의 분위기 — 하늘·안개·조명.
  *
  * 조명은 HemisphereLight + DirectionalLight 두 개뿐이다. Kenney 에셋은 색이 이미
  * 아틀라스에 구워져 있어 조명을 늘려도 얻는 게 없고, 모바일에서는 라이트 하나가
  * 셰이더 분기 비용이다.
+ *
+ * 테마가 바뀔 때 색을 **즉시 바꾸지 않고 1.2초에 걸쳐 옮긴다.** 계단 모델은 경계에서
+ * 딱 바뀌는 게 좋지만(다음 세계가 위에 보인다), 하늘이 한 프레임에 바뀌면 화면이 튄다.
  */
-export function createForestScene(): THREE.Scene {
-  const scene = new THREE.Scene();
-  const sky = new THREE.Color(0x8fd3ff);
-  scene.background = sky;
-  // 생성 구간의 끝이 허공에서 잘려 보이지 않게 안개로 덮는다
-  scene.fog = new THREE.FogExp2(sky.getHex(), 0.028);
 
-  const hemi = new THREE.HemisphereLight(0xd8ecff, 0x3f5a2a, 2.1);
-  scene.add(hemi);
+/** 색 전환 속도(1/초) — 지수 감쇠 */
+const MOOD_LERP = 2.4;
 
-  const sun = new THREE.DirectionalLight(0xfff2d0, 1.5);
-  sun.position.set(3, 7, 4);
-  scene.add(sun);
+export class Mood {
+  readonly scene = new THREE.Scene();
+  private readonly hemi: THREE.HemisphereLight;
+  private readonly sun: THREE.DirectionalLight;
+  private readonly fog: THREE.FogExp2;
 
-  return scene;
+  private readonly targetSky = new THREE.Color();
+  private readonly targetHemiSky = new THREE.Color();
+  private readonly targetHemiGround = new THREE.Color();
+  private readonly targetSun = new THREE.Color();
+  private targetFog = 0.03;
+  private targetHemiIntensity = 2;
+  private targetSunIntensity = 1.5;
+
+  constructor(theme: Theme) {
+    this.hemi = new THREE.HemisphereLight(theme.hemiSky, theme.hemiGround, theme.hemiIntensity);
+    this.scene.add(this.hemi);
+
+    this.sun = new THREE.DirectionalLight(theme.sunColor, theme.sunIntensity);
+    this.sun.position.set(3, 7, 4);
+    this.scene.add(this.sun);
+
+    this.fog = new THREE.FogExp2(theme.sky, theme.fogDensity);
+    this.scene.fog = this.fog;
+    this.scene.background = new THREE.Color(theme.sky);
+
+    this.applyTheme(theme, true);
+  }
+
+  applyTheme(theme: Theme, instant = false) {
+    this.targetSky.set(theme.sky);
+    this.targetHemiSky.set(theme.hemiSky);
+    this.targetHemiGround.set(theme.hemiGround);
+    this.targetSun.set(theme.sunColor);
+    this.targetFog = theme.fogDensity;
+    this.targetHemiIntensity = theme.hemiIntensity;
+    this.targetSunIntensity = theme.sunIntensity;
+
+    if (instant) {
+      (this.scene.background as THREE.Color).copy(this.targetSky);
+      this.fog.color.copy(this.targetSky);
+      this.hemi.color.copy(this.targetHemiSky);
+      this.hemi.groundColor.copy(this.targetHemiGround);
+      this.sun.color.copy(this.targetSun);
+      this.fog.density = this.targetFog;
+      this.hemi.intensity = this.targetHemiIntensity;
+      this.sun.intensity = this.targetSunIntensity;
+    }
+  }
+
+  update(dt: number) {
+    const t = 1 - Math.exp(-MOOD_LERP * dt);
+    const sky = this.scene.background as THREE.Color;
+    sky.lerp(this.targetSky, t);
+    this.fog.color.copy(sky);
+    this.hemi.color.lerp(this.targetHemiSky, t);
+    this.hemi.groundColor.lerp(this.targetHemiGround, t);
+    this.sun.color.lerp(this.targetSun, t);
+    this.fog.density += (this.targetFog - this.fog.density) * t;
+    this.hemi.intensity += (this.targetHemiIntensity - this.hemi.intensity) * t;
+    this.sun.intensity += (this.targetSunIntensity - this.sun.intensity) * t;
+  }
 }
 
 /**

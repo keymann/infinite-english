@@ -185,6 +185,14 @@ body {
   display: none;
 }
 
+/* 넓은 화면에서 보기 버튼이 끝까지 늘어나면 손가락이 닿지 않는 곳에 글자가 놓인다.
+   폭을 묶고 가운데로 모은다 (태블릿 가로 2단 레이아웃은 후속 작업) */
+.quiz,
+.prompt {
+  width: min(560px, 100%);
+  margin: 0 auto;
+}
+
 .q-head {
   min-height: 1.1rem;
 }
@@ -294,6 +302,52 @@ body {
 
 .banner.pop {
   animation: pop 0.9s ease-out;
+}
+
+/* 정답 칭찬 — 배너보다 작고 짧게. 퀴즈 패널 바로 위에서 떠오른다 */
+.praise {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 42%;
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  pointer-events: none;
+  color: #7ef0a8;
+  text-shadow: 0 3px 12px rgba(0, 0, 0, 0.55);
+}
+
+.praise[data-style='gold'] {
+  color: #ffd24a;
+}
+
+.praise[data-style='fire'] {
+  color: #ff8a3d;
+}
+
+.praise[data-style='lightning'] {
+  color: #7fd4ff;
+}
+
+.praise.rise {
+  animation: rise 0.7s ease-out;
+}
+
+@keyframes rise {
+  0% {
+    transform: translateY(10px) scale(0.9);
+    opacity: 0;
+  }
+  30% {
+    transform: translateY(0) scale(1.06);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-26px) scale(1);
+    opacity: 0;
+  }
 }
 
 @keyframes pop {

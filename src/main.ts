@@ -4,7 +4,7 @@ import { Sound } from './audio/sound';
 import { Input } from './core/input';
 import { startLoop } from './core/loop';
 import { createRng, randomSeed } from './core/rng';
-import { PLAYER, RULES } from './game/balance';
+import { CHECKPOINT_EVERY, PLAYER, RULES } from './game/balance';
 import { Climb } from './game/climb';
 import { Session } from './game/session';
 import { LearningEngine } from './learning/engine';
@@ -17,11 +17,13 @@ import { FollowCamera } from './three/camera';
 import { resolveProfile } from './three/profile';
 import { Renderer } from './three/renderer';
 import { Hud } from './ui/hud';
-import { Overlays } from './ui/overlays';
+import { Overlays, praiseFor } from './ui/overlays';
 import { QuizPanel } from './ui/quizPanel';
+import { Pet } from './world/pet';
 import { Props } from './world/props';
-import { createBlobShadow, createForestScene } from './world/scene';
+import { Mood, createBlobShadow } from './world/scene';
 import { Stairs } from './world/stairs';
+import { WORLD_SETS, themeForFloor, type Theme } from './world/theme';
 
 /**
  * 부트스트랩 — 배선만 한다.
@@ -48,7 +50,8 @@ async function boot() {
   const stage = app.querySelector<HTMLDivElement>('#stage')!;
 
   const renderer = new Renderer(stage, profile);
-  const scene = createForestScene();
+  const mood = new Mood(themeForFloor(0));
+  const scene = mood.scene;
   const camera = new FollowCamera(renderer.size.w / Math.max(1, renderer.size.h));
 
   const assets = new Assets(profile.side);
@@ -58,24 +61,26 @@ async function boot() {
   app.querySelector('#loading')?.remove();
 
   const seed = Number(params.get('seed')) || randomSeed();
-  const stairs = new Stairs(assets.source('world-forest', 'cliff_block_rock'), createRng(seed));
-  scene.add(stairs.group);
 
-  const props = new Props(
-    // 앞쪽에 둘수록 자주 나온다 (Props 가 가중치를 준다). 섬에 올릴 만한 크기만 넣는다 —
-    // 풀·꽃 같은 작은 장식은 Phase 5 에서 계단 블록 위에 올린다
-    [
-      assets.source('world-forest', 'tree_default'),
-      assets.source('world-forest', 'tree_pineRoundA'),
-      assets.source('world-forest', 'tree_pineTallA'),
-      assets.source('world-forest', 'tree_thin'),
-      assets.source('world-forest', 'tree_small'),
-      assets.source('world-forest', 'rock_largeA'),
-      assets.source('world-forest', 'plant_bush'),
-    ],
-    assets.source('world-forest', 'cliff_blockHalf_rock'),
-    profile.propDensity,
-  );
+  /** 월드 세트 하나를 계단·프롭에 등록한다 (모델이 로드된 뒤에만 호출된다) */
+  const registerSet = (setId: string) => {
+    const set = WORLD_SETS[setId];
+    stairs.addSet({
+      setId,
+      step: assets.source(set.bundle, set.step),
+      decor: set.decor.map((name) => assets.source(set.bundle, name)),
+    });
+    props.addSet({
+      setId,
+      props: set.props.map((name) => assets.source(set.bundle, name)),
+      island: assets.source(set.bundle, set.island),
+    });
+  };
+
+  const stairs = new Stairs([], createRng(seed));
+  const props = new Props([], profile.propDensity);
+  registerSet('forest');
+  scene.add(stairs.group);
   scene.add(props.group);
 
   const actor = new Actor(
@@ -86,6 +91,27 @@ async function boot() {
   scene.add(actor.root);
   const shadow = createBlobShadow(actor.height * 0.34);
   scene.add(shadow);
+
+  /* 월드2(성)와 펫은 **첫 플레이를 막지 않고** 뒤에서 받는다.
+     체크포인트에 닿았을 때 아직 안 왔으면 현재 세트로 계속 간다 — 로딩 때문에
+     게임이 멈추는 것이 가장 나쁘다. */
+  let pet: Pet | null = null;
+  void assets
+    .load(['world-castle', 'pet-fox'])
+    .then(() => {
+      registerSet('castle');
+      const petActor = new Actor(
+        assets.instance('pet-fox', 'animal-fox'),
+        assets.clips('pet-fox'),
+        PLAYER.height * 0.55,
+      );
+      scene.add(petActor.root);
+      pet = new Pet(petActor, actor.root.position);
+    })
+    .catch((err: unknown) => {
+      // 배경 로드 실패는 게임을 막지 않는다. 숲 월드로 끝까지 갈 수 있다
+      console.warn('월드2·펫 로드 실패 — 숲 월드로 계속한다', err);
+    });
 
   const sound = new Sound();
   const hud = new Hud(app, profile);
@@ -111,6 +137,7 @@ async function boot() {
       sound.step();
       const { done } = session.stepClimbed();
       hud.setFloor(climb.floor);
+      onFloorReached(climb.floor);
       if (done) {
         // 구간을 다 올랐다 → 다음 문제
         after(0.15, () => panel.show(session.next()));
@@ -122,6 +149,26 @@ async function boot() {
       panel.showPrompt('앗! 반대쪽이었어', 'stumble');
     },
   });
+
+  /* ── 층에 따른 배경 전환·체크포인트 ── */
+  let theme: Theme = themeForFloor(0);
+
+  const onFloorReached = (floor: number) => {
+    const next = themeForFloor(floor);
+    if (next.id !== theme.id) {
+      theme = next;
+      mood.applyTheme(theme);
+      overlays.banner(theme.name, 'lightning');
+      sound.tierUp(2);
+      camera.shake(PLAYER.landShake * 2.2);
+      return;
+    }
+    if (floor > 0 && floor % CHECKPOINT_EVERY === 0) {
+      overlays.banner(`${floor}층 돌파!`, 'gold');
+      sound.tierUp(1);
+      camera.shake(PLAYER.landShake * 1.8);
+    }
+  };
 
   const input = new Input(stage, { autoDir: params.get('autodir') === '1' });
   input.resolveAuto = () => climb.nextDir;
@@ -143,6 +190,9 @@ async function boot() {
     stairs.clearStyles();
     stairs.refresh(0);
     props.refresh(0, stairs);
+    theme = themeForFloor(0);
+    mood.applyTheme(theme, true);
+    pet?.root.position.copy(actor.root.position);
     camera.snapTo(actor.root.position);
     hud.setFloor(0);
     hud.setHp(session.hp, RULES.hp);
@@ -156,6 +206,8 @@ async function boot() {
     sound.unlock();
     if (session.phase !== 'quiz' && session.phase !== 'revive') return;
 
+    // answer() 뒤에는 다음 문제로 바뀔 수 있으므로 지금 잡아 둔다
+    const wasRetry = session.quiz?.isRetry ?? false;
     const result = session.answer(index);
     panel.feedback(index, result.correctIndex, result.correct);
     hud.setHp(result.hp, RULES.hp);
@@ -167,9 +219,14 @@ async function boot() {
       if (result.mastered) {
         overlays.banner(`WORD MASTER · ${result.word}`, 'lightning');
         sound.tierUp(3);
+        pet?.cheer();
       } else if (result.tierUp) {
         overlays.banner(result.comboLabel, result.style);
         sound.tierUp(session.combo >= 20 ? 3 : session.combo >= 10 ? 2 : 1);
+        pet?.cheer();
+      } else {
+        // 배너가 없을 때만 칭찬 문구를 띄운다 (PRD 28장)
+        overlays.praise(praiseFor(session.combo, wasRetry), result.style);
       }
       openSegment(result.segment, result.style);
       after(RULES.correctFeedbackSec, () => {
@@ -254,6 +311,8 @@ async function boot() {
       actor.root.position.z,
     );
     camera.follow(actor.root.position, dt);
+    mood.update(dt);
+    pet?.update(dt, actor.root.position);
 
     if (session.phase === 'climbing' && climb.state !== 'stumble') panel.showPrompt(promptText());
   };
@@ -325,6 +384,9 @@ async function boot() {
       },
       get climbState() {
         return climb.state;
+      },
+      get theme() {
+        return { id: theme.id, name: theme.name, setId: theme.setId, hasCastleSet: stairs.hasSet('castle'), pet: !!pet };
       },
       get nextDir() {
         return climb.nextDir;
