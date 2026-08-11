@@ -6,19 +6,51 @@ import type { SessionStats } from '../game/session';
  * 결과 화면의 문구가 중요하다. **"GAME OVER" 를 쓰지 않는다** (PRD 25장).
  * 실패를 학습 기회로 느끼게 하는 것이 이 게임의 설계 전제다.
  */
+/**
+ * 정답 칭찬 문구 (PRD 28장). 콤보가 오를수록 세진다.
+ * 매번 같은 "정답!"이면 세 번째부터는 정보가 아니다.
+ */
+export function praiseFor(combo: number, isRetry: boolean): string {
+  if (isRetry) return '기억했어!';
+  if (combo >= 20) return 'UNBELIEVABLE!';
+  if (combo >= 10) return 'AMAZING!';
+  if (combo >= 5) return 'Awesome!';
+  if (combo >= 3) return 'Perfect!';
+  return '좋아!';
+}
+
 export class Overlays {
   private readonly bannerEl: HTMLElement;
+  private readonly praiseEl: HTMLElement;
   private readonly resultEl: HTMLElement;
   private bannerTimer = 0;
+  private praiseTimer = 0;
 
   constructor(host: HTMLElement) {
     host.insertAdjacentHTML(
       'beforeend',
       `<div class="banner" id="banner" hidden></div>
+       <div class="praise" id="praise" hidden></div>
        <div class="result" id="result" hidden></div>`,
     );
     this.bannerEl = host.querySelector('#banner')!;
+    this.praiseEl = host.querySelector('#praise')!;
     this.resultEl = host.querySelector('#result')!;
+  }
+
+  /** 정답 즉시 뜨는 짧은 칭찬. 배너(콤보 단계·체크포인트)와 겹치지 않게 쓴다 */
+  praise(text: string, style = 'normal') {
+    this.praiseEl.textContent = text;
+    this.praiseEl.dataset.style = style;
+    this.praiseEl.removeAttribute('hidden');
+    this.praiseEl.classList.remove('rise');
+    void this.praiseEl.offsetWidth;
+    this.praiseEl.classList.add('rise');
+    clearTimeout(this.praiseTimer);
+    this.praiseTimer = setTimeout(
+      () => this.praiseEl.setAttribute('hidden', ''),
+      700,
+    ) as unknown as number;
   }
 
   /** 콤보 단계 상승 등 짧은 배너 */
