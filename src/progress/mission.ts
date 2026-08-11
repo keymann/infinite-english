@@ -21,7 +21,8 @@ export type MissionId =
   | 'floor40'
   | 'master1'
   | 'accuracy80'
-  | 'play2';
+  | 'play2'
+  | 'boss1';
 
 export type MissionDef = {
   id: MissionId;
@@ -43,6 +44,8 @@ export const MISSION_POOL: MissionDef[] = [
   { id: 'master1', label: '단어 1개 완전히 익히기', target: 1, minLevel: 3, gold: 30 },
   { id: 'accuracy80', label: '정답률 80% 이상으로 한 판', target: 1, minLevel: 2, gold: 25 },
   { id: 'play2', label: '2판 플레이', target: 2, minLevel: 1, gold: 15 },
+  // 보스는 20층마다 나온다 — 어느 정도 오를 수 있게 된 뒤에 낸다 (PRD 21장)
+  { id: 'boss1', label: '보스 1회 처치', target: 1, minLevel: 5, gold: 40 },
 ];
 
 /** 하루에 내는 미션 수 */
@@ -108,6 +111,8 @@ export type MissionProgressInput = {
   accuracy: number;
   /** 이 판을 끝냈으므로 플레이 횟수 +1 */
   plays: number;
+  /** 이번 판에 처치한 보스 수 */
+  bossDefeated: number;
 };
 
 /**
@@ -151,6 +156,9 @@ export function applyProgress(
         break;
       case 'play2':
         progress += input.plays;
+        break;
+      case 'boss1':
+        progress += input.bossDefeated;
         break;
     }
 

@@ -10,11 +10,11 @@
 
 ## 현재 상태
 
-**Phase 6 — 성장·메타 완료.** 시작 화면에서 캐릭터를 고르고, 문제를 맞혀 레벨을 올리고,
-일일 미션·연속 학습 기록이 쌓이고, 중단한 판을 이어서 할 수 있다. 부모용 학습 기록 화면 포함.
+**Phase 7 — 보스·랜덤 이벤트 완료.** 한 판에 기승전결이 생겼다 — 계단을 오르다 보스를 만나
+약점 단어로 싸우고, 중간중간 이벤트가 규칙을 잠깐 바꾼다.
 
 남은 것: **보급형 태블릿 실기기 30fps 실측**, 태블릿 가로 2단 레이아웃,
-단어 Level 6~10 확장(목표 1,000개 중 45%), Phase 7(보스·랜덤 이벤트) · Phase 8(PWA·배포).
+단어 Level 6~10 확장(목표 1,000개 중 45%), Phase 8(PWA·배포) · Phase 9(밸런싱·QA).
 
 ```bash
 npm install
@@ -23,7 +23,7 @@ npm run dev        # → http://localhost:5173                    게임
                    #   http://localhost:5173/spikes/spike.html   스파이크 A/B 검증 페이지
 npm run assets     # 3D 에셋 병합 → public/models/*.glb
 npm run words      # 단어 시드(TSV) 검증 → src/data/words/level-N.json
-npm test           # 퀴즈 품질 · 학습 엔진 · 성장 · 저장 마이그레이션 (66항목)
+npm test           # 퀴즈 품질 · 학습 엔진 · 성장 · 저장 · 보스·이벤트 (88항목)
 npm run typecheck
 npm run build      # dist/ (index.html + quality.html + models + _headers)
 npm run deploy     # 빌드 후 wrangler deploy
@@ -74,6 +74,26 @@ npm run deploy     # 빌드 후 wrangler deploy
 저녁 숲과 밤 성에서 다르게 보인다.
 
 월드2 에셋과 펫은 첫 플레이를 막지 않고 뒤에서 받는다. 아직 안 왔으면 현재 세트로 계속 간다.
+
+### 보스전 · 랜덤 이벤트 (Phase 7)
+
+**보스전은 규칙을 바꾼다.** 20층 milestone(+ 문제 10개 간격)에서 보스가 등장하면 계단이 잠기고
+정답이 보스 HP 를 깎는다. 어려운 단어는 2배 피해, 콤보는 추가 피해(상한 있음).
+
+**보스는 자주 틀리는 단어를 집중 출제한다** — 보스를 잡으려면 자기 약점을 반복해야 한다.
+복습을 강제하지 않고 보스가 대신 강제하는 구조다.
+
+| 이벤트 | 규칙 변화 |
+|---|---|
+| Treasure | 즉시 골드 |
+| Double XP | 다음 3문제 보상 2배 |
+| Golden Word | 이 문제 보상 3배 |
+| Speed | 5초 안에 맞히면 2배 — **넘겨도 벌은 없다** |
+| Mystery | 조금 어려운 문제 + 보상 2배 |
+| Escape | 시간 안에 계단 구간을 올라야 콤보를 지킨다 |
+
+**어떤 이벤트도 HP 를 깎지 않는다.** HP 는 영어 오답 전용이라는 규칙을 이벤트가 깨면
+아이는 왜 죽었는지 모른다.
 
 ### 성장 (Phase 6)
 

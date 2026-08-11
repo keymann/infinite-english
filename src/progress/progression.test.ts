@@ -137,6 +137,7 @@ describe('Daily Mission', () => {
       masteredCount: 0,
       accuracy: 0.5,
       plays: 1,
+      bossDefeated: 0,
     };
     state = applyProgress(state, input).state;
     expect(state.list[0].progress).toBe(12);
@@ -164,6 +165,7 @@ describe('Daily Mission', () => {
       masteredCount: 0,
       accuracy: 1,
       plays: 1,
+      bossDefeated: 0,
     };
     expect(applyProgress(base, input).state.list[0].done).toBe(false);
     expect(applyProgress(base, { ...input, answered: 6 }).state.list[0].done).toBe(true);

@@ -35,7 +35,18 @@ import type { Word, WordBank } from './words';
  * 시간도 주입받는다(`clock`) — "하루 뒤 재출제"를 테스트에서 검증해야 한다.
  */
 
-export type PickCategory = 'new' | 'review' | 'weak' | 'bonus' | 'session-review';
+export type PickCategory = 'new' | 'review' | 'weak' | 'bonus' | 'session-review' | 'boss';
+
+export type PickOptions = {
+  /**
+   * 보스전 — **자주 틀리는 단어를 집중 출제한다** (PRD 19장).
+   * 보스전이 곧 약점 복습 구간이 되도록 한 설계다. 아이는 보스를 잡으려고
+   * 자기가 약한 단어를 반복한다.
+   */
+  boss?: boolean;
+  /** 이벤트가 난이도를 올릴 때 (Mystery) */
+  difficultyBonus?: number;
+};
 
 export type Pick = {
   word: Word;
@@ -79,8 +90,12 @@ export class LearningEngine {
   private readonly rng: Rng;
   private readonly clock: () => number;
   private readonly recent: string[] = [];
+  /** 직전에 낸 단어 — 후보가 좁아도 **연속 출제는 막는다** */
+  private lastPickedId: string | null = null;
   private bag: PickCategory[] = [];
   private asked = 0;
+  /** 이번 문항에만 적용되는 난이도 가산 (Mystery 이벤트) */
+  private difficultyBonus = 0;
   private lastWasHard = false;
   /** 이번 판에서 낸 문제 기록 — 통계용 */
   private readonly log: Array<{ wordId: string; category: PickCategory; correct: boolean }> = [];
@@ -95,9 +110,18 @@ export class LearningEngine {
 
   /* ── 출제 ── */
 
-  next(): Pick {
+  next(options: PickOptions = {}): Pick {
     const now = this.clock();
     this.asked++;
+    this.difficultyBonus = options.difficultyBonus ?? 0;
+
+    /* 보스전은 비율 자루를 쓰지 않는다. 약점 → 복습 → 신규 순으로 고른다.
+       약점 단어가 없으면(아직 틀린 게 없으면) 평소처럼 낸다 — 보스가 안 나오면 안 되니까 */
+    if (options.boss) {
+      const word = this.pickWord('weak', now);
+      this.remember(word.id);
+      return { word, type: this.typeFor(word), category: 'boss', isRetry: true };
+    }
 
     // 1. 세션 내 복습이 최우선 — "30초 후 재출제"는 비율보다 앞선다 (PRD 10장)
     const dueId = this.review.dueNow(now);
@@ -148,7 +172,7 @@ export class LearningEngine {
     if (offset > HARD_OFFSET_LEVELS && this.lastWasHard) offset = 0;
     this.lastWasHard = offset > HARD_OFFSET_LEVELS;
 
-    return levelToUnit(midLevel + offset);
+    return Math.min(0.98, levelToUnit(midLevel + offset) + this.difficultyBonus);
   }
 
   private pickWord(category: PickCategory, now: number): Word {
@@ -169,6 +193,14 @@ export class LearningEngine {
     if (pool.length === 0) {
       // 어떤 카테고리도 비면 신규로 떨어진다. 게임이 멈추면 안 된다
       return this.pickClosest(this.bank.all().filter((w) => !this.recent.includes(w.id)));
+    }
+
+    /* 후보가 아주 좁을 때(보스전의 취약 단어 3개 같은 경우) recent 필터가 다 걸러져
+       fallback 으로 내려오면 **직전 단어가 다시 뽑힐 수 있다.** 연속 출제는 금지다
+       (PRD 19장 "같은 단어를 지나치게 반복하지 않는다") — 최소한 바로 다음은 피한다. */
+    if (pool.length > 1 && this.lastPickedId) {
+      const notLast = pool.filter((w) => w.id !== this.lastPickedId);
+      if (notLast.length > 0) pool = notLast;
     }
     return this.pickClosest(pool);
   }
@@ -199,7 +231,10 @@ export class LearningEngine {
         });
       case 'weak': {
         const ids = new Set(weakWords(this.progress));
-        return all.filter((w) => ids.has(w.id));
+        const weak = all.filter((w) => ids.has(w.id));
+        if (weak.length > 0) return weak;
+        // 아직 취약 단어가 없다 → 만난 적 있는 단어(복습)로 떨어진다
+        return this.candidatesFor('review', now);
       }
       case 'bonus':
         // 보너스는 **쉬운 성공 경험**이다. 이미 잘 아는 단어를 낸다
@@ -207,6 +242,7 @@ export class LearningEngine {
           const p = this.progress[w.id];
           return !!p && (isMastered(p) || (p.right >= 2 && p.wrong === 0));
         });
+      case 'boss':
       case 'session-review':
         return [];
     }
@@ -230,6 +266,7 @@ export class LearningEngine {
   }
 
   private remember(wordId: string) {
+    this.lastPickedId = wordId;
     this.recent.push(wordId);
     if (this.recent.length > RECENT_WINDOW) this.recent.shift();
   }

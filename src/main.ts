@@ -5,7 +5,9 @@ import { Input } from './core/input';
 import { startLoop } from './core/loop';
 import { createRng, randomSeed } from './core/rng';
 import { CHECKPOINT_EVERY, PLAYER, RULES } from './game/balance';
+import { BOSS_EVERY, bossReward, canSpawnBoss, hpRatio } from './game/boss';
 import { Climb } from './game/climb';
+import { ESCAPE_LIMIT_SEC, SPEED_LIMIT_SEC, instantGold } from './game/events';
 import { Session } from './game/session';
 import { LearningEngine } from './learning/engine';
 import { WordBank } from './learning/words';
@@ -29,10 +31,12 @@ import { Assets } from './three/assets';
 import { FollowCamera } from './three/camera';
 import { resolveProfile } from './three/profile';
 import { Renderer } from './three/renderer';
+import { BossBar } from './ui/bossBar';
 import { Hud } from './ui/hud';
 import { Overlays, praiseFor, type ResultReward } from './ui/overlays';
 import { QuizPanel } from './ui/quizPanel';
 import { ParentScreen, StartScreen } from './ui/screens';
+import { BossActor } from './world/bossActor';
 import { Pet } from './world/pet';
 import { Props } from './world/props';
 import { Mood, createBlobShadow } from './world/scene';
@@ -130,11 +134,25 @@ async function boot() {
     pet = new Pet(petActor, actor.root.position);
   };
 
+  let bossActor: BossActor | null = null;
+
   void assets
     .load(['world-castle', petOf(saved.collection, saved.player.level).bundle])
     .then(() => {
       registerSet('castle');
       buildPet();
+      /* 보스는 더 뒤에 받는다 — 20층에 닿기 전에만 오면 된다.
+         캐릭터 glb 에 애니메이션이 없으므로 클립 전용 bundle 과 짝으로 로드한다 (스파이크 A) */
+      return assets.load(['boss-warrior', 'boss-anims']);
+    })
+    .then(() => {
+      const actorInstance = new Actor(
+        assets.instance('boss-warrior', 'Skeleton_Warrior'),
+        assets.clips('boss-anims'),
+        PLAYER.height * 1.35,
+      );
+      scene.add(actorInstance.root);
+      bossActor = new BossActor(actorInstance);
     })
     .catch((err: unknown) => {
       // 배경 로드 실패는 게임을 막지 않는다. 숲 월드로 끝까지 갈 수 있다
@@ -143,6 +161,7 @@ async function boot() {
 
   const sound = new Sound();
   const hud = new Hud(app, profile);
+  const bossBar = new BossBar(app);
   const panel = new QuizPanel(app);
   const overlays = new Overlays(app);
 
@@ -173,8 +192,23 @@ async function boot() {
         // 한 구간(최대 4칸) 뒤처진 층에서 시작한다
         snapshotRun();
         if (done) {
-          // 구간을 다 올랐다 → 다음 문제
-          after(0.15, () => session && panel.show(session.next()));
+          /* 구간을 다 올랐다. 보스 층을 지나왔고 간격 조건도 맞으면 보스전으로.
+             구간이 4칸이라 20층을 뛰어넘을 수 있으므로 "지나온 보스 층"을 계산한다.
+             간격 조건을 못 채웠으면 lastBossFloor 를 갱신하지 않으므로 다음 구간에서 다시 본다 */
+          if (
+            canSpawnBoss({
+              floor: climb.floor,
+              lastBossFloor,
+              asked: session.asked,
+              lastBossAsked,
+            })
+          ) {
+            lastBossFloor = Math.floor(climb.floor / BOSS_EVERY) * BOSS_EVERY;
+            lastBossAsked = session.asked;
+            after(0.3, startBossFight);
+          } else {
+            after(0.15, () => showQuiz());
+          }
         }
       },
       onStumble: () => {
@@ -184,6 +218,40 @@ async function boot() {
       },
     });
   }
+
+  /* ── 보스전 ── */
+  let lastBossFloor = 0;
+  /** 마지막 보스가 등장한 시점의 문제 수 — 보스 사이 간격을 문제 수로도 둔다 */
+  let lastBossAsked = 0;
+  /** Speed·Escape 이벤트 타이머 (초). 0 이면 비활성 */
+  let timerLeft = 0;
+  let timerTotal = 0;
+  let timerKind: 'speed' | 'escape' | null = null;
+
+  const startTimer = (kind: 'speed' | 'escape', seconds: number) => {
+    timerKind = kind;
+    timerTotal = seconds;
+    timerLeft = seconds;
+  };
+
+  const stopTimer = () => {
+    timerKind = null;
+    timerLeft = 0;
+    bossBar.hideTimer();
+  };
+
+  const startBossFight = () => {
+    if (!session) return;
+    const boss = session.startBoss(climb.floor);
+    bossBar.showBoss(`BOSS ${boss.index} · 뼈 기사`, 1);
+    bossActor?.spawn(actor.root.position);
+    overlays.banner('BOSS!', 'fire');
+    sound.tierUp(3);
+    camera.shake(PLAYER.landShake * 3);
+    stopTimer();
+    // 보스전 문제는 **자주 틀리는 단어**로 낸다 (PRD 19장) — engine 이 boss 모드로 고른다
+    after(0.9, () => showQuiz());
+  };
 
   /* ── 층에 따른 배경 전환·체크포인트 ── */
   let theme: Theme = themeForFloor(0);
@@ -222,6 +290,8 @@ async function boot() {
   let runGold = 0;
   let runLevelUp: LevelUp | null = null;
   let runUnlocked: string[] = [];
+  /** 이번 판에 처치한 보스 수 — 결과 화면과 미션에 쓴다 */
+  let bossDefeated = 0;
 
   /** 중단된 판을 저장한다 — 창을 닫아도 이어서 할 수 있다 (PRD 1장) */
   const snapshotRun = () => {
@@ -274,6 +344,12 @@ async function boot() {
     runGold = 0;
     runLevelUp = null;
     runUnlocked = [];
+    bossDefeated = 0;
+    lastBossFloor = resume ? Math.floor(resume.floor / BOSS_EVERY) * BOSS_EVERY : 0;
+    lastBossAsked = 0;
+    bossBar.hideBoss();
+    bossActor?.hide();
+    stopTimer();
 
     if (resume) {
       climb.teleport(resume.floor);
@@ -294,7 +370,7 @@ async function boot() {
     hud.setLevel(saved.player.level, expRatio(saved.player));
     overlays.hideResult();
     panel.reveal();
-    panel.show(session.next());
+    showQuiz();
 
     // 연속 학습 기록은 판을 **시작할 때** 갱신한다 (PRD 22장)
     const streak = touchStreak(saved.streak, Date.now());
@@ -307,6 +383,14 @@ async function boot() {
       if (streak.milestone) after(1.4, () => overlays.banner(`${streak.milestone}일 연속!`, 'lightning'));
     }
     saveSoon(saved);
+  };
+
+  /** 문제를 띄우고, 새로 붙은 이벤트가 있으면 연출한다 */
+  const showQuiz = (options: { revive?: boolean } = {}) => {
+    if (!session) return;
+    const quiz = options.revive ? session.reviveQuiz() : session.next(climb.floor);
+    panel.show(quiz, options);
+    showPendingEvent();
   };
 
   panel.onAnswer((index) => {
@@ -335,33 +419,93 @@ async function boot() {
         // 배너가 없을 때만 칭찬 문구를 띄운다 (PRD 28장)
         overlays.praise(praiseFor(session.combo, wasRetry), result.style);
       }
-      // 경험치는 **영어 문제를 맞혀야만** 오른다. 난이도와 콤보가 반영된다 (PRD 15장)
-      award(
-        expForAnswer({ difficulty: result.difficulty, combo: session.combo, isRetry: result.isRetry }),
-        goldForAnswer(result.isRetry),
-      );
+      /* 경험치는 **영어 문제를 맞혀야만** 오른다. 난이도·콤보가 반영되고,
+         이벤트 배수(Double XP·Mystery·Golden Word·Speed)가 곱해진다 */
+      const baseExp = expForAnswer({
+        difficulty: result.difficulty,
+        combo: session.combo,
+        isRetry: result.isRetry,
+      });
+      award(baseExp * result.multiplier, goldForAnswer(result.isRetry) * result.multiplier);
+      if (result.multiplier > 1) {
+        after(0.05, () => overlays.praise(`보상 ×${result.multiplier}!`, 'gold'));
+      }
+      stopTimer();
+
+      /* 보스전: 계단이 열리지 않고 보스 HP 가 깎인다 */
+      if (result.bossHit) {
+        const hit = result.bossHit;
+        bossActor?.hit(hit.critical);
+        camera.shake(PLAYER.landShake * (hit.critical ? 2.4 : 1.4));
+        if (hit.defeated) {
+          bossBar.setBossHp(0);
+          bossBar.hideBoss();
+          bossActor?.die();
+          const reward = bossReward({ index: Math.max(1, Math.floor(climb.floor / BOSS_EVERY)), hp: 0, maxHp: 1, asked: 0 });
+          award(reward.exp, reward.gold);
+          overlays.banner('BOSS DEFEATED!', 'lightning');
+          sound.tierUp(3);
+          pet?.cheer();
+          bossDefeated++;
+          after(1.2, () => {
+            bossActor?.hide();
+            openSegment(result.segment, result.style);
+            panel.showPrompt(promptText());
+          });
+        } else {
+          bossBar.setBossHp(session.boss ? hpRatio(session.boss) : 0);
+          after(RULES.correctFeedbackSec, () => showQuiz());
+        }
+        snapshotRun();
+        return;
+      }
+
       openSegment(result.segment, result.style);
       snapshotRun();
       after(RULES.correctFeedbackSec, () => {
         panel.showPrompt(promptText());
+        // Escape — 시간 안에 구간을 올라야 콤보를 지킨다
+        if (session?.event?.def.id === 'escape') startTimer('escape', ESCAPE_LIMIT_SEC);
       });
       return;
     }
 
     sound.wrong();
+    stopTimer();
+    camera.shake(PLAYER.landShake * (session.boss ? 2 : 1));
     snapshotRun();
     after(RULES.wrongFeedbackSec, () => {
       if (!session) return;
       if (session.phase === 'revive') {
         sound.revive();
-        panel.show(session.reviveQuiz(), { revive: true });
+        showQuiz({ revive: true });
       } else if (session.phase === 'over') {
         endGame();
       } else {
-        panel.show(session.next());
+        showQuiz();
       }
     });
   });
+
+  /**
+   * 새 이벤트가 붙었으면 배너를 띄운다.
+   * Session 은 이벤트를 정하기만 하고 연출은 여기서 한다 — 규칙과 화면을 섞지 않는다.
+   */
+  const showPendingEvent = () => {
+    const def = session?.pendingEvent;
+    if (!def || !session) return;
+    session.pendingEvent = null;
+
+    overlays.banner(def.label, def.id === 'treasure' ? 'gold' : 'lightning');
+    after(0.05, () => overlays.praise(def.hint, 'gold'));
+    sound.tierUp(def.id === 'escape' ? 3 : 1);
+
+    // 보물상자는 즉시 골드
+    const gold = instantGold(def, climb.floor);
+    if (gold > 0) award(0, gold);
+    if (def.id === 'speed') startTimer('speed', SPEED_LIMIT_SEC);
+    if (def.id === 'escape') camera.shake(PLAYER.landShake * 2.5);
+  };
 
   const promptText = () => {
     const left = session?.stepsLeft ?? 0;
@@ -404,6 +548,7 @@ async function boot() {
       masteredCount: summary.masteredCount,
       accuracy: stats.accuracy,
       plays: 1,
+      bossDefeated,
     });
     saved.missions = applied.state;
     const chest = !before && allDone(saved.missions) && !saved.missions.chestClaimed;
@@ -427,6 +572,7 @@ async function boot() {
       unlocked: runUnlocked,
       missionsDone: applied.completed.map((id) => defOf(id).label),
       chest,
+      bossDefeated,
     };
     overlays.result(stats, reward, {
       onRestart: () => {
@@ -563,6 +709,24 @@ async function boot() {
     camera.follow(actor.root.position, dt);
     mood.update(dt);
     pet?.update(dt, actor.root.position);
+    bossActor?.update(dt, actor.root.position);
+
+    /* 이벤트 타이머. Speed 는 문제를 푸는 동안, Escape 는 계단을 오르는 동안 돈다.
+       **시간이 끝나도 HP 는 깎지 않는다** — 콤보만 잃는다 (기획서 3.2절) */
+    if (timerKind && session) {
+      timerLeft = Math.max(0, timerLeft - dt);
+      bossBar.showTimer(timerKind === 'speed' ? '빨리!' : '도망쳐!', timerLeft / timerTotal);
+      if (timerLeft === 0) {
+        const wasEscape = timerKind === 'escape';
+        stopTimer();
+        if (wasEscape && session.phase === 'climbing') {
+          session.breakCombo();
+          hud.setCombo(0);
+          overlays.praise('놓쳤다! 콤보 초기화', 'fire');
+          sound.stumble();
+        }
+      }
+    }
 
     if (session?.phase === 'climbing' && climb.state !== 'stumble') panel.showPrompt(promptText());
   };
@@ -634,6 +798,18 @@ async function boot() {
       },
       get climbState() {
         return climb.state;
+      },
+      get eventDebug() {
+        return session
+          ? {
+              asked: session.asked,
+              active: session.event?.def.id ?? null,
+              remaining: session.event?.remaining ?? 0,
+              rolls: session.eventRolls,
+              fired: session.eventsFired,
+              boss: !!session.boss,
+            }
+          : null;
       },
       get theme() {
         return { id: theme.id, name: theme.name, setId: theme.setId, hasCastleSet: stairs.hasSet('castle'), pet: !!pet };

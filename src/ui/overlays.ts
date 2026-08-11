@@ -12,6 +12,8 @@ export type ResultReward = {
   missionsDone: string[];
   /** 오늘의 미션을 전부 완료했는지 */
   chest: boolean;
+  /** 이번 판에 처치한 보스 수 */
+  bossDefeated: number;
 };
 
 /**
@@ -103,6 +105,11 @@ export class Overlays {
           <span class="reward">+${reward.exp} EXP</span>
           <span class="reward gold">+${reward.gold} 🪙</span>
         </div>
+        ${
+          reward.bossDefeated > 0
+            ? `<div class="boss-clear">👑 보스 ${reward.bossDefeated}마리 처치!</div>`
+            : ''
+        }
         ${
           reward.levelUp
             ? `<div class="levelup">LEVEL UP! Lv.${reward.levelUp.from} → <b>Lv.${reward.levelUp.to}</b></div>`
