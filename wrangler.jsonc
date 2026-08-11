@@ -1,0 +1,47 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "infinite-english",
+  "compatibility_date": "2026-08-11",
+
+  // 배포 전에 여기서 직접 빌드한다.
+  // Workers Builds 는 Deploy command(`npx wrangler deploy`)만 실행하고 빌드 단계를
+  // 따로 돌리지 않는 설정일 수 있다. 그 경우 dist/ 가 없어 배포가 실패한다.
+  "build": {
+    "command": "npm run build"
+  },
+
+  // Worker 코드 + 정적 자산.
+  // /api/* 는 Worker 가 처리하고 나머지는 ASSETS 로 넘긴다.
+  "main": "src/worker/index.ts",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+
+    // index.html(게임) + quality.html(단어 품질 검수) 로 된 **멀티페이지**다.
+    // wrangler 기본 제안값인 "single-page-application" 을 쓰면 존재하지 않는 경로가
+    // 전부 index.html 로 덮여 404 가 가려진다.
+    "not_found_handling": "404-page"
+  },
+
+  // 자기 최고 기록 백업용 저장소 (실명·순위 경쟁 없음 — PRD 31장).
+  //
+  // ⚠️ 최초 1회 설정이 필요하다. 아래를 실행하고 출력된 database_id 를 넣을 것.
+  //     npx wrangler d1 create infinite-english
+  //     npx wrangler d1 migrations apply infinite-english --remote
+  //
+  // 존재하지 않는 database_id 로 배포하면 런타임에 조용히 깨지므로, DB 를 만들기
+  // 전까지는 바인딩을 주석으로 둔다. 이 상태에서 기록 API 는 503 을 돌려주고
+  // 게임은 정상 동작한다(기록 백업이 없다고 학습이 막히면 안 된다).
+  // "d1_databases": [
+  //   {
+  //     "binding": "DB",
+  //     "database_name": "infinite-english",
+  //     "database_id": "<위 명령이 출력한 UUID>",
+  //     "migrations_dir": "migrations"
+  //   }
+  // ],
+
+  "observability": {
+    "enabled": true
+  }
+}
