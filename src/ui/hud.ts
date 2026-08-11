@@ -18,6 +18,10 @@ export class Hud {
   private readonly hpEl: HTMLElement;
   private readonly comboEl: HTMLElement;
   private readonly statsEl: HTMLElement;
+  private readonly lvEl: HTMLElement;
+  private readonly expEl: HTMLElement;
+  private lastLevel = -1;
+  private lastExpPct = -1;
   private lastFloor = -1;
   private lastHp = -1;
   private lastCombo = -1;
@@ -30,6 +34,10 @@ export class Hud {
            <div class="hud-left">
              <div class="hp" id="hud-hp"></div>
              <div class="floor"><b id="hud-floor">0</b><span>층</span></div>
+             <div class="hud-lv" id="hud-lv">
+               <span>Lv.<b id="hud-lv-num">1</b></span>
+               <i class="hud-exp"><em id="hud-exp"></em></i>
+             </div>
            </div>
            <div class="hud-right">
              <div class="combo" id="hud-combo"></div>
@@ -42,6 +50,8 @@ export class Hud {
     this.hpEl = host.querySelector('#hud-hp')!;
     this.comboEl = host.querySelector('#hud-combo')!;
     this.statsEl = host.querySelector('#hud-stats')!;
+    this.lvEl = host.querySelector('#hud-lv-num')!;
+    this.expEl = host.querySelector('#hud-exp')!;
     this.statsEl.dataset.spec = profile.name;
   }
 
@@ -59,6 +69,19 @@ export class Hud {
       { length: max },
       (_, i) => `<span class="heart" data-on="${i < hp}">♥</span>`,
     ).join('');
+  }
+
+  /** 캐릭터 레벨과 경험치 바 (PRD 26장 상단) */
+  setLevel(level: number, ratio: number) {
+    if (level !== this.lastLevel) {
+      this.lastLevel = level;
+      this.lvEl.textContent = String(level);
+    }
+    const pct = Math.round(ratio * 100);
+    if (pct !== this.lastExpPct) {
+      this.lastExpPct = pct;
+      this.expEl.style.width = `${pct}%`;
+    }
   }
 
   setCombo(combo: number) {

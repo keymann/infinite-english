@@ -1,4 +1,18 @@
 import type { SessionStats } from '../game/session';
+import type { LevelUp } from '../progress/player';
+
+/** 한 판의 보상 — 결과 화면에서 "이만큼 자랐다"를 보여 준다 */
+export type ResultReward = {
+  exp: number;
+  gold: number;
+  levelUp: LevelUp | null;
+  /** 새로 해금된 캐릭터·펫 이름 */
+  unlocked: string[];
+  /** 이번 판에 완료한 미션 이름 */
+  missionsDone: string[];
+  /** 오늘의 미션을 전부 완료했는지 */
+  chest: boolean;
+};
 
 /**
  * 오버레이 — 콤보 배너 · 결과 화면.
@@ -72,7 +86,7 @@ export class Overlays {
    * 결과 화면. 점수보다 **얼마나 배웠는지**를 앞에 둔다.
    * 그리고 "다시" 버튼이 가장 크다 — 한 판 더 하고 싶게 만드는 것이 목표다.
    */
-  result(stats: SessionStats, onRestart: () => void) {
+  result(stats: SessionStats, reward: ResultReward, handlers: { onRestart(): void; onHome(): void }) {
     const wrongList = stats.wrongWords.slice(0, 6);
     this.resultEl.innerHTML = `
       <div class="result-card">
@@ -84,6 +98,36 @@ export class Overlays {
           <div><dt>정답률</dt><dd>${Math.round(stats.accuracy * 100)}%</dd></div>
           <div><dt>최고 콤보</dt><dd>${stats.bestCombo}</dd></div>
         </dl>
+
+        <div class="reward-row">
+          <span class="reward">+${reward.exp} EXP</span>
+          <span class="reward gold">+${reward.gold} 🪙</span>
+        </div>
+        ${
+          reward.levelUp
+            ? `<div class="levelup">LEVEL UP! Lv.${reward.levelUp.from} → <b>Lv.${reward.levelUp.to}</b></div>`
+            : ''
+        }
+        ${
+          reward.unlocked.length
+            ? `<div class="unlocked">🎉 새로 열렸어요 — ${reward.unlocked.map(escapeHtml).join(' · ')}</div>`
+            : ''
+        }
+        ${
+          reward.missionsDone.length
+            ? `<div class="mission-done">✅ 미션 완료 — ${reward.missionsDone.map(escapeHtml).join(' · ')}${
+                reward.chest ? ' <b>+ 🎁 GOLD CHEST</b>' : ''
+              }</div>`
+            : ''
+        }
+        ${
+          stats.masteredWords.length
+            ? `<div class="result-words mastered">
+                 <h3>완전히 익힌 단어 ${stats.masteredWords.length}개</h3>
+                 <p>${stats.masteredWords.slice(0, 6).map(escapeHtml).join(' · ')}</p>
+               </div>`
+            : ''
+        }
         ${
           wrongList.length
             ? `<div class="result-words">
@@ -93,9 +137,11 @@ export class Overlays {
             : `<div class="result-words"><h3>틀린 단어가 없어!</h3></div>`
         }
         <button type="button" class="again" id="again">한 판 더</button>
+        <button type="button" class="link" id="home">홈으로</button>
       </div>`;
     this.resultEl.removeAttribute('hidden');
-    this.resultEl.querySelector<HTMLButtonElement>('#again')!.addEventListener('click', onRestart);
+    this.resultEl.querySelector<HTMLButtonElement>('#again')!.addEventListener('click', handlers.onRestart);
+    this.resultEl.querySelector<HTMLButtonElement>('#home')!.addEventListener('click', handlers.onHome);
   }
 
   hideResult() {

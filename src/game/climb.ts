@@ -51,6 +51,15 @@ export class Climb {
     return this.stairs.dirAt(this.floor + 1);
   }
 
+  /** 이어하기 — 중단했던 층으로 옮긴다 (계단 시드가 같아야 같은 계단이다) */
+  teleport(floor: number) {
+    this.reset();
+    this.floor = floor;
+    this.stairs.surfaceAt(floor, this.from);
+    this.to.copy(this.from);
+    this.actor.root.position.copy(this.from);
+  }
+
   /** 다시 시작 — 계단 방향(시드)은 그대로 두고 위치만 되돌린다 */
   reset() {
     this.floor = 0;

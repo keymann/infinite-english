@@ -18,9 +18,9 @@
       "gzip": 33466
     },
     {
-      "name": "player-female-a",
+      "name": "char-female-a",
       "when": "lazy",
-      "file": "models/player-female-a.glb",
+      "file": "models/char-female-a.glb",
       "nodes": [
         "character-female-a"
       ],
@@ -32,7 +32,75 @@
         "skins": 1
       },
       "bytes": 162620,
-      "gzip": 36451
+      "gzip": 36449
+    },
+    {
+      "name": "char-male-b",
+      "when": "lazy",
+      "file": "models/char-male-b.glb",
+      "nodes": [
+        "character-male-b"
+      ],
+      "counts": {
+        "meshes": 2,
+        "materials": 1,
+        "textures": 1,
+        "animations": 32,
+        "skins": 1
+      },
+      "bytes": 144124,
+      "gzip": 33373
+    },
+    {
+      "name": "char-female-b",
+      "when": "lazy",
+      "file": "models/char-female-b.glb",
+      "nodes": [
+        "character-female-b"
+      ],
+      "counts": {
+        "meshes": 2,
+        "materials": 1,
+        "textures": 1,
+        "animations": 32,
+        "skins": 1
+      },
+      "bytes": 147580,
+      "gzip": 34109
+    },
+    {
+      "name": "char-male-c",
+      "when": "lazy",
+      "file": "models/char-male-c.glb",
+      "nodes": [
+        "character-male-c"
+      ],
+      "counts": {
+        "meshes": 2,
+        "materials": 1,
+        "textures": 1,
+        "animations": 32,
+        "skins": 1
+      },
+      "bytes": 155332,
+      "gzip": 35612
+    },
+    {
+      "name": "char-female-c",
+      "when": "lazy",
+      "file": "models/char-female-c.glb",
+      "nodes": [
+        "character-female-c"
+      ],
+      "counts": {
+        "meshes": 2,
+        "materials": 1,
+        "textures": 1,
+        "animations": 32,
+        "skins": 1
+      },
+      "bytes": 147504,
+      "gzip": 34404
     },
     {
       "name": "pet-fox",
@@ -67,6 +135,40 @@
       },
       "bytes": 87204,
       "gzip": 21897
+    },
+    {
+      "name": "pet-panda",
+      "when": "lazy",
+      "file": "models/pet-panda.glb",
+      "nodes": [
+        "animal-panda"
+      ],
+      "counts": {
+        "meshes": 5,
+        "materials": 1,
+        "textures": 1,
+        "animations": 8,
+        "skins": 0
+      },
+      "bytes": 75332,
+      "gzip": 21002
+    },
+    {
+      "name": "pet-penguin",
+      "when": "lazy",
+      "file": "models/pet-penguin.glb",
+      "nodes": [
+        "animal-penguin"
+      ],
+      "counts": {
+        "meshes": 5,
+        "materials": 1,
+        "textures": 1,
+        "animations": 8,
+        "skins": 0
+      },
+      "bytes": 70876,
+      "gzip": 20623
     },
     {
       "name": "world-forest",

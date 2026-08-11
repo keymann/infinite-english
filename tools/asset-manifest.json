@@ -17,11 +17,35 @@
       "models": ["character-male-a"]
     },
     {
-      "name": "player-female-a",
+      "name": "char-female-a",
       "when": "lazy",
-      "note": "Phase 6 해금 캐릭터 예시. 캐릭터는 리그가 같아도 bundle 을 합칠 수 없다(위 ★).",
+      "note": "Phase 6 해금 캐릭터. 캐릭터는 리그가 같아도 bundle 을 합칠 수 없다(위 ★).",
       "dir": "mini-characters/Models/GLB format",
       "models": ["character-female-a"]
+    },
+    {
+      "name": "char-male-b",
+      "when": "lazy",
+      "dir": "mini-characters/Models/GLB format",
+      "models": ["character-male-b"]
+    },
+    {
+      "name": "char-female-b",
+      "when": "lazy",
+      "dir": "mini-characters/Models/GLB format",
+      "models": ["character-female-b"]
+    },
+    {
+      "name": "char-male-c",
+      "when": "lazy",
+      "dir": "mini-characters/Models/GLB format",
+      "models": ["character-male-c"]
+    },
+    {
+      "name": "char-female-c",
+      "when": "lazy",
+      "dir": "mini-characters/Models/GLB format",
+      "models": ["character-female-c"]
     },
     {
       "name": "pet-fox",
@@ -35,6 +59,18 @@
       "when": "lazy",
       "dir": "cube-pets_1.0/Models/GLB format",
       "models": ["animal-cat"]
+    },
+    {
+      "name": "pet-panda",
+      "when": "lazy",
+      "dir": "cube-pets_1.0/Models/GLB format",
+      "models": ["animal-panda"]
+    },
+    {
+      "name": "pet-penguin",
+      "when": "lazy",
+      "dir": "cube-pets_1.0/Models/GLB format",
+      "models": ["animal-penguin"]
     },
     {
       "name": "world-forest",
