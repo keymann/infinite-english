@@ -11,6 +11,7 @@ import { SPEED_LIMIT_SEC, instantGold } from './game/events';
 import { Session } from './game/session';
 import { LearningEngine } from './learning/engine';
 import { WordBank } from './learning/words';
+import { bandOf, levelsOf } from './learning/gradeBand';
 import { characterOf, newlyUnlocked, petOf } from './progress/collection';
 import { applyProgress, allDone, defOf, ensureToday, rewardFor } from './progress/mission';
 import {
@@ -36,6 +37,7 @@ import { Hud } from './ui/hud';
 import { Overlays, praiseFor, type ResultReward } from './ui/overlays';
 import { QuizPanel } from './ui/quizPanel';
 import { ParentScreen, StartScreen } from './ui/screens';
+import { ShopScreen } from './ui/shop';
 import { Ambient } from './world/ambient';
 import { Backdrop } from './world/backdrop';
 import { BossActor } from './world/bossActor';
@@ -514,6 +516,8 @@ async function boot() {
     engine = new LearningEngine(bank, createRng(seed ^ 0x5f3759df), () => Date.now(), {
       ability: saved.ability,
       progress: saved.progress,
+      // 로비에서 고른 학년 구간 — adaptive 위에 씌우는 제한이다 (learning/gradeBand.ts)
+      levels: levelsOf(saved.levelBand),
     });
     session = new Session(bank, engine, createRng(seed ^ 0x9e3779b9));
     runExp = 0;
@@ -798,6 +802,11 @@ async function boot() {
     parentScreen.hide();
     showHome();
   });
+  /* 상점 — MVP 는 UI 만이다 ("추가 예정"). progress/shop.ts 주석 참고 */
+  const shopScreen = new ShopScreen(app, () => {
+    shopScreen.hide();
+    showHome();
+  });
 
   const abilities = () =>
     abilitiesOf({
@@ -852,6 +861,7 @@ async function boot() {
         run: saved.run,
         // 한 번도 문제를 푼 적이 없으면 조작 설명을 보여 준다
         firstTime: saved.stats.questions === 0,
+        levelBand: saved.levelBand,
       },
       {
         onStart: () => {
@@ -866,6 +876,17 @@ async function boot() {
         },
         onSelectCharacter: (id) => void swap('char', id),
         onSelectPet: (id) => void swap('pet', id),
+        /* 문제 레벨 구간 — **판 도중에는 바뀌지 않는다.** 로비에서만 고르고,
+           다음 판을 시작할 때 엔진에 넘긴다 (startSession) */
+        onSelectBand: (id) => {
+          saved.levelBand = bandOf(id).id;
+          saveSoon(saved);
+          showHome();
+        },
+        onOpenShop: () => {
+          startScreen.hide();
+          shopScreen.show(saved.player.gold);
+        },
         onOpenParent: () => {
           startScreen.hide();
           parentScreen.show(
@@ -1151,6 +1172,10 @@ async function boot() {
       /** 잠금 상태 — 보스 예약·보스전 중에는 계단을 오를 수 없다 */
       get canClimb() {
         return canClimb();
+      },
+      /** 로비에서 고른 문제 레벨 구간 — 실제로 제한이 걸렸는지 확인용 */
+      get levelBand() {
+        return { id: saved.levelBand, levels: levelsOf(saved.levelBand) };
       },
       /** 지금 재생 중인 클립 — 애니메이션이 죽는 사고가 두 번 있었다(스파이크 A 기록) */
       get clips() {

@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
+import { emptyProgress } from '../learning/mastery';
 import { SAVE_VERSION, clear, load, saveNow } from './save';
 
 /**
@@ -154,5 +155,40 @@ describe('v1 → v2 마이그레이션', () => {
     store.set(KEY, JSON.stringify(v1));
     saveNow(load());
     expect(JSON.parse(store.get(KEY)!).v).toBe(SAVE_VERSION);
+  });
+});
+
+describe('문제 레벨 선택 (levelBand)', () => {
+  it('기본값은 자동이다', () => {
+    expect(load().levelBand).toBe('auto');
+  });
+
+  it('고른 값이 저장되고 다시 읽힌다', () => {
+    const data = load();
+    data.levelBand = 'm23';
+    saveNow(data);
+    expect(load().levelBand).toBe('m23');
+  });
+
+  /**
+   * **스키마 버전을 올리지 않았다.** 이 필드가 없는 기존 v2 저장본이 그대로 열리고
+   * 기본값('auto')이 채워지는지 — 그것이 버전을 올리지 않은 근거다 (save.ts 주석).
+   */
+  it('필드가 없는 기존 저장본이 자동으로 열린다 — 학습 기록도 그대로', () => {
+    const data = load();
+    data.player = { ...data.player, level: 5, gold: 300 };
+    data.progress = { w1: { ...emptyProgress(), right: 3, wrong: 1, stage: 2 } };
+    saveNow(data);
+
+    // 저장본에서 levelBand 키를 지운다 (= 이 기능 이전에 저장된 파일)
+    const raw = JSON.parse(store.get(KEY)!);
+    expect(raw.v).toBe(SAVE_VERSION);
+    delete raw.levelBand;
+    store.set(KEY, JSON.stringify(raw));
+
+    const loaded = load();
+    expect(loaded.levelBand).toBe('auto');
+    expect(loaded.player.gold).toBe(300);
+    expect(loaded.progress.w1.right).toBe(3);
   });
 });
