@@ -4,6 +4,19 @@ import type { Actor } from '../three/actor';
 import type { Stairs } from '../world/stairs';
 import { CLIMB, PLAYER } from './balance';
 
+/**
+ * 피격에 쓸 클립 후보.
+ *
+ * **플레이어 glb 에는 전용 피격 클립이 없다** (32종 전부 확인: static · idle · walk ·
+ * sprint · jump · fall · crouch · sit · drive · die · pick-up · emote 2종 · holding 6종 ·
+ * attack 4종 · interact 2종 · wheelchair 7종). `fall` 이 균형을 잃은 자세라 밀려나는 동작과 가장 잘 붙는다. `die` 는 HP 가 남아 있는데도
+ * 죽은 것처럼 보여 쓰지 않고, `emote-no` 는 **방향 오선택(판 종료)에 이미 쓰고 있어**
+ * 두 사건이 같은 동작이 되면 아이가 원인을 구별할 수 없다.
+ */
+const HURT_CLIPS = ['fall', 'crouch', 'emote-no'] as const;
+/** 밀려났다가 제자리로 돌아오는 지점 (0~1) */
+const KNOCK_PEAK = 0.35;
+
 export type ClimbState = 'stand' | 'jump' | 'stumble' | 'dead';
 
 export type ClimbEvents = {
@@ -40,6 +53,10 @@ export class Climb {
   /** 점프 중 들어온 입력을 잠깐 기억한다 — 빠르게 연타할 때 입력이 씹히면 억울하다 */
   private buffered: Dir | null = null;
   private bufferAge = 0;
+  /** 피격 리액션 남은 시간(초) */
+  private hurtLeft = 0;
+  /** 밀려나는 방향 (수평) */
+  private readonly knock = new THREE.Vector3();
 
   constructor(stairs: Stairs, actor: Actor, events: ClimbEvents = {}) {
     this.stairs = stairs;
@@ -71,6 +88,7 @@ export class Climb {
     this.floor = 0;
     this.state = 'stand';
     this.totalMisses = 0;
+    this.hurtLeft = 0;
     this.timer = 0;
     this.buffered = null;
     this.stairs.surfaceAt(0, this.from);
@@ -97,6 +115,8 @@ export class Climb {
 
   private startJump() {
     this.floor++;
+    // 점프가 피격 리액션을 이어받는다 — 두 동작이 위치를 동시에 건드리면 캐릭터가 떤다
+    this.hurtLeft = 0;
     this.state = 'jump';
     this.timer = 0;
     this.from.copy(this.actor.root.position);
@@ -117,10 +137,39 @@ export class Climb {
   private fallOff() {
     this.state = 'stumble';
     this.timer = 0;
+    this.hurtLeft = 0;
     this.totalMisses++;
     this.buffered = null;
     this.actor.play('emote-no', { loop: false, fade: 0.05, restart: true, timeScale: 1.4 });
     this.events.onWrongDir?.();
+  }
+
+  /**
+   * 보스에게 맞았다 — 피격 리액션.
+   *
+   * **계단 상태머신을 건드리지 않는다.** 보스전 중에는 입력이 잠겨 있어 상태는 'stand' 이고,
+   * 여기서 상태를 바꾸면 보스를 잡은 뒤 계단이 열리지 않는다. 자세와 위치만 흔든다.
+   *
+   * @param fromPos 때린 쪽(보스) 위치. 그 반대로 밀려난다
+   */
+  hurt(fromPos: THREE.Vector3) {
+    if (this.state === 'dead' || this.state === 'stumble') return;
+    this.hurtLeft = CLIMB.hurtSec;
+    // 보스 반대 방향 (수평만 — 계단 아래로 떨어지면 층과 화면이 어긋난다)
+    this.knock.subVectors(this.to, fromPos).setY(0);
+    if (this.knock.lengthSq() < 1e-6) this.knock.set(0, 0, 1);
+    this.knock.normalize();
+    for (const name of HURT_CLIPS) {
+      if (this.actor.has(name)) {
+        this.actor.play(name, { loop: false, fade: 0.06, restart: true, timeScale: 1.5 });
+        break;
+      }
+    }
+  }
+
+  /** 지금 피격 리액션 중인지 */
+  get hurting(): boolean {
+    return this.hurtLeft > 0;
   }
 
   update(dt: number) {
@@ -159,6 +208,26 @@ export class Climb {
       case 'stand':
       case 'dead':
         break;
+    }
+
+    /* 피격 리액션 — 밀려났다가 제자리로 돌아온다.
+       위치를 직접 쓰는 것은 'stand' 일 때만이다. 점프 중이면 점프가 위치의 주인이다
+       (startJump 가 hurtLeft 를 지우므로 여기 들어오지 않는다). */
+    if (this.hurtLeft > 0) {
+      this.hurtLeft -= dt;
+      if (this.state === 'stand') {
+        const t = 1 - Math.max(0, this.hurtLeft) / CLIMB.hurtSec;
+        const push =
+          t < KNOCK_PEAK ? t / KNOCK_PEAK : 1 - (t - KNOCK_PEAK) / (1 - KNOCK_PEAK);
+        this.actor.root.position
+          .copy(this.to)
+          .addScaledVector(this.knock, PLAYER.knockback * push);
+        if (this.hurtLeft <= 0) {
+          // 정지 포즈에 굳지 않게 되돌린다 (loop:false 클립은 마지막 프레임에서 멈춘다)
+          this.actor.root.position.copy(this.to);
+          this.actor.play('idle', { fade: 0.14 });
+        }
+      }
     }
   }
 

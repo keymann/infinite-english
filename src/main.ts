@@ -675,10 +675,12 @@ async function boot() {
 
     sound.wrong();
     stopTimer();
-    /* **보스가 플레이어를 공격한다** (요구 사항 3). 오답의 결과가 HP 숫자만 줄어드는 것이
-       아니라 화면에서 보여야 한다. FREE 팩에 공격 클립이 없어 Throw + 돌진으로 만들었다 */
+    /* **보스가 플레이어를 공격한다.** 오답의 결과가 HP 숫자만 줄어드는 것이 아니라
+       화면에서 보여야 한다. FREE 팩에 공격 클립이 없어 Throw + 돌진으로 만들었다.
+       플레이어 피격은 여기서 바로 하지 않는다 — 돌진이 닿는 프레임에 맞춘다(update 루프) */
     if (session.boss) bossActor?.attack();
-    camera.shake(PLAYER.landShake * (session.boss ? 2 : 1));
+    // 보스전에서는 흔들림도 타격 순간으로 미룬다. 두 번 흔들면 소음이 된다
+    if (!session.boss) camera.shake(PLAYER.landShake);
     snapshotRun();
     after(RULES.wrongFeedbackSec, () => {
       if (!session) return;
@@ -942,6 +944,16 @@ async function boot() {
     backdrop.update(dt, actor.root.position, bandProgress(climb.floor));
     pet?.update(dt, actor.root.position);
     bossActor?.update(dt);
+
+    /* 보스의 돌진이 가장 깊이 들어간 프레임 — **여기서 플레이어가 맞는다.**
+       setTimeout 으로 맞추지 않는 이유: 연출 지연은 단일 슬롯(after)을 공유하므로
+       오답 피드백 타이머와 서로를 취소한다. 그리고 시간으로 맞추면 프레임이 밀릴 때
+       타격과 리액션이 어긋난다 — 애니메이션 진행도에서 받는 것이 정확하다 */
+    if (bossActor?.takeImpact() && session && session.phase !== 'over') {
+      climb.hurt(bossActor.root.position);
+      camera.shake(PLAYER.landShake * 2.6);
+      sound.stumble();
+    }
     gimmicks.update(dt);
     npc?.update(dt, stairs);
     quizObject.update(dt, actor.root.position);
