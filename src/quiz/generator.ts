@@ -31,6 +31,7 @@ export function generateQuiz(
   rng: Rng,
   options: { isRetry?: boolean } = {},
 ): Quiz {
+  // EN_TO_KO 는 한국어 뜻을, 나머지(KO_TO_EN·IMAGE_TO_EN)는 영어 단어를 답으로 쓴다
   const answerOf = (w: Word) => (type === 'EN_TO_KO' ? w.meaning : w.word);
 
   const pool = word.distractorPool.map((w) => bank.get(w)).filter((w): w is Word => !!w);
@@ -76,11 +77,14 @@ export function generateQuiz(
     question:
       type === 'EN_TO_KO'
         ? `"${word.word}" 의 뜻은?`
-        : `"${word.meaning}" 의 영어는?`,
+        : type === 'IMAGE_TO_EN'
+          ? '이건 영어로 뭐라고 할까?'
+          : `"${word.meaning}" 의 영어는?`,
     choices,
     correctIndex: choices.indexOf(correct),
     difficulty: word.difficulty,
     isRetry: options.isRetry ?? false,
+    imageAsset: type === 'IMAGE_TO_EN' ? word.imageAsset : null,
   };
 }
 

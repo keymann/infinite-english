@@ -43,6 +43,29 @@ export const WORLD_SETS: Record<string, WorldSet> = {
     ],
     decor: ['grass', 'grass_large', 'mushroom_red', 'flower_yellowA', 'rock_smallA'],
   },
+  snow: {
+    id: 'snow',
+    bundle: 'world-snow',
+    // 눈 타일은 1×0.2×1 로 얇다 — 공중에 뜬 **얼음판**처럼 보여 숲·성과 확실히 구분된다
+    step: 'snow-tile',
+    island: 'snow-tile-rock',
+    props: [
+      'snow-detail-tree-large',
+      'snow-detail-tree',
+      'snow-detail-crystal-large',
+      'snow-wood-structure',
+      'snow-detail-rocks-large',
+    ],
+    decor: ['snow-detail-crystal', 'snow-detail-rocks', 'snow-detail-dirt'],
+  },
+  sky: {
+    id: 'sky',
+    bundle: 'world-sky',
+    step: 'platform_wood_1x1x1',
+    island: 'floor_wood_2x2',
+    props: ['structure_C', 'structure_B', 'pillar_2x2x4', 'pillar_1x1x4', 'strut_vertical', 'sign'],
+    decor: ['cone', 'ball'],
+  },
   castle: {
     id: 'castle',
     bundle: 'world-castle',
@@ -123,9 +146,37 @@ export const THEMES: Theme[] = [
     stepTint: new THREE.Color(0.95, 0.95, 1.08),
   },
   {
+    id: 'snow-peak',
+    name: 'Frozen Peak',
+    fromFloor: 35,
+    setId: 'snow',
+    sky: 0xcfe9ff,
+    fogDensity: 0.034,
+    hemiSky: 0xeaf6ff,
+    hemiGround: 0x8aa6bf,
+    hemiIntensity: 2.3,
+    sunColor: 0xffffff,
+    sunIntensity: 1.4,
+    stepTint: new THREE.Color(1, 1, 1.05),
+  },
+  {
+    id: 'sky-islands',
+    name: 'Sky Islands',
+    fromFloor: 50,
+    setId: 'sky',
+    sky: 0x63c8ff,
+    fogDensity: 0.024,
+    hemiSky: 0xdff3ff,
+    hemiGround: 0x5c86a8,
+    hemiIntensity: 2.2,
+    sunColor: 0xfff6de,
+    sunIntensity: 1.6,
+    stepTint: new THREE.Color(1, 1, 1),
+  },
+  {
     id: 'castle-night',
     name: 'Midnight Castle',
-    fromFloor: 50,
+    fromFloor: 70,
     setId: 'castle',
     sky: 0x1b2145,
     fogDensity: 0.042,
@@ -137,6 +188,11 @@ export const THEMES: Theme[] = [
     stepTint: new THREE.Color(0.62, 0.68, 0.95),
   },
 ];
+
+/** 이 테마에 떠다니는 UFO 를 띄우는지 — 눈·하늘 월드만 */
+export function hasAmbientFlyers(theme: Theme): boolean {
+  return theme.setId === 'snow' || theme.setId === 'sky';
+}
 
 export function themeForFloor(floor: number): Theme {
   let found = THEMES[0];

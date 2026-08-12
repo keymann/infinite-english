@@ -257,7 +257,8 @@ describe('출제 정책', () => {
     expect(maxRun).toBeLessThanOrEqual(2);
   });
 
-  it('아직 못 맞힌 방향을 먼저 낸다 (Mastery 게이트로 밀어준다)', () => {
+  /** 그림 문제가 이 슬롯을 가로채면 그림 있는 단어만 마스터가 늦어진다 — 게이트가 우선이다 */
+  it('아직 못 맞힌 방향을 먼저 낸다 (그림 문제보다 Mastery 게이트가 우선)', () => {
     const clock = fakeClock();
     const { engine } = makeEngine(clock);
     const target = bank.get('apple')!;
@@ -278,6 +279,25 @@ describe('출제 정책', () => {
       engine.record(pick, true);
     }
     expect(found).toBe(true);
+  });
+
+  it('두 방향을 다 맞힌 뒤에는 그림 문제가 섞인다 (PRD 2장 TYPE_C)', () => {
+    const clock = fakeClock();
+    const engine = new LearningEngine(bank, createRng(3), clock.now);
+    const withImage = bank.all().find((w) => w.imageAsset)!;
+    engine.progress[withImage.id] = {
+      ...emptyProgress(),
+      right: 4,
+      clearedTypes: ['EN_TO_KO', 'KO_TO_EN'],
+      lastCorrectAt: clock.now(),
+    };
+    const types = new Set<string>();
+    for (let i = 0; i < 200; i++) {
+      const pick = engine.next();
+      if (pick.word.id === withImage.id) types.add(pick.type);
+      engine.record(pick, true);
+    }
+    expect([...types]).toContain('IMAGE_TO_EN');
   });
 
   it('취약 단어는 정답률 60% 미만 · 2회 이상 시도한 단어다', () => {

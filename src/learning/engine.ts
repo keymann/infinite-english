@@ -258,8 +258,15 @@ export class LearningEngine {
     if (p) {
       const hasEnKo = p.clearedTypes.includes('EN_TO_KO');
       const hasKoEn = p.clearedTypes.includes('KO_TO_EN');
+      /* **Mastery 게이트가 그림 문제보다 우선한다.** 아직 못 맞힌 방향이 있으면 그것을 낸다 —
+         그림 문제가 이 슬롯을 가로채면 그림이 있는 단어(14개)만 마스터가 계속 늦어진다.
+         단위 테스트가 이 충돌을 잡았다. */
       if (hasEnKo && !hasKoEn) return 'KO_TO_EN';
       if (!hasEnKo && hasKoEn) return 'EN_TO_KO';
+
+      /* 두 방향을 다 맞힌 뒤에는 그림 문제를 섞는다 (PRD 2장 TYPE_C).
+         뜻을 한 번도 안 본 단어에 그림부터 내면 찍기가 된다. */
+      if (word.imageAsset && hasEnKo && hasKoEn && this.rng() < 0.4) return 'IMAGE_TO_EN';
     }
     // 처음 만나는 단어는 EN→KO 를 더 자주 낸다 (뜻을 먼저 익히는 게 순서다)
     return this.rng() < 0.65 ? 'EN_TO_KO' : 'KO_TO_EN';

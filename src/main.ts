@@ -36,12 +36,16 @@ import { Hud } from './ui/hud';
 import { Overlays, praiseFor, type ResultReward } from './ui/overlays';
 import { QuizPanel } from './ui/quizPanel';
 import { ParentScreen, StartScreen } from './ui/screens';
+import { Ambient } from './world/ambient';
 import { BossActor } from './world/bossActor';
+import { Gimmicks } from './world/gimmicks';
+import { Npc } from './world/npc';
 import { Pet } from './world/pet';
+import { QuizObject } from './world/quizObject';
 import { Props } from './world/props';
 import { Mood, createBlobShadow } from './world/scene';
 import { Stairs } from './world/stairs';
-import { WORLD_SETS, themeForFloor, type Theme } from './world/theme';
+import { WORLD_SETS, hasAmbientFlyers, themeForFloor, type Theme } from './world/theme';
 
 /**
  * 부트스트랩 — 배선만 한다.
@@ -75,7 +79,10 @@ async function boot() {
   const assets = new Assets(profile.side);
   const bank = new WordBank();
   // 3D 에셋과 단어 DB 를 동시에 받는다 — 둘은 서로를 기다릴 이유가 없다
-  await Promise.all([assets.load(['player', 'world-forest']), bank.loadLevels(LEVELS)]);
+  await Promise.all([
+    assets.load(['player', 'world-forest', 'gimmick', 'pickup']),
+    bank.loadLevels(LEVELS),
+  ]);
   app.querySelector('#loading')?.remove();
 
   const seed = Number(params.get('seed')) || randomSeed();
@@ -100,6 +107,24 @@ async function boot() {
   registerSet('forest');
   scene.add(stairs.group);
   scene.add(props.group);
+
+  /* 계단 기믹 — 크리스탈(골드)·방향 표지판(정보)·체크포인트 깃발·스프링(공짜 한 칸).
+     어느 것도 HP 를 건드리지 않는다 (기획서 3.2절) */
+  const gimmicks = new Gimmicks({
+    crystal: assets.source('pickup', 'detail-crystal'),
+    spring: assets.source('gimmick', 'spring'),
+    arrowLeft: assets.source('gimmick', 'signage_arrows_left'),
+    arrowRight: assets.source('gimmick', 'signage_arrows_right'),
+    flag: assets.source('gimmick', 'signage_finish'),
+  });
+  scene.add(gimmicks.group);
+
+  /** 그림 문제(TYPE_C)에서 계단 위에 떠오르는 3D 사물 */
+  const quizObject = new QuizObject();
+  scene.add(quizObject.group);
+
+  /** 눈·하늘 월드의 떠다니는 UFO — 배경이 살아 있게 한다 */
+  let ambient: Ambient | null = null;
 
   // 저장본에서 학습 상태·성장을 복원한다. 판이 끝나도 남아야 한다
   const saved = loadSave();
@@ -136,6 +161,14 @@ async function boot() {
 
   let bossActor: BossActor | null = null;
 
+  /** 보스는 층에 따라 다른 종을 낸다 — 같은 뼈 기사만 세 번 나오면 세 번째는 배경이 된다 */
+  const BOSS_KINDS = [
+    { bundle: 'boss-warrior', node: 'Skeleton_Warrior', name: '뼈 기사' },
+    { bundle: 'boss-mage', node: 'Skeleton_Mage', name: '뼈 마법사' },
+    { bundle: 'boss-rogue', node: 'Skeleton_Rogue', name: '뼈 도적' },
+  ] as const;
+  let bossKindIndex = 0;
+
   void assets
     .load(['world-castle', petOf(saved.collection, saved.player.level).bundle])
     .then(() => {
@@ -143,21 +176,59 @@ async function boot() {
       buildPet();
       /* 보스는 더 뒤에 받는다 — 20층에 닿기 전에만 오면 된다.
          캐릭터 glb 에 애니메이션이 없으므로 클립 전용 bundle 과 짝으로 로드한다 (스파이크 A) */
-      return assets.load(['boss-warrior', 'boss-anims']);
+      return assets.load(['boss-anims', 'char-female-a', ...BOSS_KINDS.map((k) => k.bundle)]);
     })
     .then(() => {
-      const actorInstance = new Actor(
-        assets.instance('boss-warrior', 'Skeleton_Warrior'),
-        assets.clips('boss-anims'),
-        PLAYER.height * 1.35,
+      /* 응원 NPC — 다음 체크포인트 옆 섬에서 기다린다. 캐릭터 하나를 재사용한다
+         (스킨드는 인스턴싱이 안 되므로 여러 명을 두면 draw call 이 그만큼 늘어난다) */
+      const npcActor = new Actor(
+        assets.instance('char-female-a', 'character-female-a'),
+        assets.clips('char-female-a'),
+        PLAYER.height * 0.95,
       );
-      scene.add(actorInstance.root);
-      bossActor = new BossActor(actorInstance);
+      scene.add(npcActor.root);
+      npc = new Npc(npcActor, stairs);
+      return undefined;
+    })
+    .then(() => {
+      buildBoss(0);
+      // 눈·하늘 월드와 그림 문제용 에셋은 가장 마지막에 받는다 (35층·그림 문제 전까지 여유가 있다)
+      return assets.load(['world-snow', 'world-sky', 'food']);
+    })
+    .then(() => {
+      registerSet('snow');
+      registerSet('sky');
+      ambient = new Ambient([
+        assets.source('world-snow', 'enemy-ufo-a'),
+        assets.source('world-snow', 'enemy-ufo-b'),
+        assets.source('world-snow', 'enemy-ufo-c'),
+      ]);
+      scene.add(ambient.group);
+      foodReady = true;
     })
     .catch((err: unknown) => {
-      // 배경 로드 실패는 게임을 막지 않는다. 숲 월드로 끝까지 갈 수 있다
-      console.warn('월드2·펫 로드 실패 — 숲 월드로 계속한다', err);
+      // 배경 로드 실패는 게임을 막지 않는다. 받은 월드까지만 쓴다
+      console.warn('추가 월드·보스 로드 실패 — 받은 에셋으로 계속한다', err);
     });
+
+  /** 그림 문제를 낼 수 있는지 (food bundle 도착 여부) */
+  let foodReady = false;
+  /** 체크포인트에서 응원하는 NPC */
+  let npc: Npc | null = null;
+
+  /** 보스 3종 중 하나를 씬에 올린다 */
+  const buildBoss = (index: number) => {
+    const kind = BOSS_KINDS[index % BOSS_KINDS.length];
+    if (bossActor) scene.remove(bossActor.root);
+    const instance = new Actor(
+      assets.instance(kind.bundle, kind.node),
+      assets.clips('boss-anims'),
+      PLAYER.height * 1.35,
+    );
+    scene.add(instance.root);
+    bossActor = new BossActor(instance);
+    return kind;
+  };
 
   const sound = new Sound();
   const hud = new Hud(app, profile);
@@ -190,6 +261,23 @@ async function boot() {
         onFloorReached(climb.floor);
         // 층을 올랐을 때도 스냅샷을 갱신한다 — 정답 시점에만 저장하면 이어하기가
         // 한 구간(최대 4칸) 뒤처진 층에서 시작한다
+        /* 계단 기믹 — 크리스탈은 골드, 스프링은 공짜 한 칸.
+           **HP 는 건드리지 않는다** (기획서 3.2절) */
+        const gimmick = gimmicks.kindAt(climb.floor);
+        if (gimmick === 'crystal') {
+          gimmicks.take(climb.floor);
+          award(0, 8 + Math.floor(climb.floor / 10) * 2);
+          overlays.praise('💎 +골드', 'gold');
+          sound.tierUp(1);
+        } else if (gimmick === 'spring') {
+          // 튕겨 올라 한 칸을 공짜로 얻는다. 구간 수와 무관하게 층만 오른다
+          overlays.praise('⬆︎ 스프링!', 'lightning');
+          sound.tierUp(2);
+          camera.shake(PLAYER.landShake * 2);
+          after(0.08, () => climb.input(climb.nextDir));
+        }
+        gimmicks.refresh(climb.floor, stairs);
+
         snapshotRun();
         if (done) {
           /* 구간을 다 올랐다. 보스 층을 지나왔고 간격 조건도 맞으면 보스전으로.
@@ -243,7 +331,9 @@ async function boot() {
   const startBossFight = () => {
     if (!session) return;
     const boss = session.startBoss(climb.floor);
-    bossBar.showBoss(`BOSS ${boss.index} · 뼈 기사`, 1);
+    // 보스마다 다른 종을 낸다 — 같은 뼈 기사만 세 번 나오면 세 번째는 배경이 된다
+    const kind = bossActor ? buildBoss(bossKindIndex++) : null;
+    bossBar.showBoss(`BOSS ${boss.index} · ${kind?.name ?? '보스'}`, 1);
     bossActor?.spawn(actor.root.position);
     overlays.banner('BOSS!', 'fire');
     sound.tierUp(3);
@@ -257,6 +347,7 @@ async function boot() {
   let theme: Theme = themeForFloor(0);
 
   const onFloorReached = (floor: number) => {
+    npc?.onFloor(floor, stairs);
     const next = themeForFloor(floor);
     if (next.id !== theme.id) {
       theme = next;
@@ -360,6 +451,11 @@ async function boot() {
     stairs.clearStyles();
     stairs.refresh(climb.floor);
     props.refresh(climb.floor, stairs);
+    gimmicks.reset();
+    gimmicks.refresh(climb.floor, stairs);
+    npc?.reset(stairs);
+    quizObject.hide();
+    bossKindIndex = 0;
     theme = themeForFloor(climb.floor);
     mood.applyTheme(theme, true);
     pet?.root.position.copy(actor.root.position);
@@ -390,6 +486,14 @@ async function boot() {
     if (!session) return;
     const quiz = options.revive ? session.reviveQuiz() : session.next(climb.floor);
     panel.show(quiz, options);
+
+    /* 그림 문제(TYPE_C) — 계단 위에 실물을 띄운다. food bundle 이 아직 안 왔으면
+       사물 없이 진행한다(문제 자체는 영어 4지선다라 성립한다) */
+    if (quiz.imageAsset && foodReady) {
+      quizObject.present(assets.instance('food', quiz.imageAsset));
+    } else {
+      quizObject.hide();
+    }
     showPendingEvent();
   };
 
@@ -401,6 +505,7 @@ async function boot() {
     const wasRetry = session.quiz?.isRetry ?? false;
     const result = session.answer(index);
     panel.feedback(index, result.correctIndex, result.correct);
+    quizObject.hide();
     hud.setHp(result.hp, RULES.hp);
     hud.setCombo(session.combo);
 
@@ -686,6 +791,7 @@ async function boot() {
     placedFloor = floor;
     stairs.refresh(floor);
     props.refresh(floor, stairs);
+    gimmicks.refresh(floor, stairs);
   };
 
   const update = (dt: number) => {
@@ -710,6 +816,11 @@ async function boot() {
     mood.update(dt);
     pet?.update(dt, actor.root.position);
     bossActor?.update(dt, actor.root.position);
+    gimmicks.update(dt);
+    npc?.update(dt, stairs);
+    quizObject.update(dt, actor.root.position);
+    ambient?.setEnabled(hasAmbientFlyers(theme));
+    ambient?.update(dt, actor.root.position);
 
     /* 이벤트 타이머. Speed 는 문제를 푸는 동안, Escape 는 계단을 오르는 동안 돈다.
        **시간이 끝나도 HP 는 깎지 않는다** — 콤보만 잃는다 (기획서 3.2절) */
@@ -812,7 +923,21 @@ async function boot() {
           : null;
       },
       get theme() {
-        return { id: theme.id, name: theme.name, setId: theme.setId, hasCastleSet: stairs.hasSet('castle'), pet: !!pet };
+        return {
+          id: theme.id,
+          name: theme.name,
+          setId: theme.setId,
+          sets: ['forest', 'castle', 'snow', 'sky'].filter((id) => stairs.hasSet(id)),
+          pet: !!pet,
+          npc: npc ? npc.floor : null,
+          boss: !!bossActor,
+          food: foodReady,
+          flyers: hasAmbientFlyers(theme),
+        };
+      },
+      /** 이 층에 있는 기믹 (테스트용) */
+      gimmickAt(floor: number) {
+        return gimmicks.kindAt(floor);
       },
       get nextDir() {
         return climb.nextDir;

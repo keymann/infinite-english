@@ -122,6 +122,66 @@
       ]
     },
     {
+      "name": "gimmick",
+      "when": "eager",
+      "note": "계단 기믹 — 방향 표지판·체크포인트 깃발·스프링. 1층부터 필요하므로 eager.",
+      "dir": "Platformer_Pack_1.0_FREE/Assets/gltf/neutral",
+      "models": ["signage_arrows_left", "signage_arrows_right", "signage_finish", "spring"]
+    },
+    {
+      "name": "pickup",
+      "when": "eager",
+      "note": "계단 위 수집물(크리스탈). 작아서 eager 로 둔다.",
+      "dir": "tower-defense-kit/Models/GLB format",
+      "models": ["detail-crystal", "detail-crystal-large"]
+    },
+    {
+      "name": "world-snow",
+      "when": "lazy",
+      "note": "WORLD 4 Snow. tower-defense-kit 의 눈 타일·크리스탈. 발판이 얇은 얼음판처럼 보인다.",
+      "dir": "tower-defense-kit/Models/GLB format",
+      "models": [
+        "snow-tile",
+        "snow-tile-rock",
+        "snow-detail-tree-large",
+        "snow-detail-tree",
+        "snow-detail-crystal-large",
+        "snow-detail-crystal",
+        "snow-detail-rocks-large",
+        "snow-detail-rocks",
+        "snow-detail-dirt",
+        "snow-wood-structure",
+        "detail-crystal",
+        "enemy-ufo-a",
+        "enemy-ufo-b",
+        "enemy-ufo-c"
+      ]
+    },
+    {
+      "name": "world-sky",
+      "when": "lazy",
+      "note": "WORLD 5 Sky. KayKit Platformer — **.gltf + .bin 포맷**이라 파이프라인이 확장자를 자동 탐지한다. 기믹(표지판·스프링)도 여기서 온다.",
+      "dir": "Platformer_Pack_1.0_FREE/Assets/gltf/neutral",
+      "models": [
+        "platform_wood_1x1x1",
+        "floor_wood_2x2",
+        "pillar_1x1x2",
+        "pillar_1x1x4",
+        "pillar_2x2x4",
+        "structure_A",
+        "structure_B",
+        "structure_C",
+        "strut_vertical",
+        "cone",
+        "sign",
+        "ball",
+        "spring",
+        "signage_arrows_left",
+        "signage_arrows_right",
+        "signage_finish"
+      ]
+    },
+    {
       "name": "food",
       "when": "lazy",
       "note": "TYPE_C(영어→그림) 문제용. 단어 ↔ 3D 모델 1:1 매핑. 회전 프리뷰로 출제한다.",
@@ -167,6 +227,20 @@
       "note": "4종 모두 Rig_Medium(23본) 동일 — boss-anims 의 클립 26종을 그대로 재사용한다.",
       "dir": "Skeletons_1.1_FREE/characters/gltf",
       "models": ["Skeleton_Minion"]
+    },
+    {
+      "name": "boss-mage",
+      "when": "lazy",
+      "note": "보스 2번째. 리그가 같아 클립을 공유한다.",
+      "dir": "Skeletons_1.1_FREE/characters/gltf",
+      "models": ["Skeleton_Mage"]
+    },
+    {
+      "name": "boss-rogue",
+      "when": "lazy",
+      "note": "보스 3번째.",
+      "dir": "Skeletons_1.1_FREE/characters/gltf",
+      "models": ["Skeleton_Rogue"]
     },
     {
       "name": "boss-anims",

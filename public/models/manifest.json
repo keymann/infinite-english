@@ -236,6 +236,106 @@
       "gzip": 29912
     },
     {
+      "name": "gimmick",
+      "when": "eager",
+      "file": "models/gimmick.glb",
+      "nodes": [
+        "signage_arrows_left",
+        "signage_arrows_right",
+        "signage_finish",
+        "spring"
+      ],
+      "counts": {
+        "meshes": 5,
+        "materials": 1,
+        "textures": 1,
+        "animations": 0,
+        "skins": 0
+      },
+      "bytes": 194584,
+      "gzip": 105481
+    },
+    {
+      "name": "pickup",
+      "when": "eager",
+      "file": "models/pickup.glb",
+      "nodes": [
+        "detail-crystal",
+        "detail-crystal-large"
+      ],
+      "counts": {
+        "meshes": 2,
+        "materials": 1,
+        "textures": 1,
+        "animations": 0,
+        "skins": 0
+      },
+      "bytes": 48360,
+      "gzip": 20924
+    },
+    {
+      "name": "world-snow",
+      "when": "lazy",
+      "file": "models/world-snow.glb",
+      "nodes": [
+        "snow-tile",
+        "snow-tile-rock",
+        "snow-detail-tree-large",
+        "snow-detail-tree",
+        "snow-detail-crystal-large",
+        "snow-detail-crystal",
+        "snow-detail-rocks-large",
+        "snow-detail-rocks",
+        "snow-detail-dirt",
+        "snow-wood-structure",
+        "detail-crystal",
+        "enemy-ufo-a",
+        "enemy-ufo-b",
+        "enemy-ufo-c"
+      ],
+      "counts": {
+        "meshes": 14,
+        "materials": 1,
+        "textures": 1,
+        "animations": 0,
+        "skins": 0
+      },
+      "bytes": 245080,
+      "gzip": 54933
+    },
+    {
+      "name": "world-sky",
+      "when": "lazy",
+      "file": "models/world-sky.glb",
+      "nodes": [
+        "platform_wood_1x1x1",
+        "floor_wood_2x2",
+        "pillar_1x1x2",
+        "pillar_1x1x4",
+        "pillar_2x2x4",
+        "structure_A",
+        "structure_B",
+        "structure_C",
+        "strut_vertical",
+        "cone",
+        "sign",
+        "ball",
+        "spring",
+        "signage_arrows_left",
+        "signage_arrows_right",
+        "signage_finish"
+      ],
+      "counts": {
+        "meshes": 17,
+        "materials": 1,
+        "textures": 1,
+        "animations": 0,
+        "skins": 0
+      },
+      "bytes": 365648,
+      "gzip": 156326
+    },
+    {
       "name": "food",
       "when": "lazy",
       "file": "models/food.glb",
@@ -309,6 +409,40 @@
       },
       "bytes": 315420,
       "gzip": 144082
+    },
+    {
+      "name": "boss-mage",
+      "when": "lazy",
+      "file": "models/boss-mage.glb",
+      "nodes": [
+        "Skeleton_Mage"
+      ],
+      "counts": {
+        "meshes": 9,
+        "materials": 2,
+        "textures": 1,
+        "animations": 0,
+        "skins": 1
+      },
+      "bytes": 262560,
+      "gzip": 120280
+    },
+    {
+      "name": "boss-rogue",
+      "when": "lazy",
+      "file": "models/boss-rogue.glb",
+      "nodes": [
+        "Skeleton_Rogue"
+      ],
+      "counts": {
+        "meshes": 10,
+        "materials": 2,
+        "textures": 1,
+        "animations": 0,
+        "skins": 1
+      },
+      "bytes": 327960,
+      "gzip": 152339
     },
     {
       "name": "boss-anims",

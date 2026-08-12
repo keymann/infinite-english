@@ -96,8 +96,11 @@ async function buildBundle(bundle) {
   let srcBytes = 0;
 
   for (const name of bundle.models) {
-    const path = join(srcDir, `${name}.glb`);
-    if (!existsSync(path)) {
+    /* kit 마다 포맷이 다르다. Kenney·KayKit 캐릭터는 .glb 인데
+       KayKit Platformer 는 .gltf + .bin 으로 나온다 — 확장자를 자동으로 찾는다. */
+    const candidates = [`${name}.glb`, `${name}.gltf`];
+    const path = candidates.map((file) => join(srcDir, file)).find((p) => existsSync(p));
+    if (!path) {
       missing.push(name);
       continue;
     }
