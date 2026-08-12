@@ -11,6 +11,8 @@ export class BossBar {
   private readonly timerRoot: HTMLElement;
   private readonly timerFill: HTMLElement;
   private readonly timerLabel: HTMLElement;
+  private readonly stairRoot: HTMLElement;
+  private readonly stairFill: HTMLElement;
 
   constructor(host: HTMLElement) {
     host.insertAdjacentHTML(
@@ -22,6 +24,9 @@ export class BossBar {
        <div class="timer-bar" id="timer-bar" hidden>
          <div class="timer-label" id="timer-label"></div>
          <div class="timer-track"><i id="timer-fill"></i></div>
+       </div>
+       <div class="stair-bar" id="stair-bar" hidden>
+         <div class="stair-track"><i id="stair-fill"></i></div>
        </div>`,
     );
     this.root = host.querySelector('#boss-bar')!;
@@ -30,6 +35,8 @@ export class BossBar {
     this.timerRoot = host.querySelector('#timer-bar')!;
     this.timerFill = host.querySelector('#timer-fill')!;
     this.timerLabel = host.querySelector('#timer-label')!;
+    this.stairRoot = host.querySelector('#stair-bar')!;
+    this.stairFill = host.querySelector('#stair-fill')!;
   }
 
   showBoss(name: string, ratio: number) {
@@ -58,5 +65,25 @@ export class BossBar {
 
   hideTimer() {
     this.timerRoot.setAttribute('hidden', '');
+  }
+
+  /**
+   * 계단 타이머 — 한 칸에 머무를 수 있는 남은 시간 (1 → 0).
+   *
+   * **보스 HP 바와 같은 자리에 둔다.** 둘은 동시에 뜨지 않는다 (보스전에는 계단 타이머가
+   * 적용되지 않는다). 바를 층층이 쌓으면 화면 위쪽이 게이지로 덮여 계단이 안 보인다.
+   *
+   * 라벨이 없다. 이 바는 **줄어드는 것 자체가 메시지**이고, 남은 시간이 2초일 때
+   * 글자를 읽을 여유는 없다. 대신 위험 구간에서 색이 바뀌고 깜빡인다.
+   */
+  showStairTimer(ratio: number) {
+    const clamped = Math.max(0, Math.min(1, ratio));
+    this.stairFill.style.width = `${clamped * 100}%`;
+    this.stairFill.dataset.low = String(clamped <= 0.3);
+    this.stairRoot.removeAttribute('hidden');
+  }
+
+  hideStairTimer() {
+    this.stairRoot.setAttribute('hidden', '');
   }
 }

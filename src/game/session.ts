@@ -37,6 +37,12 @@ import {
 
 export type Phase = 'quiz' | 'climbing' | 'revive' | 'over';
 
+/**
+ * 판이 끝난 이유. 종료 화면의 문구가 달라진다 — 아이가 "무엇 때문에 끝났는지"를
+ * 알아야 다음 판에 고칠 수 있다.
+ */
+export type FailReason = 'quiz' | 'direction' | 'timeout';
+
 export type AnswerResult = {
   correct: boolean;
   correctIndex: number;
@@ -94,6 +100,8 @@ export class Session {
   event: ActiveEvent | null = null;
   /** 방금 새로 발생한 이벤트 — UI 가 배너를 띄운 뒤 비운다 */
   pendingEvent: EventDef | null = null;
+  /** 판이 끝난 이유. 기본값은 영어 오답(REVIVE 실패) */
+  failReason: FailReason = 'quiz';
 
   private readonly bank: WordBank;
   private readonly engine: LearningEngine;
@@ -180,6 +188,22 @@ export class Session {
   breakCombo() {
     this.combo = 0;
     this.tierIndex = 0;
+  }
+
+  /**
+   * 계단 조작 실패로 판을 끝낸다 — **방향 오선택** 또는 **계단 타이머 만료**.
+   *
+   * HP 와 REVIVE 를 거치지 않는다. HP 는 영어 오답 전용이고(PRD 3.2절), REVIVE 는
+   * "이 단어만 다시 맞히면 계속" 이라는 학습 장치다 — 조작 실패에는 다시 낼 단어가 없다.
+   * 그래서 즉시 종료다.
+   */
+  fail(reason: FailReason): void {
+    this.failReason = reason;
+    this.phase = 'over';
+    this.combo = 0;
+    this.tierIndex = 0;
+    this.stepsLeft = 0;
+    this.quiz = null;
   }
 
   private tierFor(combo: number): number {

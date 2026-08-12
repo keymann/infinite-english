@@ -4,7 +4,7 @@ import { Sound } from './audio/sound';
 import { Input } from './core/input';
 import { startLoop } from './core/loop';
 import { createRng, randomSeed } from './core/rng';
-import { CHECKPOINT_EVERY, PLAYER, RULES } from './game/balance';
+import { CHECKPOINT_EVERY, CLIMB, PLAYER, RULES, stairTimeFor } from './game/balance';
 import { BOSS_EVERY, bossReward, canSpawnBoss, hpRatio } from './game/boss';
 import { Climb } from './game/climb';
 import { ESCAPE_LIMIT_SEC, SPEED_LIMIT_SEC, instantGold } from './game/events';
@@ -297,6 +297,9 @@ async function boot() {
         gimmicks.refresh(climb.floor, stairs);
 
         snapshotRun();
+        // 한 칸 올랐으니 계단 시간을 다시 채운다. 구간이 끝났으면 멈춘다(문제 차례다)
+        if (done) stopStairTimer();
+        else armStairTimer();
         if (done) {
           /* 구간을 다 올랐다. 보스 층을 지나왔고 간격 조건도 맞으면 보스전으로.
              구간이 4칸이라 20층을 뛰어넘을 수 있으므로 "지나온 보스 층"을 계산한다.
@@ -317,11 +320,10 @@ async function boot() {
           }
         }
       },
-      onStumble: () => {
-        camera.shake(PLAYER.landShake * 1.6);
-        sound.stumble();
-        panel.showPrompt('앗! 반대쪽이었어', 'stumble');
-      },
+      /* **방향을 틀리면 판이 끝난다.** 이전에는 휘청이고 계속했다 (PRD 3.2절) —
+         원작의 긴장이 방향 선택에서 온다는 요청으로 뒤집었다.
+         조작이 어려운 아이에게는 `?autodir=1` 이 그대로 남아 있다. */
+      onWrongDir: () => failRun('direction'),
     });
   }
 
@@ -344,6 +346,47 @@ async function boot() {
     timerKind = null;
     timerLeft = 0;
     bossBar.hideTimer();
+  };
+
+  /* ── 계단 타이머 ──
+     한 칸에 머무를 수 있는 시간. 0 이 되면 판이 끝난다.
+     **보스전에는 돌지 않는다** — 계단이 잠긴 구간이고, 문제를 읽을 시간을 빼앗으면 안 된다. */
+  let stairLeft = 0;
+  let stairTotal = 0;
+
+  /** 한 칸을 밟을 때마다 다시 찬다. 층이 높으면 짧아진다 (balance.stairTimeFor) */
+  const armStairTimer = () => {
+    if (!session || session.boss || session.phase === 'over') return;
+    stairTotal = stairTimeFor(climb.floor);
+    stairLeft = stairTotal;
+    bossBar.showStairTimer(1);
+  };
+
+  const stopStairTimer = () => {
+    stairLeft = 0;
+    stairTotal = 0;
+    bossBar.hideStairTimer();
+  };
+
+  /**
+   * 계단 조작 실패로 판을 끝낸다 — 방향 오선택 / 계단 시간 초과.
+   *
+   * HP·REVIVE 를 거치지 않는다 (`Session.fail`). 왜 끝났는지 보여 줄 시간을 준 뒤
+   * 결과 화면으로 넘긴다 — 즉시 암전하면 아이가 원인을 못 본다.
+   */
+  const failRun = (reason: 'direction' | 'timeout') => {
+    if (!session || session.phase === 'over') return;
+    session.fail(reason);
+    stopTimer();
+    stopStairTimer();
+    input.clear();
+    panel.hide();
+    sound.stumble();
+    sound.wrong();
+    camera.shake(PLAYER.landShake * 3.2);
+    overlays.banner(reason === 'direction' ? '방향을 틀렸다!' : '시간 초과!', 'fire');
+    stairs.setHint(-1);
+    after(CLIMB.stumbleSec + 0.3, endGame);
   };
 
   const startBossFight = () => {
@@ -460,6 +503,7 @@ async function boot() {
     bossBar.hideBoss();
     bossActor?.hide();
     stopTimer();
+    stopStairTimer();
 
     if (resume) {
       climb.teleport(resume.floor);
@@ -508,6 +552,8 @@ async function boot() {
   /** 문제를 띄우고, 새로 붙은 이벤트가 있으면 연출한다 */
   const showQuiz = (options: { revive?: boolean } = {}) => {
     if (!session) return;
+    // 문제를 푸는 동안 계단 시간은 돌지 않는다 — 문제를 읽는 시간을 빼앗으면 안 된다
+    stopStairTimer();
     const quiz = options.revive ? session.reviveQuiz() : session.next(climb.floor);
     panel.show(quiz, options);
 
@@ -580,6 +626,8 @@ async function boot() {
             bossActor?.hide();
             openSegment(result.segment, result.style);
             panel.showPrompt(promptText());
+            // 보스를 잡아 계단이 다시 열렸다 — 여기서부터 계단 시간이 돈다
+            armStairTimer();
           });
         } else {
           bossBar.setBossHp(session.boss ? hpRatio(session.boss) : 0);
@@ -593,6 +641,9 @@ async function boot() {
       snapshotRun();
       after(RULES.correctFeedbackSec, () => {
         panel.showPrompt(promptText());
+        /* 계단 시간은 **정답 피드백이 끝난 시점부터** 잰다. openSegment 시점에 시작하면
+           연출 0.25초가 아이의 시간에서 깎인다 — 2초까지 줄어드는 층에서는 12% 다 */
+        armStairTimer();
         // Escape — 시간 안에 구간을 올라야 콤보를 지킨다
         if (session?.event?.def.id === 'escape') startTimer('escape', ESCAPE_LIMIT_SEC);
       });
@@ -702,6 +753,8 @@ async function boot() {
       missionsDone: applied.completed.map((id) => defOf(id).label),
       chest,
       bossDefeated,
+      // 왜 끝났는지 — 결과 화면의 문구가 달라진다
+      reason: session.failReason,
     };
     overlays.result(stats, reward, {
       onRestart: () => {
@@ -763,6 +816,8 @@ async function boot() {
 
   function showHome() {
     panel.hide();
+    stopStairTimer();
+    stopTimer();
     startScreen.show(
       {
         player: saved.player,
@@ -847,6 +902,24 @@ async function boot() {
     quizObject.update(dt, actor.root.position);
     ambient?.setEnabled(hasAmbientFlyers(theme));
     ambient?.update(dt, actor.root.position);
+
+    /* 계단 타이머 — 한 칸에 머무를 수 있는 시간. 0 이 되면 **판이 끝난다.**
+       구간을 오르는 중(stepsLeft > 0)에만, 보스전이 아닐 때만 돈다.
+       `climb.state !== 'dead'` 를 보는 이유: 방향을 틀려 죽는 연출 중에 타이머가 0 이 되어
+       종료 사유가 'timeout' 으로 덮이면 아이가 잘못된 이유를 보게 된다. */
+    if (
+      stairTotal > 0 &&
+      session &&
+      session.phase === 'climbing' &&
+      session.stepsLeft > 0 &&
+      !session.boss &&
+      climb.state !== 'stumble' &&
+      climb.state !== 'dead'
+    ) {
+      stairLeft = Math.max(0, stairLeft - dt);
+      bossBar.showStairTimer(stairLeft / stairTotal);
+      if (stairLeft === 0) failRun('timeout');
+    }
 
     /* 이벤트 타이머. Speed 는 문제를 푸는 동안, Escape 는 계단을 오르는 동안 돈다.
        **시간이 끝나도 HP 는 깎지 않는다** — 콤보만 잃는다 (기획서 3.2절) */
@@ -944,6 +1017,14 @@ async function boot() {
       },
       get climbState() {
         return climb.state;
+      },
+      /** 계단 타이머 — 남은 시간·총 시간(초). total 0 이면 돌지 않는 상태다 */
+      get stairTimer() {
+        return { left: +stairLeft.toFixed(2), total: stairTotal, floorTime: stairTimeFor(climb.floor) };
+      },
+      /** 판이 끝난 이유 — 'quiz' | 'direction' | 'timeout' */
+      get failReason() {
+        return session?.failReason ?? null;
       },
       get eventDebug() {
         return session

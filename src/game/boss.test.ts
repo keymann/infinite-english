@@ -4,6 +4,7 @@ import { createRng } from '../core/rng';
 import { LearningEngine } from '../learning/engine';
 import { emptyProgress } from '../learning/mastery';
 import { WordBank } from '../learning/words';
+import { Session } from './session';
 import {
   BOSS_EVERY,
   BOSS_MIN_GAP_QUESTIONS,
@@ -13,6 +14,7 @@ import {
   hpRatio,
   isBossFloor,
   missBoss,
+  questionsToDefeat,
   spawnBoss,
 } from './boss';
 import {
@@ -34,24 +36,43 @@ import {
  */
 
 describe('보스전', () => {
-  it('20층마다 나온다', () => {
+  /* 20층 → 10층으로 줄였다. 문제를 계단 구간마다 조금씩 내는 대신 보스전에 모은다 */
+  it('10층마다 나온다', () => {
+    expect(BOSS_EVERY).toBe(10);
+    expect(isBossFloor(10)).toBe(true);
     expect(isBossFloor(20)).toBe(true);
-    expect(isBossFloor(40)).toBe(true);
-    expect(isBossFloor(19)).toBe(false);
+    expect(isBossFloor(9)).toBe(false);
     expect(isBossFloor(0)).toBe(false); // 시작 지점은 보스가 아니다
-    expect(BOSS_EVERY).toBe(20);
   });
 
-  it('10~15문제로 처치할 수 있다', () => {
-    const boss = spawnBoss(20);
+  it('첫 보스는 12문제로 처치할 수 있다', () => {
+    const boss = spawnBoss(BOSS_EVERY);
     let asked = 0;
     // 평범한 난이도·콤보 없이 계속 맞히는 최악의 경우
     while (boss.hp > 0 && asked < 100) {
       hitBoss(boss, 0.2, 0);
       asked++;
     }
-    expect(asked).toBeGreaterThanOrEqual(10);
-    expect(asked).toBeLessThanOrEqual(15);
+    expect(asked).toBe(12);
+    expect(questionsToDefeat(spawnBoss(BOSS_EVERY))).toBe(12);
+  });
+
+  /**
+   * "보스의 난이도만큼 체력을 늘린다" = 층이 오르면 낼 문제 수가 늘어난다.
+   * 다만 상한이 없으면 100층대 보스 하나가 판 전체보다 길어진다.
+   */
+  it('층이 오르면 체력과 문제 수가 늘어나고, 상한에서 멈춘다', () => {
+    const counts = [10, 50, 100, 300, 1000].map((floor) =>
+      questionsToDefeat(spawnBoss(floor)),
+    );
+    // 단조 증가
+    for (let i = 1; i < counts.length; i++) {
+      expect(counts[i]).toBeGreaterThanOrEqual(counts[i - 1]);
+    }
+    expect(counts[0]).toBe(12);
+    // 상한 — 어느 층이든 24문제를 넘지 않는다 (기본 데미지 10 기준 최악의 경우)
+    expect(Math.max(...counts)).toBeLessThanOrEqual(24);
+    expect(spawnBoss(1000).maxHp).toBe(spawnBoss(5000).maxHp);
   });
 
   it('어려운 단어가 더 큰 피해를 준다 (PRD 18장)', () => {
@@ -94,20 +115,25 @@ describe('보스전', () => {
   });
 
   it('뒤 보스가 더 단단하고 보상도 크다', () => {
-    const first = spawnBoss(20);
-    const second = spawnBoss(40);
+    const first = spawnBoss(10);
+    const second = spawnBoss(50);
     expect(second.maxHp).toBeGreaterThan(first.maxHp);
     expect(bossReward(second).gold).toBeGreaterThan(bossReward(first).gold);
   });
 
   /**
-   * 콤보가 최고조면 한 문제에 4칸을 오른다 — 20층이면 5문제다. 층 조건만 두면
-   * 판 전체가 보스전이 된다(브라우저 실측에서 그렇게 됐다).
+   * 한 구간이 최대 12칸이므로 보스 층을 두 번 지나칠 수 있다. 층 조건만 두면
+   * 보스가 연달아 등장한다 — 문제 수 간격이 그 병리적 경우를 막는다.
    */
   it('보스 사이에 최소 문제 수 간격을 둔다', () => {
-    // 20층에 닿았지만 직전 보스로부터 5문제밖에 안 지났다 → 아직 안 낸다
+    // 보스 층에 닿았지만 직전 보스로부터 문제 수 간격을 못 채웠다 → 아직 안 낸다
     expect(
-      canSpawnBoss({ floor: 20, lastBossFloor: 0, asked: 5, lastBossAsked: 0 }),
+      canSpawnBoss({
+        floor: 20,
+        lastBossFloor: 0,
+        asked: BOSS_MIN_GAP_QUESTIONS - 1,
+        lastBossAsked: 0,
+      }),
     ).toBe(false);
     // 간격을 채우면 낸다
     expect(
@@ -119,9 +145,9 @@ describe('보스전', () => {
     ).toBe(false);
     // 다음 보스 층에 닿으면 다시 낸다
     expect(
-      canSpawnBoss({ floor: 40, lastBossFloor: 20, asked: 50, lastBossAsked: 10 }),
+      canSpawnBoss({ floor: 30, lastBossFloor: 20, asked: 50, lastBossAsked: 10 }),
     ).toBe(true);
-    // 구간이 4칸이라 20층을 뛰어넘어 22층에 도착해도 보스는 나온다
+    // 구간이 최대 12칸이라 보스 층을 뛰어넘어 도착해도 보스는 나온다
     expect(
       canSpawnBoss({ floor: 22, lastBossFloor: 0, asked: 30, lastBossAsked: 0 }),
     ).toBe(true);
@@ -170,6 +196,62 @@ describe('보스전 출제 — 약점 단어 집중 (PRD 19장)', () => {
     const engine = new LearningEngine(bank, createRng(9), () => 1_700_000_000_000);
     const pick = engine.next({ boss: true });
     expect(pick.word).toBeTruthy();
+  });
+});
+
+describe('조작 실패로 판이 끝난다 — 방향 오선택 · 계단 시간 초과', () => {
+  const bank = new WordBank();
+
+  /**
+   * `Session.fail` 은 **HP 와 REVIVE 를 거치지 않는다.**
+   * HP 는 영어 오답 전용이고(PRD 3.2절), REVIVE 는 "이 단어만 다시 맞히면 계속" 이라는
+   * 학습 장치다 — 조작 실패에는 다시 낼 단어가 없다.
+   */
+  it('즉시 종료되고 HP 는 건드리지 않는다', async () => {
+    await bank.loadLevels([1, 2]);
+    const engine = new LearningEngine(bank, createRng(11), () => 1_700_000_000_000);
+    const session = new Session(bank, engine, createRng(12), () => 1_700_000_000_000);
+    session.next(0);
+    const hpBefore = session.hp;
+
+    session.fail('direction');
+
+    expect(session.phase).toBe('over');
+    expect(session.failReason).toBe('direction');
+    expect(session.hp).toBe(hpBefore); // REVIVE 로 가지 않는다
+    expect(session.stepsLeft).toBe(0);
+  });
+
+  it('콤보를 잃는다 — 조작을 틀렸는데 콤보가 남으면 다음 판으로 새어 나간다', async () => {
+    await bank.loadLevels([1, 2]);
+    const engine = new LearningEngine(bank, createRng(13), () => 1_700_000_000_000);
+    const session = new Session(bank, engine, createRng(14), () => 1_700_000_000_000);
+    session.next(0);
+    const quiz = session.quiz!;
+    session.answer(quiz.correctIndex);
+    expect(session.combo).toBe(1);
+
+    session.fail('timeout');
+    expect(session.combo).toBe(0);
+    expect(session.failReason).toBe('timeout');
+  });
+
+  it('이미 끝난 판의 사유를 덮어쓰지 않는다', async () => {
+    await bank.loadLevels([1, 2]);
+    const engine = new LearningEngine(bank, createRng(15), () => 1_700_000_000_000);
+    const session = new Session(bank, engine, createRng(16), () => 1_700_000_000_000);
+    session.next(0);
+    session.fail('direction');
+    // main.ts 의 failRun 이 phase 를 보고 두 번째 호출을 막는다 (여기서는 계약만 고정한다)
+    expect(session.phase).toBe('over');
+    expect(session.failReason).toBe('direction');
+  });
+
+  it('기본 종료 사유는 영어 오답이다', async () => {
+    await bank.loadLevels([1, 2]);
+    const engine = new LearningEngine(bank, createRng(17), () => 1_700_000_000_000);
+    const session = new Session(bank, engine, createRng(18), () => 1_700_000_000_000);
+    expect(session.failReason).toBe('quiz');
   });
 });
 

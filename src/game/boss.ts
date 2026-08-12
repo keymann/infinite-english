@@ -16,18 +16,23 @@
  * 단, 같은 단어를 연달아 내지는 않는다 (PRD 19장).
  */
 
-/** 몇 층마다 보스가 나오는지 */
-export const BOSS_EVERY = 20;
+/**
+ * 몇 층마다 보스가 나오는지.
+ *
+ * 20층 → **10층으로 줄였다.** 문제를 계단 구간마다 조금씩 내는 대신 보스전에 모으는
+ * 구조로 바꿨다 (요구 사항 1). 계단 구간은 4~12칸으로 길어져 오르는 동안 끊기지 않고,
+ * 문제는 보스 앞에서 몰아서 나온다.
+ */
+export const BOSS_EVERY = 10;
 
 /**
  * 보스 사이 최소 문제 수.
  *
- * 콤보가 최고조인 플레이어는 **한 문제에 4칸**을 오른다 — 20층이면 5문제다.
- * 층 조건만 두면 5~6문제마다 보스를 만나고, 보스전이 8~10문제이므로 판 전체가
- * 보스전이 되어 버린다(실측에서 그렇게 됐다). 계단을 오르는 리듬이 주인공이므로
- * 보스는 문제 수로도 간격을 둔다.
+ * 층 조건만 두면 한 구간(최대 12칸)에 보스 층을 두 번 지나칠 수 있어 연달아 등장한다.
+ * 보스전 자체가 10문제 이상이므로 이 값은 그 병리적 경우만 막는 하한이다
+ * (보스전이 끝나면 `asked` 가 이미 크게 늘어 조건을 넘는다).
  */
-export const BOSS_MIN_GAP_QUESTIONS = 10;
+export const BOSS_MIN_GAP_QUESTIONS = 3;
 
 /** 보스를 지금 낼 수 있는지 — 층 조건과 간격 조건을 모두 본다 */
 export function canSpawnBoss(options: {
@@ -42,8 +47,26 @@ export function canSpawnBoss(options: {
   return asked - lastBossAsked >= BOSS_MIN_GAP_QUESTIONS;
 }
 
-/** 보스 최대 HP — 기본 데미지 10 이면 10~15문제 */
+/** 첫 보스의 최대 HP — 기본 데미지 10 이면 12문제 */
 const BOSS_HP = 120;
+/**
+ * 보스 하나당 늘어나는 HP.
+ *
+ * **보스가 어려워지는 만큼 체력도 늘어난다** = 낼 문제 수가 늘어난다 (요구 사항 1).
+ * 층이 오르면 출제 난이도(adaptive)도 함께 올라가므로, 체력만 늘려도 "어려운 문제를
+ * 더 많이" 푸는 구간이 된다.
+ */
+const BOSS_HP_STEP = 25;
+/**
+ * HP 상한.
+ *
+ * 없으면 100층대 보스가 400 HP(40문제)가 되어 한 보스전이 판 전체보다 길어진다.
+ *
+ * **240 은 시뮬레이션으로 고른 값이다.** 320 과 비교했을 때 (200문항 × 40회, 정답률 78%)
+ * 도달 층 124층 → **140층**, 보스전 평균 19.9문제 → **17.9문제** — 층수는 높아지고
+ * 보스전은 짧아졌다. 그러면서도 100층 보스의 체력은 변경 전(200)보다 여전히 높다.
+ */
+const BOSS_HP_MAX = 240;
 /** 정답 데미지 */
 const DAMAGE_BASE = 10;
 /** 고난도 단어(난이도 0.5 이상) 정답 데미지 */
@@ -65,11 +88,14 @@ export function isBossFloor(floor: number): boolean {
 }
 
 export function spawnBoss(floor: number): BossState {
-  const index = Math.floor(floor / BOSS_EVERY);
-  // 두 번째 보스부터 조금 더 단단해진다. 하지만 문제 수로는 크게 늘리지 않는다 —
-  // 보스전이 길어지면 계단을 오르는 재미가 끊긴다
-  const maxHp = BOSS_HP + (index - 1) * 20;
+  const index = Math.max(1, Math.floor(floor / BOSS_EVERY));
+  const maxHp = Math.min(BOSS_HP_MAX, BOSS_HP + (index - 1) * BOSS_HP_STEP);
   return { index, hp: maxHp, maxHp, asked: 0 };
+}
+
+/** 이 보스를 잡는 데 필요한 최소 정답 수 — 밸런스 확인·테스트용 */
+export function questionsToDefeat(boss: BossState, damagePerHit = DAMAGE_BASE): number {
+  return Math.ceil(boss.maxHp / damagePerHit);
 }
 
 export type BossHit = {

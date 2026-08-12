@@ -901,8 +901,56 @@ body {
   top: calc(env(safe-area-inset-top) + 104px);
 }
 
+/* 계단 타이머 — 보스 HP 바와 같은 자리. 둘은 동시에 뜨지 않는다 (ui/bossBar.ts) */
+.stair-bar {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: calc(env(safe-area-inset-top) + 58px);
+  width: min(340px, 76%);
+  pointer-events: none;
+}
+
+.stair-track {
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(10, 18, 32, 0.55);
+  overflow: hidden;
+}
+
+.stair-track i {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, #4dd6a1, #7fd4ff);
+  /* 매 프레임 갱신하므로 transition 을 두면 실제 남은 시간보다 늦게 보인다 */
+  transition: none;
+}
+
+/* 위험 구간 — 색만 바꾸면 화면 위쪽은 잘 안 본다. 깜빡여야 눈에 들어온다 */
+.stair-track i[data-low='true'] {
+  background: #ff5f6d;
+  animation: stair-urgent 0.32s steps(2, end) infinite;
+}
+
+@keyframes stair-urgent {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.45;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stair-track i[data-low='true'] {
+    animation: none;
+  }
+}
+
 .boss-bar[hidden],
-.timer-bar[hidden] {
+.timer-bar[hidden],
+.stair-bar[hidden] {
   display: none;
 }
 
