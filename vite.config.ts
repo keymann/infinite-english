@@ -9,6 +9,8 @@ export default defineConfig({
     // 3D 모델(glb)은 첫 로드 후 계속 캐시되어야 한다 — 매 판 3MB 를 다시 받으면 안 된다.
     VitePWA({
       registerType: 'autoUpdate',
+      // 아이콘은 `npm run icons` 가 만든다 (tools/make-icons.mjs — 의존성 없이 PNG 직접 인코딩)
+      includeAssets: ['icon-192.png', 'icon-512.png', 'apple-touch-icon.png'],
       manifest: {
         name: '영어계단',
         short_name: '영어계단',
@@ -21,6 +23,11 @@ export default defineConfig({
         orientation: 'portrait',
         background_color: '#10151f',
         theme_color: '#10151f',
+        icons: [
+          { src: 'icon-192.png', sizes: '192x192', type: 'image/png' },
+          // maskable — 안드로이드가 원형으로 잘라도 그림이 살아 있게 안쪽 80% 에 그렸다
+          { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
+        ],
       },
       workbox: {
         // 3D 모델은 **프리캐시에서 제외한다.** 프리캐시는 서비스워커 설치 시점에 전부

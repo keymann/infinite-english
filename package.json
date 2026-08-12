@@ -12,7 +12,8 @@
     "deploy": "npm run build && wrangler deploy",
     "assets": "node tools/optimize-assets.mjs",
     "test": "vitest run",
-    "words": "tsx tools/build-words.ts"
+    "words": "tsx tools/build-words.ts",
+    "icons": "node tools/make-icons.mjs"
   },
   "dependencies": {
     "three": "^0.185.1"

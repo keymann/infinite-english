@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import type { Dir } from '../core/input';
 import { CHECKPOINT_EVERY, STEP } from '../game/balance';
 import { InstancedModel } from '../three/instanced';
 import type { Stairs } from './stairs';
@@ -13,9 +12,11 @@ import type { Stairs } from './stairs';
  * | 기믹 | 하는 일 |
  * |---|---|
  * | 크리스탈 | 그 칸에 착지하면 골드를 준다 |
- * | 방향 표지판 | 다음 계단이 꺾이는 쪽을 알려 준다 (접근성) |
  * | 체크포인트 깃발 | 10층마다 서 있어 "얼마나 왔는지"를 눈으로 보여 준다 |
  * | 스프링 | 착지하면 한 칸을 공짜로 더 오른다 |
+ *
+ * 방향 안내는 3D 표지판을 세워 봤지만 이 시점에서는 읽히지 않았다 —
+ * 지금은 **다음 칸을 밝게 그리는 것**으로 대신한다 (stairs.setHint).
  *
  * 배치는 **계단 번호의 해시**로 정한다. 회수·재배치해도 같은 칸에 같은 것이 온다.
  */
@@ -26,13 +27,11 @@ export type GimmickKind = 'crystal' | 'spring' | null;
 const CRYSTAL_CHANCE = 0.16;
 /** 스프링이 놓일 확률 (크리스탈보다 드물게 — 특별해야 한다) */
 const SPRING_CHANCE = 0.05;
-/** 방향 표지판을 몇 칸마다 세울지 */
-const SIGN_EVERY = 4;
 /** 처음 몇 칸은 아무것도 두지 않는다 — 조작을 익히는 구간 */
 const QUIET_FLOORS = 2;
 
 /** 원본 모델 크기가 kit 마다 달라 배치 시 맞춰 줄인다 */
-const SCALE = { crystal: 1.1, spring: 0.42, sign: 0.12, flag: 0.16 } as const;
+const SCALE = { crystal: 1.1, spring: 0.42, flag: 0.16 } as const;
 
 function hash01(n: number, salt: number): number {
   let h = Math.imul((n + salt * 7919) ^ 0x6d2b79f5, 0x85ebca6b);
@@ -43,8 +42,6 @@ function hash01(n: number, salt: number): number {
 export type GimmickSources = {
   crystal: THREE.Object3D;
   spring: THREE.Object3D;
-  arrowLeft: THREE.Object3D;
-  arrowRight: THREE.Object3D;
   flag: THREE.Object3D;
 };
 
@@ -53,8 +50,6 @@ export class Gimmicks {
 
   private readonly crystal: InstancedModel;
   private readonly spring: InstancedModel;
-  private readonly arrowLeft: InstancedModel;
-  private readonly arrowRight: InstancedModel;
   private readonly flag: InstancedModel;
   /** 이미 먹은 크리스탈 — 다시 그리지 않는다 */
   private readonly taken = new Set<number>();
@@ -69,12 +64,8 @@ export class Gimmicks {
     const capacity = STEP.ahead + STEP.behind + 2;
     this.crystal = new InstancedModel(sources.crystal, capacity);
     this.spring = new InstancedModel(sources.spring, capacity);
-    this.arrowLeft = new InstancedModel(sources.arrowLeft, capacity);
-    this.arrowRight = new InstancedModel(sources.arrowRight, capacity);
     this.flag = new InstancedModel(sources.flag, capacity);
-    for (const m of [this.crystal, this.spring, this.arrowLeft, this.arrowRight, this.flag]) {
-      this.group.add(m.group);
-    }
+    for (const m of [this.crystal, this.spring, this.flag]) this.group.add(m.group);
   }
 
   /** 이 칸에 무엇이 있는지 — 게임이 착지 시 확인한다 */
@@ -111,8 +102,6 @@ export class Gimmicks {
 
     let crystals = 0;
     let springs = 0;
-    let arrowsL = 0;
-    let arrowsR = 0;
     let flags = 0;
 
     for (let i = from; i <= to; i++) {
@@ -125,19 +114,6 @@ export class Gimmicks {
         this.place(this.spring, springs++, this.pos, SCALE.spring, 0, 0);
       }
 
-      // 방향 표지판 — 다음 칸이 꺾이는 쪽을 가리킨다
-      if (i > QUIET_FLOORS && i % SIGN_EVERY === 0) {
-        const dir: Dir = stairs.dirAt(i + 1);
-        const model = dir < 0 ? this.arrowLeft : this.arrowRight;
-        const slot = dir < 0 ? arrowsL++ : arrowsR++;
-        if (slot < model.capacity) {
-          // 밟는 자리를 피해 진행 방향 반대쪽 뒤편에 세운다
-          this.pos.z += STEP.z * 0.42;
-          this.place(model, slot, this.pos, SCALE.sign, 0, 0);
-          this.pos.z -= STEP.z * 0.42;
-        }
-      }
-
       // 체크포인트 깃발
       if (i > 0 && i % CHECKPOINT_EVERY === 0 && flags < this.flag.capacity) {
         this.pos.x += 0.42;
@@ -148,12 +124,8 @@ export class Gimmicks {
 
     this.crystal.setCount(crystals);
     this.spring.setCount(springs);
-    this.arrowLeft.setCount(arrowsL);
-    this.arrowRight.setCount(arrowsR);
     this.flag.setCount(flags);
-    for (const m of [this.crystal, this.spring, this.arrowLeft, this.arrowRight, this.flag]) {
-      m.commit();
-    }
+    for (const m of [this.crystal, this.spring, this.flag]) m.commit();
   }
 
   private place(

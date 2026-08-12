@@ -113,8 +113,6 @@ async function boot() {
   const gimmicks = new Gimmicks({
     crystal: assets.source('pickup', 'detail-crystal'),
     spring: assets.source('gimmick', 'spring'),
-    arrowLeft: assets.source('gimmick', 'signage_arrows_left'),
-    arrowRight: assets.source('gimmick', 'signage_arrows_right'),
     flag: assets.source('gimmick', 'signage_finish'),
   });
   scene.add(gimmicks.group);
@@ -187,7 +185,10 @@ async function boot() {
         PLAYER.height * 0.95,
       );
       scene.add(npcActor.root);
-      npc = new Npc(npcActor, stairs);
+      // 발밑 섬 — 없으면 허공에 떠 보인다 (배포본에서 확인했다)
+      const npcIsland = assets.instance('world-forest', 'cliff_blockHalf_rock');
+      scene.add(npcIsland);
+      npc = new Npc(npcActor, stairs, npcIsland);
       return undefined;
     })
     .then(() => {
@@ -786,6 +787,7 @@ async function boot() {
   // 계단·프롭 배치는 층이 바뀔 때만 다시 계산한다. 매 프레임 돌리면 저사양 기기에서
   // 아무 변화도 없는 행렬 연산에 CPU 예산을 쓴다 (28칸 + 프롭 수십 개 × 60Hz).
   let placedFloor = -1;
+  let lastHint = -2;
   const placeIfNeeded = (floor: number) => {
     if (floor === placedFloor) return;
     placedFloor = floor;
@@ -837,6 +839,15 @@ async function boot() {
           sound.stumble();
         }
       }
+    }
+
+    /* 다음에 밟을 칸을 밝게 — 방향 안내를 3D 표지판으로 시도했으나 이 시점에서는
+       읽히지 않았다(배포본 확인). 계단 색이 훨씬 빨리 읽힌다 */
+    const hint = session?.phase === 'climbing' && session.stepsLeft > 0 ? climb.floor + 1 : -1;
+    if (hint !== lastHint) {
+      lastHint = hint;
+      stairs.setHint(hint);
+      stairs.refresh(climb.floor);
     }
 
     if (session?.phase === 'climbing' && climb.state !== 'stumble') panel.showPrompt(promptText());

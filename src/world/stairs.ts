@@ -72,6 +72,14 @@ export class Stairs {
   private readonly up = new THREE.Vector3(0, 1, 0);
   /** 계단 번호 → 연출 스타일. 지정되지 않은 칸은 normal */
   private readonly styles = new Map<number, StepStyle>();
+  /**
+   * 다음에 밟을 칸 — 살짝 밝게 그린다.
+   *
+   * 처음에는 Platformer 의 방향 표지판(5.4유닛 폭)을 계단에 세웠는데, 이 게임의
+   * 3/4 시점에서는 **검은 덩어리로 뭉개져 읽히지 않았다**(배포본에서 확인). 표지판은
+   * 측면 시점 플랫포머용 모델이다. 이미 있는 인스턴스 색을 쓰는 편이 즉시 읽힌다.
+   */
+  private hintIndex = -1;
 
   constructor(sets: readonly StepSet[], rng: Rng) {
     this.rng = rng;
@@ -154,6 +162,12 @@ export class Stairs {
 
   clearStyles() {
     this.styles.clear();
+    this.hintIndex = -1;
+  }
+
+  /** 다음에 밟을 칸을 표시한다 (-1 이면 없음) */
+  setHint(index: number) {
+    this.hintIndex = index;
   }
 
   /**
@@ -191,6 +205,8 @@ export class Stairs {
 
       // 콤보 연출 색 × 테마 색조 — 같은 금색이 저녁 숲과 밤 성에서 다르게 보인다
       this.tint.copy(STYLE_COLOR[this.styles.get(i) ?? 'normal']).multiply(theme.stepTint);
+      // 다음에 밟을 칸은 밝게 — 어느 쪽으로 눌러야 하는지가 색으로 보인다
+      if (i === this.hintIndex) this.tint.multiplyScalar(1.45);
       models.step.setColorAt(slot, this.tint);
       stepCount.set(setId, slot + 1);
 
