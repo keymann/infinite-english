@@ -82,7 +82,12 @@ export function recordWrong(p: WordProgress): WordProgress {
   };
 }
 
-/** Mastered 게이트 — 두 방향 + 지연 재인 */
+/**
+ * Mastered 게이트 — 두 방향 + 지연 재인.
+ *
+ * 그림 문제(IMAGE_TO_EN)는 기록은 하되 **게이트에 넣지 않는다.** 그림이 있는 단어는
+ * 14개뿐이라, 게이트에 넣으면 나머지 단어는 영원히 Mastered 가 될 수 없다.
+ */
 export function isGatePassed(p: WordProgress): boolean {
   return (
     p.clearedTypes.includes('EN_TO_KO') && p.clearedTypes.includes('KO_TO_EN') && p.delayedRecall
