@@ -291,7 +291,8 @@ async function boot() {
           overlays.praise('⬆︎ 스프링!', 'lightning');
           sound.tierUp(2);
           camera.shake(PLAYER.landShake * 2);
-          after(0.08, () => climb.input(climb.nextDir));
+          // 보스가 예약된 순간이면 튕겨 올리지 않는다 — 보스를 지나쳐 버린다
+          after(0.08, () => { if (canClimb()) climb.input(climb.nextDir); });
         }
         gimmicks.refresh(climb.floor, stairs);
 
@@ -302,7 +303,10 @@ async function boot() {
            봤지만, 이제 구간이라는 개념이 없다 (요구 사항 1). */
         if (canSpawnBoss({ floor: climb.floor, lastBossFloor })) {
           lastBossFloor = Math.floor(climb.floor / BOSS_EVERY) * BOSS_EVERY;
+          // 연출을 기다리지 않고 **여기서 바로 잠근다** (bossPending 주석 참고)
+          bossPending = true;
           stopStairTimer();
+          stairs.setHint(-1);
           after(0.3, startBossFight);
         } else {
           armStairTimer();
@@ -319,6 +323,18 @@ async function boot() {
   /** 보스가 서는 위치 — 플레이어보다 몇 칸 위. 길을 막고 있는 것으로 보여야 한다 */
   const BOSS_STAND_AHEAD = 3;
   let lastBossFloor = 0;
+  /**
+   * 보스 등장이 예약됐다 — **계단을 즉시 잠근다.**
+   *
+   * `session.boss` 는 `startBossFight` 에서야 채워지고, 거기서 다시 0.9초 뒤에 문제가 뜬다.
+   * 그 사이 `phase` 는 'climbing' 이라 **플레이어가 보스를 통과해 계속 올라갔다** —
+   * 브라우저 검증에서 10층 보스를 만나고도 27층까지 올라가 버렸다. 관문이 성립하지 않는다.
+   */
+  let bossPending = false;
+
+  /** 지금 계단을 오를 수 있는지 — 보스가 예약됐거나 싸우는 중이면 잠긴다 */
+  const canClimb = () =>
+    !!session && session.phase === 'climbing' && !session.boss && !bossPending;
   /** Speed·Escape 이벤트 타이머 (초). 0 이면 비활성 */
   let timerLeft = 0;
   let timerTotal = 0;
@@ -359,6 +375,7 @@ async function boot() {
   /** 자유 등반 시작 — 판 시작 직후와 보스 처치 직후 */
   const beginClimb = () => {
     if (!session) return;
+    bossPending = false;
     session.startClimb();
     panel.showPrompt(promptText());
     armStairTimer();
@@ -372,6 +389,7 @@ async function boot() {
    */
   const failRun = (reason: 'direction' | 'timeout') => {
     if (!session || session.phase === 'over') return;
+    bossPending = false;
     session.fail(reason);
     stopTimer();
     stopStairTimer();
@@ -385,8 +403,15 @@ async function boot() {
     after(CLIMB.stumbleSec + 0.3, endGame);
   };
 
+  /** 보스의 현재 클립 (없으면 null) */
+  const bossClip = () => bossActor?.clip ?? null;
+
   const startBossFight = () => {
     if (!session) return;
+    bossPending = false;
+    /* 등반 안내를 지운다 — 보스전 중에 "오른쪽 ▶ · 다음 보스 20층" 이 남아 있으면
+       계단을 오를 수 있다는 뜻이 되어 거짓 안내가 된다 (브라우저 검증에서 드러났다) */
+    panel.showPrompt('보스를 넘어야 한다!', 'stumble');
     const boss = session.startBoss(climb.floor);
     // 보스마다 다른 종을 낸다 — 같은 뼈 기사만 세 번 나오면 세 번째는 배경이 된다
     const kind = bossActor ? buildBoss(bossKindIndex++) : null;
@@ -497,6 +522,7 @@ async function boot() {
     runUnlocked = [];
     bossDefeated = 0;
     lastBossFloor = resume ? Math.floor(resume.floor / BOSS_EVERY) * BOSS_EVERY : 0;
+    bossPending = false;
     bossBar.hideBoss();
     bossActor?.hide();
     stopTimer();
@@ -878,7 +904,7 @@ async function boot() {
     const dir = input.take();
     if (dir !== null) {
       sound.unlock();
-      if (session?.phase === 'climbing') climb.input(dir);
+      if (canClimb()) climb.input(dir);
     }
 
     climb.update(dt);
@@ -937,14 +963,16 @@ async function boot() {
 
     /* 다음에 밟을 칸을 밝게 — 방향 안내를 3D 표지판으로 시도했으나 이 시점에서는
        읽히지 않았다(배포본 확인). 계단 색이 훨씬 빨리 읽힌다 */
-    const hint = session?.phase === 'climbing' ? climb.floor + 1 : -1;
+    const hint = canClimb() ? climb.floor + 1 : -1;
     if (hint !== lastHint) {
       lastHint = hint;
       stairs.setHint(hint);
       stairs.refresh(climb.floor);
     }
 
-    if (session?.phase === 'climbing' && climb.state !== 'stumble') panel.showPrompt(promptText());
+    /* 등반 안내는 **실제로 오를 수 있을 때만** 갱신한다. `phase === 'climbing'` 만 보면
+       보스 등장 연출(0.9초) 동안 이 루프가 보스 안내를 등반 안내로 덮어썼다 */
+    if (canClimb() && climb.state !== 'stumble') panel.showPrompt(promptText());
   };
 
   const render = () => {
@@ -1116,8 +1144,66 @@ async function boot() {
         const q = session?.quiz;
         if (q) this.answer((q.correctIndex + 1) % q.choices.length);
       },
+      /** 실제 입력과 **같은 게이트**를 지난다 — 훅이 더 허용적이면 검증이 거짓이 된다 */
       tap(dir: -1 | 1) {
-        climb.input(dir);
+        if (canClimb()) climb.input(dir);
+      },
+      /** 잠금 상태 — 보스 예약·보스전 중에는 계단을 오를 수 없다 */
+      get canClimb() {
+        return canClimb();
+      },
+      /** 지금 재생 중인 클립 — 애니메이션이 죽는 사고가 두 번 있었다(스파이크 A 기록) */
+      get clips() {
+        return { player: actor.playing, boss: bossClip() };
+      },
+      /**
+       * 디버그: 프롭이 **실제로 화면에 보이는지** 센다.
+       *
+       * 배치했다는 것과 보인다는 것은 다르다 — 세로 화면의 프러스텀은 좁다.
+       */
+      propVisibility() {
+        const cam = camera.camera;
+        cam.updateMatrixWorld(true);
+        const vp = cam.projectionMatrix.clone().multiply(cam.matrixWorldInverse);
+        let near = 0;
+        let far = 0;
+        let nearOn = 0;
+        let farOn = 0;
+        const m = new (Object.getPrototypeOf(cam.projectionMatrix).constructor)();
+        props.group.traverse((o) => {
+          const inst = o as unknown as {
+            isInstancedMesh?: boolean;
+            count?: number;
+            getMatrixAt(i: number, m: unknown): void;
+            matrixWorld: { elements: number[] };
+          };
+          if (!inst.isInstancedMesh) return;
+          for (let i = 0; i < (inst.count ?? 0); i++) {
+            inst.getMatrixAt(i, m);
+            const e = (m as unknown as { elements: number[] }).elements;
+            const scale = Math.hypot(e[0], e[1], e[2]);
+            const isFar = scale >= 1.5;
+            if (isFar) far++;
+            else near++;
+            // 클립 공간으로 투영
+            const x = e[12];
+            const y = e[13];
+            const z = e[14];
+            const v = vp.elements;
+            const cx = v[0] * x + v[4] * y + v[8] * z + v[12];
+            const cy = v[1] * x + v[5] * y + v[9] * z + v[13];
+            const cw = v[3] * x + v[7] * y + v[11] * z + v[15];
+            if (cw <= 0) continue;
+            const ndcX = cx / cw;
+            const ndcY = cy / cw;
+            const on = Math.abs(ndcX) <= 1.1 && Math.abs(ndcY) <= 1.1;
+            if (on) {
+              if (isFar) farOn++;
+              else nearOn++;
+            }
+          }
+        });
+        return { near, nearOn, far, farOn };
       },
       /** 정답 방향으로 계속 오른다 — 보스 층에 닿으면 phase 가 바뀌어 멈춘다 */
       climbSegment(floors = 1) {

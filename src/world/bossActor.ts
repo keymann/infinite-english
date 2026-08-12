@@ -118,6 +118,11 @@ export class BossActor {
     return this.actor.root.visible;
   }
 
+  /** 지금 재생 중인 클립 이름 — 애니메이션이 죽었는지 확인하는 통로 */
+  get clip(): string | null {
+    return this.actor.playing;
+  }
+
   /** 지금 공격 연출 중인지 — 카메라 흔들림 타이밍을 맞추는 데 쓴다 */
   get attacking(): boolean {
     return this.attackLeft > 0;

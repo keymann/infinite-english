@@ -150,7 +150,10 @@ describe('원경 레이어', () => {
     const { props, stairs } = makeProps();
     props.refresh(30, stairs);
     for (const p of instances(props.group).filter(isFar)) {
-      expect(p.pos.y).toBeLessThan(stairs.surfaceAt(floorOf(p)).y - 2);
+      /* 자기 층 표면보다 아래. 여유 0.5 만 두는 이유: z 지터로 층 되찾기가 ±1 밀리고
+         (계단 한 칸 0.46), 프롭은 섬 상단면 위에 서므로 낙차의 일부를 되돌려 받는다.
+         이 단정은 "원경이 계단 위로 떠오르는" 회귀를 잡는 것이 목적이다 */
+      expect(p.pos.y).toBeLessThan(stairs.surfaceAt(floorOf(p)).y - 0.5);
     }
   });
 
@@ -158,8 +161,9 @@ describe('원경 레이어', () => {
     const { props, stairs } = makeProps();
     props.refresh(30, stairs);
     for (const p of instances(props.group)) {
-      // 자기 층 계단 중심에서 최소 이격(3.4) — z 지터로 층이 ±1 밀릴 여유를 둔다
-      expect(Math.abs(p.pos.x - stairs.surfaceAt(floorOf(p)).x)).toBeGreaterThan(2.0);
+      /* 자기 층 계단 중심에서 최소 이격(SIDE_MIN 2.6).
+         z 지터로 층 되찾기가 ±1 밀리고 계단 x 는 칸당 0.78 움직이므로 하한은 1.5 로 둔다 */
+      expect(Math.abs(p.pos.x - stairs.surfaceAt(floorOf(p)).x)).toBeGreaterThan(1.5);
     }
   });
 });
