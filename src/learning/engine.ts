@@ -70,6 +70,27 @@ const MIX_BAG: PickCategory[] = [
 ];
 
 /**
+ * 보스전 자루 — 신규 8 · 복습 5 · 취약 6 · 보너스 1.
+ *
+ * **보스전이 유일한 학습 창구가 되면서 필요해진 자루다.** 이전에는 보스전에서
+ * 취약 단어만 냈다(`pickWord('weak')` 고정). 계단 구간에도 문제가 있었으니 그쪽이
+ * 신규 단어를 담당했다.
+ *
+ * 문제를 보스전에서만 내게 되자 그 구조가 **신규 단어를 영원히 내지 않는 상태**가 됐다 —
+ * 아이가 아는 단어만 반복하고 어휘가 늘지 않는다. 게임 요청이 학습 목적을 무너뜨리면
+ * 안 되므로, 보스전이 전체 커리큘럼을 지고 가게 바꿨다.
+ *
+ * 그래도 **취약 비중은 15% → 30% 로 두 배다** — "보스는 약점을 집중 출제한다"(PRD 19장)는
+ * 성격은 유지된다.
+ */
+const BOSS_BAG: PickCategory[] = [
+  ...Array(8).fill('new'),
+  ...Array(5).fill('review'),
+  ...Array(6).fill('weak'),
+  ...Array(1).fill('bonus'),
+];
+
+/**
  * 파도형 난이도 곡선 (PRD 24장). 목표 난이도에 더하는 보정값 — **레벨 단위**다.
  * 쉬움 → 쉬움 → 보통 → 쉬움 → 어려움 → 보통 → … 처럼 오르내린다.
  * 0.6레벨이면 정답 확률로 약 12%p 차이다 — 체감되지만 무너지지는 않는 폭.
@@ -93,6 +114,8 @@ export class LearningEngine {
   /** 직전에 낸 단어 — 후보가 좁아도 **연속 출제는 막는다** */
   private lastPickedId: string | null = null;
   private bag: PickCategory[] = [];
+  /** 보스전 자루를 쓰는지 — 보스전에서만 문제가 나오므로 사실상 항상 true 가 된다 */
+  private useBossBag = false;
   private asked = 0;
   /** 이번 문항에만 적용되는 난이도 가산 (Mystery 이벤트) */
   private difficultyBonus = 0;
@@ -115,13 +138,10 @@ export class LearningEngine {
     this.asked++;
     this.difficultyBonus = options.difficultyBonus ?? 0;
 
-    /* 보스전은 비율 자루를 쓰지 않는다. 약점 → 복습 → 신규 순으로 고른다.
-       약점 단어가 없으면(아직 틀린 게 없으면) 평소처럼 낸다 — 보스가 안 나오면 안 되니까 */
-    if (options.boss) {
-      const word = this.pickWord('weak', now);
-      this.remember(word.id);
-      return { word, type: this.typeFor(word), category: 'boss', isRetry: true };
-    }
+    /* 보스전도 비율 자루를 쓴다 — 취약 비중만 두 배인 별도 자루(BOSS_BAG).
+       세션 내 복습(아래 1번)은 보스전에서도 그대로 최우선이다: 방금 틀린 단어를
+       30초 뒤에 다시 만나는 것이 보스전에서 특히 자연스럽다 */
+    if (options.boss) this.useBossBag = true;
 
     // 1. 세션 내 복습이 최우선 — "30초 후 재출제"는 비율보다 앞선다 (PRD 10장)
     const dueId = this.review.dueNow(now);
@@ -148,7 +168,7 @@ export class LearningEngine {
   private drawCategory(): PickCategory {
     if (this.bag.length === 0) {
       // 자루를 채워 섞는다 — 매번 확률로 뽑으면 20문항에서 비율이 맞지 않는다
-      this.bag = MIX_BAG.slice();
+      this.bag = (this.useBossBag ? BOSS_BAG : MIX_BAG).slice();
       for (let i = this.bag.length - 1; i > 0; i--) {
         const j = Math.floor(this.rng() * (i + 1));
         [this.bag[i], this.bag[j]] = [this.bag[j], this.bag[i]];

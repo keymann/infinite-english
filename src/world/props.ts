@@ -24,6 +24,27 @@ const SIDE_MAX = 6.6;
 /** 좌우 한쪽에 섬이 생길 확률 (밀도 1 기준). 높이면 화면이 산만해진다 */
 const CHANCE = 0.34;
 
+/**
+ * 원경 레이어 — 가까운 섬보다 **멀고 낮고 크다.**
+ *
+ * 가까운 섬만 있으면 그 너머가 빈 하늘이라 세계가 얇아 보인다. 같은 모델을 크게 키워
+ * 멀리 두면 깊이가 생긴다.
+ *
+ * **draw call 이 늘지 않는다.** 같은 `InstancedModel` 에 인스턴스를 더 담는 것뿐이다
+ * (용량만 늘린다). 새 종류를 추가하는 것과 달리 재질이 늘지 않기 때문이다.
+ */
+const FAR = {
+  spacing: 7,
+  sideMin: 9,
+  sideMax: 15.5,
+  chance: 0.62,
+  /** 아래로 내리는 거리 — 가까운 섬보다 훨씬 낮아야 시야를 막지 않는다 */
+  dropMin: 4.5,
+  dropMax: 10,
+  scaleMin: 1.7,
+  scaleMax: 2.9,
+} as const;
+
 /** 정수 → [0,1) 결정론적 해시 (계단 번호만으로 같은 배치를 재현한다) */
 function hash01(n: number): number {
   let h = Math.imul(n ^ 0x9e3779b9, 0x85ebca6b);
@@ -57,7 +78,9 @@ export class Props {
 
   constructor(sets: readonly PropSet[], density: number) {
     this.density = density;
-    this.slots = Math.ceil(((STEP.ahead + STEP.behind) / SPACING) * 2) + 4;
+    const span = STEP.ahead + STEP.behind;
+    // 가까운 레이어 + 원경 레이어를 한 인스턴스 풀에 담는다
+    this.slots = Math.ceil((span / SPACING) * 2) + Math.ceil((span / FAR.spacing) * 2) + 6;
     for (const set of sets) this.addSet(set);
   }
 
@@ -120,6 +143,49 @@ export class Props {
         this.pos.y += models.islandTop * this.scale.y;
         this.quat.setFromAxisAngle(this.up, hash01(seed * 5 + 2) * Math.PI * 2);
         this.scale.setScalar(0.85 + hash01(seed * 23 + 9) * 0.5);
+        this.matrix.compose(this.pos, this.quat, this.scale);
+        model.setAt(count.kinds[kind], this.matrix);
+        count.kinds[kind]++;
+      }
+
+    }
+
+    /* ── 원경 레이어 ──
+       **근경과 다른 주기(7칸)로 돈다.** 처음에 근경 루프 안에 넣었더니 `i % 3` 필터를
+       이미 통과한 층만 검사해 3과 7의 공배수(21칸)마다만 놓였다 —
+       배치 테스트로 잡았다 (world/placement.test.ts). */
+    for (let i = from; i <= to; i++) {
+      if (i % FAR.spacing !== 0) continue;
+      const theme = themeForFloor(i);
+      const setId = this.sets.has(theme.setId) ? theme.setId : this.defaultSetId;
+      const models = this.sets.get(setId);
+      const count = counts.get(setId);
+      if (!models || !count) continue;
+
+      for (const side of [-1, 1] as const) {
+        const seed = i * 2 + (side > 0 ? 1 : 0) + 90_001;
+        if (hash01(seed) > this.density * FAR.chance) continue;
+
+        // 원경은 큰 종류를 우선한다 — 멀리 있는 작은 풀은 보이지 않는다
+        const biased = Math.pow(hash01(seed * 31 + 7), 2.4);
+        const kind = Math.min(models.kinds.length - 1, Math.floor(biased * models.kinds.length));
+        const model = models.kinds[kind];
+        if (count.kinds[kind] >= model.capacity || count.island >= models.island.capacity) continue;
+
+        stairs.surfaceAt(i, this.pos);
+        this.pos.x += side * (FAR.sideMin + hash01(seed * 17 + 3) * (FAR.sideMax - FAR.sideMin));
+        this.pos.y -= FAR.dropMin + hash01(seed * 13 + 5) * (FAR.dropMax - FAR.dropMin);
+        this.pos.z += (hash01(seed * 7 + 11) - 0.5) * STEP.z * 4;
+
+        const big = FAR.scaleMin + hash01(seed * 41 + 13) * (FAR.scaleMax - FAR.scaleMin);
+        this.quat.setFromAxisAngle(this.up, hash01(seed * 19 + 4) * Math.PI * 2);
+        this.scale.set(big, big * 0.7, big);
+        this.matrix.compose(this.pos, this.quat, this.scale);
+        models.island.setAt(count.island++, this.matrix);
+
+        this.pos.y += models.islandTop * this.scale.y;
+        this.quat.setFromAxisAngle(this.up, hash01(seed * 5 + 2) * Math.PI * 2);
+        this.scale.setScalar(big);
         this.matrix.compose(this.pos, this.quat, this.scale);
         model.setAt(count.kinds[kind], this.matrix);
         count.kinds[kind]++;

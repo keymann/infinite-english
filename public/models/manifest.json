@@ -193,17 +193,36 @@
         "plant_bush",
         "mushroom_red",
         "flower_yellowA",
-        "log"
+        "log",
+        "tree_oak",
+        "tree_detailed",
+        "tree_fat",
+        "tree_pineSmallA",
+        "rock_tallB",
+        "rock_tallE",
+        "stump_oldTall",
+        "statue_column",
+        "statue_obelisk",
+        "tent_smallOpen",
+        "campfire_logs",
+        "log_stack",
+        "plant_bushLarge",
+        "mushroom_tanGroup",
+        "flower_purpleA",
+        "flower_redA",
+        "grass_leafs",
+        "stone_smallA",
+        "rock_smallB"
       ],
       "counts": {
-        "meshes": 19,
-        "materials": 9,
+        "meshes": 38,
+        "materials": 16,
         "textures": 0,
         "animations": 0,
         "skins": 0
       },
-      "bytes": 117912,
-      "gzip": 25553
+      "bytes": 253876,
+      "gzip": 52781
     },
     {
       "name": "world-castle",
@@ -223,17 +242,32 @@
         "flag-banner-long",
         "tower-square-base",
         "tower-square-mid",
-        "tower-square-top-roof"
+        "tower-square-top-roof",
+        "tower-hexagon-base",
+        "tower-hexagon-roof",
+        "tower-square-arch",
+        "wall-doorway",
+        "wall-narrow-wood-fence",
+        "rocks-large",
+        "rocks-small",
+        "tree-large",
+        "tree-small",
+        "tree-log",
+        "siege-catapult",
+        "siege-ballista",
+        "flag-pennant",
+        "flag-wide",
+        "bridge-straight"
       ],
       "counts": {
-        "meshes": 14,
+        "meshes": 37,
         "materials": 1,
         "textures": 1,
         "animations": 0,
         "skins": 0
       },
-      "bytes": 144552,
-      "gzip": 29912
+      "bytes": 411184,
+      "gzip": 74595
     },
     {
       "name": "gimmick",
@@ -289,17 +323,25 @@
         "detail-crystal",
         "enemy-ufo-a",
         "enemy-ufo-b",
-        "enemy-ufo-c"
+        "enemy-ufo-c",
+        "snow-detail-dirt-large",
+        "snow-tile-tree-double",
+        "snow-tile-tree",
+        "snow-tile-crystal",
+        "snow-wood-structure-high",
+        "tower-round-crystals",
+        "detail-tree-large",
+        "detail-rocks-large"
       ],
       "counts": {
-        "meshes": 14,
+        "meshes": 23,
         "materials": 1,
         "textures": 1,
         "animations": 0,
         "skins": 0
       },
-      "bytes": 245080,
-      "gzip": 54933
+      "bytes": 420016,
+      "gzip": 81825
     },
     {
       "name": "world-sky",
@@ -321,17 +363,24 @@
         "spring",
         "signage_arrows_left",
         "signage_arrows_right",
-        "signage_finish"
+        "signage_finish",
+        "floor_wood_4x4",
+        "floor_wood_2x6",
+        "pillar_2x2x8",
+        "pillar_1x1x8",
+        "barrier_2x1x2",
+        "barrier_4x1x1",
+        "strut_horizontal"
       ],
       "counts": {
-        "meshes": 17,
+        "meshes": 24,
         "materials": 1,
         "textures": 1,
         "animations": 0,
         "skins": 0
       },
-      "bytes": 365648,
-      "gzip": 156326
+      "bytes": 453208,
+      "gzip": 181362
     },
     {
       "name": "food",

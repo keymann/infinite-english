@@ -5,9 +5,9 @@ import { Input } from './core/input';
 import { startLoop } from './core/loop';
 import { createRng, randomSeed } from './core/rng';
 import { CHECKPOINT_EVERY, CLIMB, PLAYER, RULES, stairTimeFor } from './game/balance';
-import { BOSS_EVERY, bossReward, canSpawnBoss, hpRatio } from './game/boss';
+import { BOSS_EVERY, bossReward, canSpawnBoss, hpRatio, nextBossFloor } from './game/boss';
 import { Climb } from './game/climb';
-import { ESCAPE_LIMIT_SEC, SPEED_LIMIT_SEC, instantGold } from './game/events';
+import { SPEED_LIMIT_SEC, instantGold } from './game/events';
 import { Session } from './game/session';
 import { LearningEngine } from './learning/engine';
 import { WordBank } from './learning/words';
@@ -274,7 +274,6 @@ async function boot() {
         if (!session) return;
         camera.shake(PLAYER.landShake);
         sound.step();
-        const { done } = session.stepClimbed();
         hud.setFloor(climb.floor);
         onFloorReached(climb.floor);
         // 층을 올랐을 때도 스냅샷을 갱신한다 — 정답 시점에만 저장하면 이어하기가
@@ -297,27 +296,16 @@ async function boot() {
         gimmicks.refresh(climb.floor, stairs);
 
         snapshotRun();
-        // 한 칸 올랐으니 계단 시간을 다시 채운다. 구간이 끝났으면 멈춘다(문제 차례다)
-        if (done) stopStairTimer();
-        else armStairTimer();
-        if (done) {
-          /* 구간을 다 올랐다. 보스 층을 지나왔고 간격 조건도 맞으면 보스전으로.
-             구간이 4칸이라 20층을 뛰어넘을 수 있으므로 "지나온 보스 층"을 계산한다.
-             간격 조건을 못 채웠으면 lastBossFloor 를 갱신하지 않으므로 다음 구간에서 다시 본다 */
-          if (
-            canSpawnBoss({
-              floor: climb.floor,
-              lastBossFloor,
-              asked: session.asked,
-              lastBossAsked,
-            })
-          ) {
-            lastBossFloor = Math.floor(climb.floor / BOSS_EVERY) * BOSS_EVERY;
-            lastBossAsked = session.asked;
-            after(0.3, startBossFight);
-          } else {
-            after(0.15, () => showQuiz());
-          }
+
+        /* 계단은 항상 열려 있다 — 한 칸 올랐으니 계단 시간을 다시 채운다.
+           **보스 층 검사는 매 착지마다 한다.** 예전에는 "열린 구간을 다 오른 시점"에만
+           봤지만, 이제 구간이라는 개념이 없다 (요구 사항 1). */
+        if (canSpawnBoss({ floor: climb.floor, lastBossFloor })) {
+          lastBossFloor = Math.floor(climb.floor / BOSS_EVERY) * BOSS_EVERY;
+          stopStairTimer();
+          after(0.3, startBossFight);
+        } else {
+          armStairTimer();
         }
       },
       /* **방향을 틀리면 판이 끝난다.** 이전에는 휘청이고 계속했다 (PRD 3.2절) —
@@ -328,9 +316,9 @@ async function boot() {
   }
 
   /* ── 보스전 ── */
+  /** 보스가 서는 위치 — 플레이어보다 몇 칸 위. 길을 막고 있는 것으로 보여야 한다 */
+  const BOSS_STAND_AHEAD = 3;
   let lastBossFloor = 0;
-  /** 마지막 보스가 등장한 시점의 문제 수 — 보스 사이 간격을 문제 수로도 둔다 */
-  let lastBossAsked = 0;
   /** Speed·Escape 이벤트 타이머 (초). 0 이면 비활성 */
   let timerLeft = 0;
   let timerTotal = 0;
@@ -368,6 +356,14 @@ async function boot() {
     bossBar.hideStairTimer();
   };
 
+  /** 자유 등반 시작 — 판 시작 직후와 보스 처치 직후 */
+  const beginClimb = () => {
+    if (!session) return;
+    session.startClimb();
+    panel.showPrompt(promptText());
+    armStairTimer();
+  };
+
   /**
    * 계단 조작 실패로 판을 끝낸다 — 방향 오선택 / 계단 시간 초과.
    *
@@ -395,7 +391,9 @@ async function boot() {
     // 보스마다 다른 종을 낸다 — 같은 뼈 기사만 세 번 나오면 세 번째는 배경이 된다
     const kind = bossActor ? buildBoss(bossKindIndex++) : null;
     bossBar.showBoss(`BOSS ${boss.index} · ${kind?.name ?? '보스'}`, 1);
-    bossActor?.spawn(actor.root.position);
+    /* **계단 표면에 세운다.** 플레이어 좌표에 오프셋을 더하던 방식은 계단이 올라가면서
+       안쪽으로 뻗는 것을 무시해 보스를 계단 아래에 박아 넣었다 (world/bossActor.ts) */
+    bossActor?.spawn(stairs.surfaceAt(climb.floor + BOSS_STAND_AHEAD), actor.root.position);
     overlays.banner('BOSS!', 'fire');
     sound.tierUp(3);
     camera.shake(PLAYER.landShake * 3);
@@ -499,7 +497,6 @@ async function boot() {
     runUnlocked = [];
     bossDefeated = 0;
     lastBossFloor = resume ? Math.floor(resume.floor / BOSS_EVERY) * BOSS_EVERY : 0;
-    lastBossAsked = 0;
     bossBar.hideBoss();
     bossActor?.hide();
     stopTimer();
@@ -534,7 +531,8 @@ async function boot() {
     hud.setLevel(saved.player.level, expRatio(saved.player));
     overlays.hideResult();
     panel.reveal();
-    showQuiz();
+    /* **문제로 시작하지 않는다.** 첫 보스 층까지는 계단만 오른다 (요구 사항 1) */
+    beginClimb();
 
     // 연속 학습 기록은 판을 **시작할 때** 갱신한다 (PRD 22장)
     const streak = touchStreak(saved.streak, Date.now());
@@ -624,10 +622,10 @@ async function boot() {
           bossDefeated++;
           after(1.2, () => {
             bossActor?.hide();
+            // 콤보만큼의 계단을 물들인다 (보상 연출 — 진행을 막지는 않는다)
             openSegment(result.segment, result.style);
-            panel.showPrompt(promptText());
-            // 보스를 잡아 계단이 다시 열렸다 — 여기서부터 계단 시간이 돈다
-            armStairTimer();
+            // 보스를 넘었다 — 다시 자유 등반
+            beginClimb();
           });
         } else {
           bossBar.setBossHp(session.boss ? hpRatio(session.boss) : 0);
@@ -637,21 +635,19 @@ async function boot() {
         return;
       }
 
-      openSegment(result.segment, result.style);
+      /* 보스전 밖에서는 문제를 내지 않으므로 여기에 도달하지 않는다.
+         도달했다면 상태가 어긋난 것이므로 자유 등반으로 되돌린다 —
+         문제가 뜬 채로 멈추는 것이 가장 나쁘다 */
       snapshotRun();
-      after(RULES.correctFeedbackSec, () => {
-        panel.showPrompt(promptText());
-        /* 계단 시간은 **정답 피드백이 끝난 시점부터** 잰다. openSegment 시점에 시작하면
-           연출 0.25초가 아이의 시간에서 깎인다 — 2초까지 줄어드는 층에서는 12% 다 */
-        armStairTimer();
-        // Escape — 시간 안에 구간을 올라야 콤보를 지킨다
-        if (session?.event?.def.id === 'escape') startTimer('escape', ESCAPE_LIMIT_SEC);
-      });
+      after(RULES.correctFeedbackSec, beginClimb);
       return;
     }
 
     sound.wrong();
     stopTimer();
+    /* **보스가 플레이어를 공격한다** (요구 사항 3). 오답의 결과가 HP 숫자만 줄어드는 것이
+       아니라 화면에서 보여야 한다. FREE 팩에 공격 클립이 없어 Throw + 돌진으로 만들었다 */
+    if (session.boss) bossActor?.attack();
     camera.shake(PLAYER.landShake * (session.boss ? 2 : 1));
     snapshotRun();
     after(RULES.wrongFeedbackSec, () => {
@@ -687,13 +683,15 @@ async function boot() {
     if (def.id === 'escape') camera.shake(PLAYER.landShake * 2.5);
   };
 
+  /** 다음 칸 방향 안내. 남은 칸 수는 없다 — 계단은 보스 층까지 계속 열려 있다 */
   const promptText = () => {
-    const left = session?.stepsLeft ?? 0;
+    const next = nextBossFloor(climb.floor);
+    const to = next > climb.floor ? ` · 다음 보스 ${next}층` : '';
     return input.options.autoDir
-      ? `아무 곳이나 탭 · ${left}칸`
+      ? `아무 곳이나 탭${to}`
       : climb.nextDir < 0
-        ? `◀ 왼쪽 · ${left}칸`
-        : `오른쪽 ▶ · ${left}칸`;
+        ? `◀ 왼쪽${to}`
+        : `오른쪽 ▶${to}`;
   };
 
   const endGame = () => {
@@ -875,12 +873,12 @@ async function boot() {
   };
 
   const update = (dt: number) => {
-    // 계단은 문제를 맞혀서 열린 구간에서만 오를 수 있다.
-    // **영어를 맞혀야 게임이 진행된다** (PRD 35장 2항)
+    /* 계단은 **항상 열려 있다.** 보스전 중(phase 'quiz'·'revive')에만 잠긴다 —
+       보스를 지나쳐 올라갈 수 없어야 관문이 성립한다 (요구 사항 1) */
     const dir = input.take();
     if (dir !== null) {
       sound.unlock();
-      if (session?.phase === 'climbing' && session.stepsLeft > 0) climb.input(dir);
+      if (session?.phase === 'climbing') climb.input(dir);
     }
 
     climb.update(dt);
@@ -896,7 +894,7 @@ async function boot() {
     mood.update(dt);
     backdrop.update(dt, actor.root.position, bandProgress(climb.floor));
     pet?.update(dt, actor.root.position);
-    bossActor?.update(dt, actor.root.position);
+    bossActor?.update(dt);
     gimmicks.update(dt);
     npc?.update(dt, stairs);
     quizObject.update(dt, actor.root.position);
@@ -911,7 +909,6 @@ async function boot() {
       stairTotal > 0 &&
       session &&
       session.phase === 'climbing' &&
-      session.stepsLeft > 0 &&
       !session.boss &&
       climb.state !== 'stumble' &&
       climb.state !== 'dead'
@@ -940,7 +937,7 @@ async function boot() {
 
     /* 다음에 밟을 칸을 밝게 — 방향 안내를 3D 표지판으로 시도했으나 이 시점에서는
        읽히지 않았다(배포본 확인). 계단 색이 훨씬 빨리 읽힌다 */
-    const hint = session?.phase === 'climbing' && session.stepsLeft > 0 ? climb.floor + 1 : -1;
+    const hint = session?.phase === 'climbing' ? climb.floor + 1 : -1;
     if (hint !== lastHint) {
       lastHint = hint;
       stairs.setHint(hint);
@@ -1000,9 +997,6 @@ async function boot() {
       },
       get score() {
         return session?.score ?? 0;
-      },
-      get stepsLeft() {
-        return session?.stepsLeft ?? 0;
       },
       get quiz() {
         const q = session?.quiz;
@@ -1125,10 +1119,11 @@ async function boot() {
       tap(dir: -1 | 1) {
         climb.input(dir);
       },
-      /** 열린 구간을 정답 방향으로 끝까지 오른다 */
-      climbSegment() {
+      /** 정답 방향으로 계속 오른다 — 보스 층에 닿으면 phase 가 바뀌어 멈춘다 */
+      climbSegment(floors = 1) {
+        const target = climb.floor + floors;
         const t = setInterval(() => {
-          if (session?.phase !== 'climbing' || session.stepsLeft === 0) return clearInterval(t);
+          if (session?.phase !== 'climbing' || climb.floor >= target) return clearInterval(t);
           if (climb.state === 'stand') climb.input(climb.nextDir);
         }, 16);
       },

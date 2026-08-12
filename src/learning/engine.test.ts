@@ -353,7 +353,9 @@ describe('출제 정책', () => {
       let correct = 0;
       const N = 100;
       for (let i = 0; i < N; i++) {
-        const pick = engine.next();
+        /* **보스 모드로 돌린다.** 문제는 보스전에서만 나오므로(game/session.ts) 이것이
+           실제 경로다. 평소 자루로 재면 게임에 없는 상황을 측정하게 된다 */
+        const pick = engine.next({ boss: true });
         const level = 1 + pick.word.difficulty * 9;
         const ok = rng() < 1 / (1 + Math.exp(-(trueAbility - level)));
         if (ok) correct++;
@@ -370,7 +372,7 @@ describe('출제 정책', () => {
       expect(accuracy, rows.at(-1)).toBeGreaterThan(0.6);
       expect(accuracy, rows.at(-1)).toBeLessThan(0.95);
     }
-    console.log('\n  [실력대별 시뮬레이션 100문항]\n  ' + rows.join('\n  ') + '\n');
+    console.log('\n  [실력대별 시뮬레이션 100문항 · 보스 모드]\n  ' + rows.join('\n  ') + '\n');
   });
 
   it('학습 요약이 누적된다', () => {
