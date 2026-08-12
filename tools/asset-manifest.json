@@ -124,9 +124,9 @@
     {
       "name": "gimmick",
       "when": "eager",
-      "note": "계단 기믹 — 방향 표지판·체크포인트 깃발·스프링. 1층부터 필요하므로 eager.",
+      "note": "계단 기믹 — 체크포인트 깃발·스프링. 1층부터 필요하므로 eager. (방향 표지판은 3/4 시점에서 읽히지 않아 제거하고 '다음 칸 밝게'로 대체했다)",
       "dir": "Platformer_Pack_1.0_FREE/Assets/gltf/neutral",
-      "models": ["signage_arrows_left", "signage_arrows_right", "signage_finish", "spring"]
+      "models": ["signage_finish", "spring"]
     },
     {
       "name": "pickup",

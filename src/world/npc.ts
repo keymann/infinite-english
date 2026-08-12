@@ -21,13 +21,22 @@ const CHEER_SEC = 2.2;
 
 export class Npc {
   private readonly actor: Actor;
+  /**
+   * 발밑에 깔아 주는 섬.
+   *
+   * 계단은 공중에 뜬 구조물이라 지면이 없다. 섬 없이 세우면 **NPC 가 허공에 떠 있어
+   * 버그로 보인다** — 배포본에서 실제로 그렇게 보였다. 배경 프롭과 같은 처리를 한다.
+   */
+  private readonly platform: THREE.Object3D | null;
   private readonly target = new THREE.Vector3();
   /** 이 NPC 가 기다리는 층 */
   private waitingFloor = CHECKPOINT_EVERY;
   private cheerLeft = 0;
 
-  constructor(actor: Actor, stairs: Stairs) {
+  constructor(actor: Actor, stairs: Stairs, platform: THREE.Object3D | null = null) {
     this.actor = actor;
+    this.platform = platform;
+    if (platform) platform.scale.setScalar(1.25);
     this.actor.play('idle');
     this.moveTo(this.waitingFloor, stairs);
   }
@@ -50,6 +59,13 @@ export class Npc {
     this.actor.root.position.copy(this.target);
     // 계단 쪽(플레이어가 올라오는 방향)을 본다
     this.actor.root.rotation.y = side > 0 ? -Math.PI / 2 : Math.PI / 2;
+
+    if (this.platform) {
+      // 섬의 상단면이 NPC 의 발에 닿도록 내려 놓는다
+      const box = new THREE.Box3().setFromObject(this.platform);
+      const top = box.max.y - this.platform.position.y;
+      this.platform.position.set(this.target.x, this.target.y - top, this.target.z);
+    }
   }
 
   /** 플레이어가 층을 올랐다 */

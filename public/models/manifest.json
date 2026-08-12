@@ -240,20 +240,18 @@
       "when": "eager",
       "file": "models/gimmick.glb",
       "nodes": [
-        "signage_arrows_left",
-        "signage_arrows_right",
         "signage_finish",
         "spring"
       ],
       "counts": {
-        "meshes": 5,
+        "meshes": 3,
         "materials": 1,
         "textures": 1,
         "animations": 0,
         "skins": 0
       },
-      "bytes": 194584,
-      "gzip": 105481
+      "bytes": 103156,
+      "gzip": 65936
     },
     {
       "name": "pickup",
