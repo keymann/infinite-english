@@ -37,6 +37,7 @@ import { Overlays, praiseFor, type ResultReward } from './ui/overlays';
 import { QuizPanel } from './ui/quizPanel';
 import { ParentScreen, StartScreen } from './ui/screens';
 import { Ambient } from './world/ambient';
+import { Backdrop } from './world/backdrop';
 import { BossActor } from './world/bossActor';
 import { Gimmicks } from './world/gimmicks';
 import { Npc } from './world/npc';
@@ -45,7 +46,7 @@ import { QuizObject } from './world/quizObject';
 import { Props } from './world/props';
 import { Mood, createBlobShadow } from './world/scene';
 import { Stairs } from './world/stairs';
-import { WORLD_SETS, hasAmbientFlyers, themeForFloor, type Theme } from './world/theme';
+import { WORLD_SETS, bandProgress, hasAmbientFlyers, themeForFloor, type Theme } from './world/theme';
 
 /**
  * 부트스트랩 — 배선만 한다.
@@ -123,6 +124,12 @@ async function boot() {
 
   /** 눈·하늘 월드의 떠다니는 UFO — 배경이 살아 있게 한다 */
   let ambient: Ambient | null = null;
+
+  /* 배경 — 그라디언트 하늘·해/달·별·구름·원경 실루엣·날씨.
+     텍스처를 새로 만들지 않고 셰이더와 절차적 도형으로 6개 월드의 분위기를 나눈다 */
+  const backdrop = new Backdrop();
+  scene.add(backdrop.group);
+  backdrop.applyTheme(themeForFloor(0));
 
   // 저장본에서 학습 상태·성장을 복원한다. 판이 끝나도 남아야 한다
   const saved = loadSave();
@@ -353,6 +360,7 @@ async function boot() {
     if (next.id !== theme.id) {
       theme = next;
       mood.applyTheme(theme);
+      backdrop.applyTheme(theme);
       overlays.banner(theme.name, 'lightning');
       sound.tierUp(2);
       camera.shake(PLAYER.landShake * 2.2);
@@ -448,6 +456,10 @@ async function boot() {
       session.restore(resume);
     } else {
       climb.reset();
+      /* 개발용 시작 층. 테마 구간이 100층 단위라 뒤 월드를 확인하려면 필요하다
+         (`?floor=350` → Frozen Peak 에서 시작) */
+      const startFloor = Number(params.get('floor'));
+      if (Number.isFinite(startFloor) && startFloor > 0) climb.teleport(Math.floor(startFloor));
     }
     stairs.clearStyles();
     stairs.refresh(climb.floor);
@@ -459,6 +471,7 @@ async function boot() {
     bossKindIndex = 0;
     theme = themeForFloor(climb.floor);
     mood.applyTheme(theme, true);
+    backdrop.applyTheme(theme);
     pet?.root.position.copy(actor.root.position);
     camera.snapTo(actor.root.position);
     hud.setFloor(climb.floor);
@@ -816,6 +829,7 @@ async function boot() {
     );
     camera.follow(actor.root.position, dt);
     mood.update(dt);
+    backdrop.update(dt, actor.root.position, bandProgress(climb.floor));
     pet?.update(dt, actor.root.position);
     bossActor?.update(dt, actor.root.position);
     gimmicks.update(dt);
