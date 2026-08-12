@@ -738,6 +738,145 @@ body {
   opacity: 0.8;
 }
 
+/* 문제 난이도 선택 — 5개가 한 줄에 들어가야 한다(세로 화면 폭 360px 기준) */
+.chips.bands .chip {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 6px 4px;
+  justify-content: center;
+  text-align: center;
+  font-size: 0.8rem;
+}
+
+/* ── 상점 ── */
+
+.shop-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: center;
+}
+
+.shop-entry em {
+  font-size: 0.72rem;
+  font-style: normal;
+  font-weight: 600;
+  opacity: 0.75;
+}
+
+.shop-wallet {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(255, 210, 74, 0.14);
+  color: #ffd24a;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.shop-wallet b {
+  font-size: 1.15rem;
+}
+
+/* "구경만 할 수 있다"를 먼저 알려 준다 — 눌러 봤는데 안 되는 것이 가장 나쁘다 */
+.shop-notice {
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  opacity: 0.72;
+}
+
+.soon {
+  margin-left: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  font-size: 0.68rem;
+  font-weight: 700;
+  vertical-align: middle;
+  opacity: 0.75;
+}
+
+.shop-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.shop-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 11px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* 살 수 있는 것은 테두리로 구분한다 — 목표가 보여야 골드를 모을 이유가 생긴다 */
+.shop-item[data-can='true'] {
+  border-color: rgba(255, 210, 74, 0.5);
+  background: rgba(255, 210, 74, 0.08);
+}
+
+.shop-emoji {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.shop-text {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+}
+
+.shop-text b {
+  font-size: 0.9rem;
+}
+
+.shop-text small {
+  font-size: 0.74rem;
+  opacity: 0.62;
+}
+
+.shop-buy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  white-space: nowrap;
+}
+
+.shop-price {
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.shop-ok,
+.shop-left {
+  font-size: 0.68rem;
+  font-style: normal;
+}
+
+.shop-ok {
+  color: #ffd24a;
+  font-weight: 700;
+}
+
+.shop-left {
+  opacity: 0.6;
+}
+
 /* 결과 화면 보상 */
 .reward-row {
   display: flex;

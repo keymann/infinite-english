@@ -16,6 +16,7 @@ import {
   recordWrong,
   type WordProgress,
 } from './mastery';
+import { inBand } from './gradeBand';
 import { ReviewQueue, isNew, progressOf, scheduleNext } from './review';
 import { isWeak, weakWords } from './weak';
 import type { Word, WordBank } from './words';
@@ -56,9 +57,25 @@ export type Pick = {
   isRetry: boolean;
 };
 
+/** 판을 넘어 남는 학습 상태 — 조회용(항상 채워져 있다) */
 export type LearningState = {
   ability: Ability;
   progress: Record<string, WordProgress>;
+};
+
+/**
+ * 엔진 생성 입력 — **전부 선택이다.** 없으면 기본값에서 시작한다.
+ *
+ * 조회용 `LearningState` 와 나눠 둔다. 하나로 합쳐 필드를 선택으로 만들면
+ * `engine.state` 를 쓰는 쪽이 매번 `?.` 를 붙여야 한다.
+ */
+export type EngineInit = Partial<LearningState> & {
+  /**
+   * 로비에서 고른 문제 레벨 (learning/gradeBand.ts).
+   *
+   * adaptive 를 대체하지 않고 **그 위에 씌우는 제한**이다. null 이면 제한 없음.
+   */
+  levels?: readonly number[] | null;
 };
 
 /** 20문항 기준 자루 — 신규 10 · 복습 6 · 취약 3 · 보너스 1 (PRD 8장) */
@@ -111,6 +128,8 @@ export class LearningEngine {
   private readonly rng: Rng;
   private readonly clock: () => number;
   private readonly recent: string[] = [];
+  /** 출제 가능한 레벨 — 로비 선택. null 이면 제한 없음 */
+  private levels: readonly number[] | null;
   /** 직전에 낸 단어 — 후보가 좁아도 **연속 출제는 막는다** */
   private lastPickedId: string | null = null;
   private bag: PickCategory[] = [];
@@ -123,12 +142,18 @@ export class LearningEngine {
   /** 이번 판에서 낸 문제 기록 — 통계용 */
   private readonly log: Array<{ wordId: string; category: PickCategory; correct: boolean }> = [];
 
-  constructor(bank: WordBank, rng: Rng, clock: () => number, state?: LearningState) {
+  constructor(bank: WordBank, rng: Rng, clock: () => number, state?: EngineInit) {
     this.bank = bank;
     this.rng = rng;
     this.clock = clock;
     this.ability = state?.ability ?? initialAbility();
     this.progress = state?.progress ?? {};
+    this.levels = state?.levels ?? null;
+  }
+
+  /** 로비에서 레벨 구간을 바꿨다 — 판 도중에는 호출되지 않는다 */
+  setLevels(levels: readonly number[] | null) {
+    this.levels = levels;
   }
 
   /* ── 출제 ── */
@@ -212,7 +237,8 @@ export class LearningEngine {
 
     if (pool.length === 0) {
       // 어떤 카테고리도 비면 신규로 떨어진다. 게임이 멈추면 안 된다
-      return this.pickClosest(this.bank.all().filter((w) => !this.recent.includes(w.id)));
+      const any = inBand(this.bank.all(), this.levels);
+      return this.pickClosest(any.filter((w) => !this.recent.includes(w.id)));
     }
 
     /* 후보가 아주 좁을 때(보스전의 취약 단어 3개 같은 경우) recent 필터가 다 걸러져
@@ -237,7 +263,8 @@ export class LearningEngine {
   }
 
   private candidatesFor(category: PickCategory, now: number): Word[] {
-    const all = this.bank.all();
+    // 고른 학년 구간 안에서만 고른다 (비면 전체로 되돌아간다 — gradeBand.inBand)
+    const all = inBand(this.bank.all(), this.levels);
     switch (category) {
       case 'new':
         return all.filter((w) => isNew(this.progress, w.id));

@@ -6,7 +6,9 @@ import {
   type Collectible,
   type CollectionState,
 } from '../progress/collection';
+import { GRADE_BANDS, bandOf } from '../learning/gradeBand';
 import { allDone, defOf, type MissionState } from '../progress/mission';
+import { nextGoal } from '../progress/shop';
 import { expRatio, expToNext, type Abilities, type PlayerState } from '../progress/player';
 import type { RunState } from '../progress/save';
 import type { StreakState } from '../progress/streak';
@@ -28,6 +30,8 @@ export type StartScreenData = {
   run: RunState | null;
   /** 처음 방문인지 — 설명을 보여 줄지 결정한다 */
   firstTime: boolean;
+  /** 지금 고른 문제 레벨 구간 (learning/gradeBand.ts) */
+  levelBand: string;
 };
 
 export type StartScreenHandlers = {
@@ -36,6 +40,9 @@ export type StartScreenHandlers = {
   onSelectCharacter(id: string): void;
   onSelectPet(id: string): void;
   onOpenParent(): void;
+  /** 문제 레벨 구간을 바꿨다 */
+  onSelectBand(id: string): void;
+  onOpenShop(): void;
 };
 
 const escapeHtml = (s: string) =>
@@ -65,8 +72,10 @@ export class StartScreen {
       if (action === 'start') this.handlers.onStart();
       else if (action === 'resume') this.handlers.onResume();
       else if (action === 'parent') this.handlers.onOpenParent();
+      else if (action === 'shop') this.handlers.onOpenShop();
       else if (kind === 'char' && id) this.handlers.onSelectCharacter(id);
       else if (kind === 'pet' && id) this.handlers.onSelectPet(id);
+      else if (kind === 'band' && id) this.handlers.onSelectBand(id);
     });
   }
 
@@ -74,6 +83,8 @@ export class StartScreen {
     this.handlers = handlers;
     const { player, missions, streak, collection, run, abilities } = data;
     const next = nextUnlock(player.level);
+    const band = bandOf(data.levelBand);
+    const goal = nextGoal(player.gold);
 
     const missionRows = missions.list
       .map((mission) => {
@@ -108,12 +119,32 @@ export class StartScreen {
           <div><dt>MEMORY</dt><dd>${abilities.memory}</dd><small>완전히 익힌 단어</small></div>
         </div>
 
+        <section class="block">
+          <h2>문제 난이도</h2>
+          <div class="chips bands">
+            ${GRADE_BANDS.map(
+              (b) => `<button type="button" class="chip" data-kind="band" data-id="${b.id}"
+                data-selected="${b.id === band.id}">
+                  <span>${escapeHtml(b.label)}</span>
+                </button>`,
+            ).join('')}
+          </div>
+          <p class="hint-text">${escapeHtml(band.hint)}${
+            band.levels ? '' : ' — 맞히면 어려워지고, 틀리면 쉬워져요'
+          }</p>
+        </section>
+
         ${
           run
             ? `<button type="button" class="primary" data-action="resume">이어하기 · ${run.floor}층</button>
                <button type="button" class="secondary" data-action="start">새로 시작</button>`
             : `<button type="button" class="primary" data-action="start">시작하기</button>`
         }
+
+        <button type="button" class="secondary shop-entry" data-action="shop">
+          🛒 상점
+          ${goal ? `<em>다음 목표 ${escapeHtml(goal.name)} · 🪙 ${goal.price}</em>` : ''}
+        </button>
 
         ${
           data.firstTime

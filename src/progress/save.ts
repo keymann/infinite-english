@@ -1,4 +1,5 @@
 import type { Ability } from '../learning/adaptive';
+import type { BandId } from '../learning/gradeBand';
 import type { WordProgress } from '../learning/mastery';
 import { emptyCollection, type CollectionState } from './collection';
 import { emptyMissions, type MissionState } from './mission';
@@ -42,6 +43,15 @@ export type SaveData = {
   missions: MissionState;
   streak: StreakState;
   collection: CollectionState;
+  /**
+   * 로비에서 고른 문제 레벨 구간 (learning/gradeBand.ts 의 BandId).
+   *
+   * **스키마 버전을 올리지 않는다.** 없으면 기본값('auto')이 그대로 남는 필드이고
+   * (migrate 의 `{...base, ...raw}` 가 없는 키를 덮지 않는다), 값이 없다고 해서
+   * 기존 학습 기록을 해석할 수 없게 되는 것도 아니다. 버전을 올리면 마이그레이션
+   * 경로가 하나 더 늘고, 그 경로마다 학습 기록을 잃을 위험이 생긴다.
+   */
+  levelBand: BandId;
   /** 이어할 판이 없으면 null */
   run: RunState | null;
   meta: {
@@ -60,6 +70,7 @@ export function emptySave(): SaveData {
     missions: emptyMissions(),
     streak: emptyStreak(),
     collection: emptyCollection(),
+    levelBand: 'auto',
     run: null,
     meta: { lastSeed: 0, lastPlayedAt: 0 },
   };
