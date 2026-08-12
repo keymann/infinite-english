@@ -1,6 +1,6 @@
 {
   "generated": "npm run words",
-  "total": 455,
+  "total": 1000,
   "levels": [
     {
       "level": 1,
@@ -26,6 +26,31 @@
       "level": 5,
       "count": 84,
       "file": "level-5.json"
+    },
+    {
+      "level": 6,
+      "count": 110,
+      "file": "level-6.json"
+    },
+    {
+      "level": 7,
+      "count": 110,
+      "file": "level-7.json"
+    },
+    {
+      "level": 8,
+      "count": 110,
+      "file": "level-8.json"
+    },
+    {
+      "level": 9,
+      "count": 110,
+      "file": "level-9.json"
+    },
+    {
+      "level": 10,
+      "count": 105,
+      "file": "level-10.json"
     }
   ]
 }

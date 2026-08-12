@@ -1,0 +1,111 @@
+word	level	grade	pos	meaning	meaningAlt	synonyms	tags	freq	example	exampleKo	image
+confident	6	middle_1	adjective	자신 있는			quality|emotion	mid	She is confident about the test.	그녀는 시험에 자신 있다.
+lazy	6	middle_1	adjective	게으른			quality	mid	The lazy cat sleeps all day.	게으른 고양이가 하루 종일 잔다.
+generous	6	middle_1	adjective	너그러운			quality	mid	My uncle is generous to everyone.	우리 삼촌은 모두에게 너그럽다.
+gentle	6	middle_1	adjective	온화한			quality	mid	The nurse has a gentle voice.	그 간호사는 온화한 목소리를 가졌다.
+cheerful	6	middle_1	adjective	밝은			quality|emotion	mid	Her cheerful song made me happy.	그녀의 밝은 노래가 나를 행복하게 했다.
+selfish	6	middle_1	adjective	이기적인			quality	mid	A selfish child never shares food.	이기적인 아이는 음식을 나누지 않는다.
+clever	6	middle_1	adjective	똑똑한			quality	mid	The clever student solved the problem.	똑똑한 학생이 그 문제를 풀었다.
+foolish	6	middle_1	adjective	어리석은			quality	mid	It was a foolish mistake.	그것은 어리석은 실수였다.
+friendly	6	middle_1	adjective	다정한			quality	high	Our new neighbor is very friendly.	우리 새 이웃은 아주 다정하다.
+strict	6	middle_1	adjective	엄격한			quality	mid	My teacher is strict about homework.	우리 선생님은 숙제에 엄격하다.
+grade	6	middle_1	noun	성적			school|study	high	I got a good grade in math.	나는 수학에서 좋은 성적을 받았다.
+textbook	6	middle_1	noun	교과서			school|study	high	Open your textbook and read it.	교과서를 펴고 읽어라.
+classmate	6	middle_1	noun	반 친구			school	high	My classmate helped me with science.	내 반 친구가 과학을 도와주었다.
+principal	6	middle_1	noun	교장			school|job	mid	The principal visited our class today.	교장 선생님이 오늘 우리 반을 방문했다.
+semester	6	middle_1	noun	학기			school|time	mid	The new semester starts next week.	새 학기가 다음 주에 시작한다.
+quiz	6	middle_1	noun	쪽지 시험			school|study	mid	We have a short quiz every week.	우리는 매주 짧은 쪽지 시험이 있다.
+essay	6	middle_1	noun	글짓기			school|study	mid	I wrote an essay about my family.	나는 가족에 대한 글짓기를 썼다.
+spelling	6	middle_1	noun	철자			study|language	mid	The spelling of this word is hard.	이 단어의 철자는 어렵다.
+sentence	6	middle_1	noun	문장			study|language	high	Write one sentence about your dream.	네 꿈에 대해 한 문장을 써라.
+paragraph	6	middle_1	noun	단락			study|language	mid	This paragraph has five sentences.	이 단락은 다섯 문장으로 되어 있다.
+vocabulary	6	middle_1	noun	어휘			study|language	mid	I learn new vocabulary every day.	나는 매일 새 어휘를 배운다.
+grammar	6	middle_1	noun	문법			study|language	mid	The grammar of this test is difficult.	이 시험의 문법은 어렵다.
+stomach	6	middle_1	noun	배(신체)			body|health	high	My stomach hurts after lunch.	점심 후에 배가 아프다.
+fever	6	middle_1	noun	열			health	high	The child has a high fever.	그 아이는 열이 높다.
+cough	6	middle_1	noun	기침			health	mid	I have a cough and a fever.	나는 기침과 열이 있다.
+skin	6	middle_1	noun	피부			body|health	mid	Wash your skin with warm water.	따뜻한 물로 피부를 씻어라.
+bone	6	middle_1	noun	뼈			body	mid	The dog carried a big bone.	그 개가 큰 뼈를 물고 갔다.
+muscle	6	middle_1	noun	근육			body|health	mid	Exercise makes your muscle strong.	운동은 근육을 튼튼하게 만든다.
+breath	6	middle_1	noun	숨			body|health	mid	Take a deep breath and count ten.	숨을 깊이 쉬고 열까지 세라.
+rest	6	middle_1	noun	휴식			health|daily	high	You need rest after the long walk.	긴 산책 후에는 휴식이 필요하다.
+furniture	6	middle_1	noun	가구			thing|daily	mid	We put new furniture in the house.	우리는 집에 새 가구를 놓았다.
+blanket	6	middle_1	noun	담요			thing|daily	mid	I sleep under a warm blanket.	나는 따뜻한 담요 아래에서 잔다.
+pillow	6	middle_1	noun	베개			thing|daily	mid	My pillow is soft and white.	내 베개는 부드럽고 하얗다.
+towel	6	middle_1	noun	수건			thing|daily	mid	Dry your hair with this towel.	이 수건으로 머리카락을 말려라.
+curtain	6	middle_1	noun	커튼			thing|daily	mid	Please close the curtain at night.	밤에는 커튼을 닫아 주세요.
+mirror	6	middle_1	noun	거울			thing|daily	mid	She looks at her eyes in the mirror.	그녀는 거울로 자기 눈을 본다.
+shelf	6	middle_1	noun	선반			thing|daily	mid	Put the books on the shelf.	책들을 선반에 올려라.
+roof	6	middle_1	noun	지붕			place|thing	mid	Snow is white on the roof.	지붕 위의 눈은 하얗다.
+stairs	6	middle_1	noun	계단			place|thing	high	I climb the stairs every morning.	나는 매일 아침 계단을 오른다.
+floor	6	middle_1	noun	바닥			place|thing	high	The floor is wet and cold.	바닥이 젖고 차갑다.
+ceiling	6	middle_1	noun	천장			place|thing	mid	A light hangs from the ceiling.	등이 천장에 걸려 있다.
+basement	6	middle_1	noun	지하실			place	mid	Old boxes are in the basement.	낡은 상자들이 지하실에 있다.
+garage	6	middle_1	noun	차고			place	mid	Dad put the car in the garage.	아빠가 차를 차고에 넣었다.
+bank	6	middle_1	noun	은행			place|society	high	My mom is in the bank now.	우리 엄마는 지금 은행에 있다.
+bakery	6	middle_1	noun	빵집			place|food	mid	The bakery sells fresh bread.	그 빵집은 신선한 빵을 판다.
+restaurant	6	middle_1	noun	식당			place|food	high	We eat dinner at a small restaurant.	우리는 작은 식당에서 저녁을 먹는다.
+hotel	6	middle_1	noun	호텔			place|travel	mid	They slept in a hotel near the beach.	그들은 해변 근처 호텔에서 잤다.
+airport	6	middle_1	noun	공항			place|transport	mid	The airport is far from the city.	공항은 도시에서 멀다.
+station	6	middle_1	noun	역			place|transport	high	I will wait for you at the station.	역에서 너를 기다릴게.
+factory	6	middle_1	noun	공장			place|society	mid	The factory makes paper boxes.	그 공장은 종이 상자를 만든다.
+church	6	middle_1	noun	교회			place|society	mid	An old church stands on the hill.	오래된 교회가 언덕에 서 있다.
+theater	6	middle_1	noun	극장			place	mid	We watched a story at the theater.	우리는 극장에서 이야기를 봤다.
+zoo	6	middle_1	noun	동물원			place|animal	high	A tiger and a lion live in the zoo.	호랑이와 사자가 동물원에 산다.
+playground	6	middle_1	noun	놀이터			place|school	high	Children play on the playground.	아이들이 놀이터에서 논다.
+bridge	6	middle_1	noun	다리(구조물)			place|thing	mid	The train crossed a long bridge.	기차가 긴 다리를 건넜다.
+thunder	6	middle_1	noun	천둥			weather|nature	mid	Thunder is loud in a storm.	폭풍 속에서 천둥은 시끄럽다.
+lightning	6	middle_1	noun	번개			weather|nature	mid	Lightning is faster than thunder.	번개는 천둥보다 빠르다.
+shadow	6	middle_1	noun	그림자			nature	mid	My shadow is long in the evening.	저녁에는 내 그림자가 길다.
+sunlight	6	middle_1	noun	햇빛			nature|weather	mid	Sunlight is warm in the garden.	정원의 햇빛은 따뜻하다.
+wave	6	middle_1	noun	파도			nature	mid	Big waves are on the beach.	큰 파도가 해변에 있다.
+sand	6	middle_1	noun	모래			nature	mid	The children played in the sand.	아이들이 모래에서 놀았다.
+rock	6	middle_1	noun	바위			nature	high	A large rock is under the tree.	큰 바위가 나무 아래에 있다.
+cliff	6	middle_1	noun	절벽			nature	mid	Birds live on the high cliff.	새들이 높은 절벽에 산다.
+stream	6	middle_1	noun	개울			nature	mid	A small stream is in the forest.	작은 개울이 숲에 있다.
+pond	6	middle_1	noun	연못			nature	mid	Ducks swim in the pond.	오리들이 연못에서 수영한다.
+jungle	6	middle_1	noun	정글			nature|place	mid	Tigers hide in the green jungle.	호랑이들은 초록 정글에 숨는다.
+grass	6	middle_1	noun	풀(식물)			nature	high	Cows eat green grass.	소들이 초록 풀을 먹는다.
+shout	6	middle_1	verb	외치다			motion|daily	mid	Do not shout in the library.	도서관에서 외치지 마라.
+whisper	6	middle_1	verb	속삭이다			daily	mid	She whispered to me in class.	그녀가 수업 중에 나에게 속삭였다.
+knock	6	middle_1	verb	두드리다			motion|daily	mid	Please knock on the door.	문을 두드려 주세요.
+wipe	6	middle_1	verb	닦다			motion|daily	mid	Wipe the desk with a clean towel.	깨끗한 수건으로 책상을 닦아라.
+fold	6	middle_1	verb	접다			motion|daily	mid	Fold the paper two times.	종이를 두 번 접어라.
+tie	6	middle_1	verb	묶다			motion|daily	mid	Tie your shoes before you run.	달리기 전에 신발을 묶어라.
+pour	6	middle_1	verb	붓다			daily|food	mid	Pour the milk into the cup.	우유를 컵에 부어라.
+stir	6	middle_1	verb	젓다			food	mid	Stir the soup with a spoon.	숟가락으로 수프를 저어라.
+bake	6	middle_1	verb	굽다			food	mid	My mom bakes bread every week.	우리 엄마는 매주 빵을 굽는다.
+boil	6	middle_1	verb	끓이다			food	mid	Boil the water for tea.	차를 위해 물을 끓여라.
+taste	6	middle_1	verb	맛보다			food	high	Taste this soup and answer me.	이 수프를 맛보고 대답해 줘.
+smell	6	middle_1	verb	냄새를 맡다			daily	high	The dog smells the food.	그 개가 음식 냄새를 맡는다.
+touch	6	middle_1	verb	만지다			motion	high	Do not touch the hot soup.	뜨거운 수프를 만지지 마라.
+lift	6	middle_1	verb	들어 올리다			motion	mid	He lifted the heavy box.	그는 무거운 상자를 들어 올렸다.
+drop	6	middle_1	verb	떨어뜨리다			motion	mid	Do not drop the glass plate.	유리 접시를 떨어뜨리지 마라.
+kick	6	middle_1	verb	차다			motion|daily	high	He kicked the ball very hard.	그는 공을 아주 세게 찼다.
+pass	6	middle_1	verb	건네주다			motion|daily	high	Pass me the bowl, please.	그릇을 건네주세요.
+hang	6	middle_1	verb	걸다			motion|daily	mid	Hang your coat on the door.	외투를 문에 걸어라.
+customer	6	middle_1	noun	손님			job|society	mid	The customer bought two cakes.	그 손님은 케이크 두 개를 샀다.
+owner	6	middle_1	noun	주인			job|society	mid	The owner of this market is kind.	이 시장 주인은 친절하다.
+leader	6	middle_1	noun	지도자			job|society	mid	A good leader listens to everyone.	훌륭한 지도자는 모두의 말을 듣는다.
+captain	6	middle_1	noun	주장			job|group	mid	Our team captain is very strong.	우리 팀 주장은 아주 힘이 세다.
+guard	6	middle_1	noun	경비원			job	mid	The guard watches the museum at night.	경비원이 밤에 박물관을 지켜본다.
+clerk	6	middle_1	noun	점원			job	mid	The clerk sold me a notebook.	점원이 나에게 공책을 팔았다.
+waiter	6	middle_1	noun	종업원			job|food	mid	The waiter is in the restaurant.	종업원이 식당에 있다.
+pilot	6	middle_1	noun	조종사			job|transport	mid	The pilot is in a big airplane.	조종사가 큰 비행기에 있다.
+dentist	6	middle_1	noun	치과 의사			job|health	mid	The dentist looked at my tooth.	치과 의사가 내 치아를 보았다.
+vet	6	middle_1	noun	수의사			job|animal	mid	The vet helped our sick dog.	수의사가 우리 아픈 개를 도왔다.
+reporter	6	middle_1	noun	기자			job	mid	A reporter is with the singer.	기자가 그 가수와 함께 있다.
+artist	6	middle_1	noun	예술가			job	mid	The artist draws beautiful flowers.	그 예술가는 아름다운 꽃을 그린다.
+writer	6	middle_1	noun	작가			job	mid	The writer reads his story to us.	그 작가는 우리에게 자기 이야기를 읽어 준다.
+scientist	6	middle_1	noun	과학자			job|science	mid	The scientist has a new idea.	그 과학자는 새 생각을 가지고 있다.
+engineer	6	middle_1	noun	기술자			job	mid	An engineer fixed our computer.	기술자가 우리 컴퓨터를 고쳤다.
+often	6	middle_1	adverb	자주			time|daily	high	I often walk to school.	나는 자주 학교에 걸어간다.
+always	6	middle_1	adverb	항상			time|daily	high	She always finishes her homework.	그녀는 항상 숙제를 끝낸다.
+never	6	middle_1	adverb	절대			time|daily	high	He never forgets my name.	그는 내 이름을 절대 잊지 않는다.
+sometimes	6	middle_1	adverb	때때로			time|daily	high	Sometimes I read books at night.	때때로 나는 밤에 책을 읽는다.
+usually	6	middle_1	adverb	보통			time|daily	high	We usually eat rice for dinner.	우리는 보통 저녁으로 밥을 먹는다.
+early	6	middle_1	adverb	일찍			time	high	I get up early every morning.	나는 매일 아침 일찍 일어난다.
+late	6	middle_1	adverb	늦게			time	high	He arrived late for the class.	그는 수업에 늦게 도착했다.
+suddenly	6	middle_1	adverb	갑자기			time	mid	Suddenly the rain started.	갑자기 비가 시작되었다.
+finally	6	middle_1	adverb	마침내			time	mid	Finally we found the answer.	마침내 우리는 답을 찾았다.
+already	6	middle_1	adverb	이미			time	high	I already finished my lunch.	나는 이미 점심을 끝냈다.

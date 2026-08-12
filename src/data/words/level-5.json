@@ -1,6 +1,6 @@
 [
  {
-  "id": "word_000372",
+  "id": "word_000477",
   "word": "culture",
   "meaning": "문화",
   "meaningAlt": [],
@@ -23,19 +23,19 @@
    "world",
    "festival",
    "tradition",
+   "bank",
+   "church",
+   "customer",
    "support",
-   "respect",
-   "nature",
-   "computer",
-   "choice",
-   "history",
-   "science",
-   "music"
+   "factory",
+   "owner",
+   "leader",
+   "respect"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000373",
+  "id": "word_000478",
   "word": "history",
   "meaning": "역사",
   "meaningAlt": [],
@@ -70,7 +70,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000374",
+  "id": "word_000479",
   "word": "science",
   "meaning": "과학",
   "meaningAlt": [],
@@ -99,14 +99,14 @@
    "computer",
    "machine",
    "robot",
-   "culture",
-   "country",
-   "world"
+   "scientist",
+   "technology",
+   "sentence"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000375",
+  "id": "word_000480",
   "word": "music",
   "meaning": "음악",
   "meaningAlt": [],
@@ -141,7 +141,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000376",
+  "id": "word_000481",
   "word": "art",
   "meaning": "미술",
   "meaningAlt": [],
@@ -176,7 +176,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000377",
+  "id": "word_000482",
   "word": "math",
   "meaning": "수학",
   "meaningAlt": [],
@@ -211,7 +211,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000378",
+  "id": "word_000483",
   "word": "language",
   "meaning": "언어",
   "meaningAlt": [],
@@ -246,7 +246,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000379",
+  "id": "word_000484",
   "word": "country",
   "meaning": "나라",
   "meaningAlt": [],
@@ -269,19 +269,19 @@
    "world",
    "festival",
    "tradition",
+   "bank",
+   "church",
+   "customer",
    "support",
-   "respect",
-   "computer",
-   "choice",
-   "history",
-   "science",
-   "music",
-   "art"
+   "factory",
+   "owner",
+   "leader",
+   "respect"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000380",
+  "id": "word_000485",
   "word": "village",
   "meaning": "마을",
   "meaningAlt": [],
@@ -301,22 +301,22 @@
   "isPhrase": false,
   "distractorPool": [
    "museum",
-   "market",
-   "hospital",
-   "library",
-   "kitchen",
-   "garden",
-   "farm",
-   "park",
-   "city",
-   "machine",
-   "robot",
-   "safety"
+   "roof",
+   "ceiling",
+   "basement",
+   "garage",
+   "bakery",
+   "hotel",
+   "airport",
+   "factory",
+   "church",
+   "theater",
+   "jungle"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000381",
+  "id": "word_000486",
   "word": "world",
   "meaning": "세계",
   "meaningAlt": [],
@@ -339,19 +339,19 @@
    "country",
    "festival",
    "tradition",
+   "bank",
    "support",
-   "respect",
-   "whale",
-   "history",
-   "science",
-   "music",
-   "art",
-   "math"
+   "factory",
+   "church",
+   "customer",
+   "owner",
+   "leader",
+   "respect"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000382",
+  "id": "word_000487",
   "word": "nature",
   "meaning": "자연",
   "meaningAlt": [],
@@ -375,18 +375,18 @@
    "sky",
    "ground",
    "leaf",
+   "rock",
    "island",
    "desert",
    "field",
    "valley",
    "hill",
-   "cave",
-   "lake"
+   "cave"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000383",
+  "id": "word_000488",
   "word": "environment",
   "meaning": "환경",
   "meaningAlt": [],
@@ -410,18 +410,18 @@
    "sky",
    "ground",
    "leaf",
+   "rock",
    "island",
    "desert",
    "field",
    "valley",
    "hill",
-   "cave",
-   "lake"
+   "cave"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000384",
+  "id": "word_000489",
   "word": "energy",
   "meaning": "에너지",
   "meaningAlt": [],
@@ -450,14 +450,14 @@
    "computer",
    "machine",
    "robot",
-   "environment",
-   "exercise",
-   "example"
+   "scientist",
+   "technology",
+   "experiment"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000385",
+  "id": "word_000490",
   "word": "machine",
   "meaning": "기계",
   "meaningAlt": [],
@@ -481,19 +481,19 @@
    "computer",
    "science",
    "energy",
+   "mirror",
    "map",
    "message",
-   "ticket",
-   "letter",
-   "music",
-   "math",
-   "village",
-   "medicine"
+   "furniture",
+   "blanket",
+   "pillow",
+   "towel",
+   "curtain"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000386",
+  "id": "word_000491",
   "word": "computer",
   "meaning": "컴퓨터",
   "meaningAlt": [],
@@ -521,15 +521,15 @@
    "map",
    "letter",
    "message",
-   "car",
-   "clock",
-   "culture",
-   "country"
+   "curtain",
+   "stairs",
+   "floor",
+   "ceiling"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000387",
+  "id": "word_000492",
   "word": "robot",
   "meaning": "로봇",
   "meaningAlt": [],
@@ -550,22 +550,22 @@
   "isPhrase": false,
   "distractorPool": [
    "machine",
+   "roof",
    "computer",
    "science",
    "energy",
-   "ticket",
-   "map",
-   "letter",
-   "message",
-   "habit",
-   "box",
-   "door",
-   "root"
+   "furniture",
+   "blanket",
+   "pillow",
+   "towel",
+   "curtain",
+   "mirror",
+   "shelf"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000388",
+  "id": "word_000493",
   "word": "health",
   "meaning": "건강",
   "meaningAlt": [],
@@ -589,18 +589,18 @@
    "healthy",
    "safety",
    "danger",
+   "breath",
+   "fever",
+   "rest",
    "sick",
-   "prevent",
-   "math",
-   "history",
-   "culture",
-   "science",
-   "music"
+   "stomach",
+   "cough",
+   "skin"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000389",
+  "id": "word_000494",
   "word": "medicine",
   "meaning": "약",
   "meaningAlt": [],
@@ -623,19 +623,19 @@
    "exercise",
    "safety",
    "danger",
+   "fever",
+   "muscle",
+   "rest",
    "healthy",
    "sick",
-   "prevent",
-   "music",
-   "math",
-   "mistake",
-   "museum",
-   "culture"
+   "stomach",
+   "cough",
+   "skin"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000390",
+  "id": "word_000495",
   "word": "exercise",
   "meaning": "운동",
   "meaningAlt": [],
@@ -658,19 +658,19 @@
    "medicine",
    "safety",
    "danger",
+   "fever",
+   "rest",
    "healthy",
    "sick",
-   "prevent",
-   "environment",
-   "energy",
-   "example",
-   "experience",
-   "culture"
+   "stomach",
+   "cough",
+   "skin",
+   "muscle"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000391",
+  "id": "word_000496",
   "word": "safety",
   "meaning": "안전",
   "meaningAlt": [],
@@ -693,19 +693,19 @@
    "health",
    "medicine",
    "exercise",
+   "skin",
+   "cough",
+   "muscle",
+   "breath",
    "prevent",
    "sick",
-   "healthy",
-   "success",
-   "science",
-   "village",
-   "machine",
-   "robot"
+   "stomach",
+   "fever"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000392",
+  "id": "word_000497",
   "word": "danger",
   "meaning": "위험",
   "meaningAlt": [],
@@ -728,19 +728,19 @@
    "health",
    "medicine",
    "exercise",
+   "cough",
+   "skin",
+   "muscle",
+   "breath",
+   "dentist",
    "prevent",
-   "healthy",
-   "sick",
-   "deer",
-   "village",
-   "machine",
-   "robot",
-   "difference"
+   "fever",
+   "rest"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000393",
+  "id": "word_000498",
   "word": "information",
   "meaning": "정보",
   "meaningAlt": [],
@@ -775,7 +775,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000394",
+  "id": "word_000499",
   "word": "example",
   "meaning": "예시",
   "meaningAlt": [],
@@ -810,7 +810,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000395",
+  "id": "word_000500",
   "word": "result",
   "meaning": "결과",
   "meaningAlt": [],
@@ -845,7 +845,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000396",
+  "id": "word_000501",
   "word": "difference",
   "meaning": "차이",
   "meaningAlt": [],
@@ -880,7 +880,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000397",
+  "id": "word_000502",
   "word": "experience",
   "meaning": "경험",
   "meaningAlt": [],
@@ -915,7 +915,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000398",
+  "id": "word_000503",
   "word": "opinion",
   "meaning": "의견",
   "meaningAlt": [],
@@ -950,7 +950,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000399",
+  "id": "word_000504",
   "word": "choice",
   "meaning": "선택",
   "meaningAlt": [],
@@ -985,7 +985,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000400",
+  "id": "word_000505",
   "word": "effort",
   "meaning": "노력",
   "meaningAlt": [],
@@ -1013,14 +1013,14 @@
    "opinion",
    "choice",
    "mistake",
+   "essay",
    "chance",
-   "express",
-   "problem"
+   "express"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000401",
+  "id": "word_000506",
   "word": "success",
   "meaning": "성공",
   "meaningAlt": [],
@@ -1049,13 +1049,13 @@
    "opinion",
    "choice",
    "mistake",
-   "chance",
-   "story"
+   "spelling",
+   "chance"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000402",
+  "id": "word_000507",
   "word": "mistake",
   "meaning": "실수",
   "meaningAlt": [],
@@ -1090,7 +1090,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000403",
+  "id": "word_000508",
   "word": "habit",
   "meaning": "습관",
   "meaningAlt": [],
@@ -1109,23 +1109,23 @@
   ],
   "isPhrase": false,
   "distractorPool": [
+   "furniture",
+   "blanket",
+   "pillow",
+   "towel",
+   "curtain",
+   "mirror",
+   "shelf",
+   "hang",
    "refuse",
    "disappear",
    "happen",
-   "receive",
-   "allow",
-   "avoid",
-   "appear",
-   "get up",
-   "turn on",
-   "turn off",
-   "look for",
-   "promise"
+   "rest"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000404",
+  "id": "word_000509",
   "word": "tradition",
   "meaning": "전통",
   "meaningAlt": [],
@@ -1148,19 +1148,19 @@
    "country",
    "world",
    "festival",
+   "factory",
+   "church",
+   "customer",
+   "owner",
+   "leader",
    "respect",
-   "support",
-   "village",
-   "machine",
-   "robot",
-   "safety",
-   "danger",
-   "effort"
+   "bank",
+   "support"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000405",
+  "id": "word_000510",
   "word": "festival",
   "meaning": "축제",
   "meaningAlt": [],
@@ -1183,19 +1183,19 @@
    "country",
    "world",
    "tradition",
+   "bank",
+   "factory",
    "support",
-   "respect",
-   "history",
-   "science",
-   "music",
-   "art",
-   "math",
-   "language"
+   "church",
+   "customer",
+   "owner",
+   "leader",
+   "respect"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000406",
+  "id": "word_000511",
   "word": "museum",
   "meaning": "박물관",
   "meaningAlt": [],
@@ -1215,22 +1215,22 @@
   "isPhrase": false,
   "distractorPool": [
    "village",
-   "music",
-   "park",
-   "market",
-   "city",
-   "math",
-   "medicine",
-   "mistake",
-   "school",
-   "house",
-   "hospital",
-   "library"
+   "stairs",
+   "floor",
+   "bank",
+   "restaurant",
+   "station",
+   "zoo",
+   "playground",
+   "roof",
+   "ceiling",
+   "basement",
+   "garage"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000407",
+  "id": "word_000512",
   "word": "continue",
   "meaning": "계속하다",
   "meaningAlt": [],
@@ -1265,7 +1265,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000408",
+  "id": "word_000513",
   "word": "improve",
   "meaning": "향상시키다",
   "meaningAlt": [],
@@ -1300,7 +1300,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000409",
+  "id": "word_000514",
   "word": "increase",
   "meaning": "늘리다",
   "meaningAlt": [],
@@ -1335,7 +1335,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000410",
+  "id": "word_000515",
   "word": "reduce",
   "meaning": "줄이다",
   "meaningAlt": [],
@@ -1370,7 +1370,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000411",
+  "id": "word_000516",
   "word": "create",
   "meaning": "창조하다",
   "meaningAlt": [],
@@ -1405,7 +1405,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000412",
+  "id": "word_000517",
   "word": "produce",
   "meaning": "생산하다",
   "meaningAlt": [],
@@ -1440,7 +1440,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000413",
+  "id": "word_000518",
   "word": "provide",
   "meaning": "제공하다",
   "meaningAlt": [],
@@ -1475,7 +1475,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000414",
+  "id": "word_000519",
   "word": "receive",
   "meaning": "받다",
   "meaningAlt": [],
@@ -1504,13 +1504,13 @@
    "prepare",
    "save",
    "spend",
-   "promise",
-   "collect"
+   "kick",
+   "pass"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000415",
+  "id": "word_000520",
   "word": "accept",
   "meaning": "받아들이다",
   "meaningAlt": [],
@@ -1539,13 +1539,13 @@
    "prepare",
    "save",
    "spend",
-   "promise",
-   "collect"
+   "smell",
+   "pass"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000416",
+  "id": "word_000521",
   "word": "refuse",
   "meaning": "거절하다",
   "meaningAlt": [],
@@ -1575,12 +1575,12 @@
    "promise",
    "collect",
    "protect",
-   "prepare"
+   "shout"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000417",
+  "id": "word_000522",
   "word": "allow",
   "meaning": "허락하다",
   "meaningAlt": [],
@@ -1609,13 +1609,13 @@
    "prepare",
    "save",
    "spend",
-   "promise",
-   "collect"
+   "smell",
+   "kick"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000418",
+  "id": "word_000523",
   "word": "avoid",
   "meaning": "피하다",
   "meaningAlt": [],
@@ -1641,16 +1641,16 @@
    "happen",
    "refuse",
    "disappear",
+   "fold",
    "prepare",
    "save",
    "spend",
-   "promise",
-   "collect"
+   "kick"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000419",
+  "id": "word_000524",
   "word": "appear",
   "meaning": "나타나다",
   "meaningAlt": [],
@@ -1679,13 +1679,13 @@
    "prepare",
    "save",
    "spend",
-   "promise",
-   "collect"
+   "smell",
+   "kick"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000420",
+  "id": "word_000525",
   "word": "disappear",
   "meaning": "사라지다",
   "meaningAlt": [],
@@ -1714,13 +1714,13 @@
    "promise",
    "collect",
    "protect",
-   "prepare",
-   "save"
+   "shout",
+   "whisper"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000421",
+  "id": "word_000526",
   "word": "happen",
   "meaning": "발생하다",
   "meaningAlt": [],
@@ -1749,13 +1749,13 @@
    "prepare",
    "save",
    "spend",
-   "promise",
-   "collect"
+   "smell",
+   "kick"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000422",
+  "id": "word_000527",
   "word": "succeed",
   "meaning": "성공하다",
   "meaningAlt": [],
@@ -1790,7 +1790,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000423",
+  "id": "word_000528",
   "word": "cause",
   "meaning": "일으키다",
   "meaningAlt": [],
@@ -1825,7 +1825,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000424",
+  "id": "word_000529",
   "word": "express",
   "meaning": "표현하다",
   "meaningAlt": [],
@@ -1860,7 +1860,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000425",
+  "id": "word_000530",
   "word": "respect",
   "meaning": "존중하다",
   "meaningAlt": [],
@@ -1885,17 +1885,17 @@
    "country",
    "world",
    "festival",
-   "repeat",
-   "refuse",
-   "reduce",
-   "receive",
-   "disappear",
-   "succeed"
+   "factory",
+   "church",
+   "customer",
+   "owner",
+   "leader",
+   "apologize"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000426",
+  "id": "word_000531",
   "word": "support",
   "meaning": "지지하다",
   "meaningAlt": [],
@@ -1920,17 +1920,17 @@
    "world",
    "festival",
    "tradition",
-   "continue",
-   "improve",
-   "increase",
-   "reduce",
-   "create",
-   "produce"
+   "bank",
+   "thank",
+   "supply",
+   "factory",
+   "church",
+   "customer"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000427",
+  "id": "word_000532",
   "word": "prevent",
   "meaning": "막다",
   "meaningAlt": [],
@@ -1956,16 +1956,16 @@
    "exercise",
    "healthy",
    "sick",
-   "protect",
-   "repeat",
-   "invent",
-   "produce",
-   "provide"
+   "cough",
+   "skin",
+   "muscle",
+   "breath",
+   "protect"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000428",
+  "id": "word_000533",
   "word": "possible",
   "meaning": "가능한",
   "meaningAlt": [],
@@ -2000,7 +2000,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000429",
+  "id": "word_000534",
   "word": "impossible",
   "meaning": "불가능한",
   "meaningAlt": [],
@@ -2035,7 +2035,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000430",
+  "id": "word_000535",
   "word": "similar",
   "meaning": "비슷한",
   "meaningAlt": [],
@@ -2070,7 +2070,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000431",
+  "id": "word_000536",
   "word": "different",
   "meaning": "다른",
   "meaningAlt": [],
@@ -2105,7 +2105,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000432",
+  "id": "word_000537",
   "word": "common",
   "meaning": "흔한",
   "meaningAlt": [],
@@ -2140,7 +2140,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000433",
+  "id": "word_000538",
   "word": "rare",
   "meaning": "드문",
   "meaningAlt": [],
@@ -2163,19 +2163,19 @@
    "honest",
    "creative",
    "active",
+   "lazy",
    "safe",
    "possible",
    "impossible",
    "similar",
    "different",
    "common",
-   "modern",
-   "serious"
+   "modern"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000434",
+  "id": "word_000539",
   "word": "ancient",
   "meaning": "고대의",
   "meaningAlt": [],
@@ -2210,7 +2210,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000435",
+  "id": "word_000540",
   "word": "modern",
   "meaning": "현대의",
   "meaningAlt": [],
@@ -2245,7 +2245,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000436",
+  "id": "word_000541",
   "word": "natural",
   "meaning": "자연스러운",
   "meaningAlt": [],
@@ -2280,7 +2280,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000437",
+  "id": "word_000542",
   "word": "serious",
   "meaning": "심각한",
   "meaningAlt": [],
@@ -2315,7 +2315,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000438",
+  "id": "word_000543",
   "word": "polite",
   "meaning": "예의 바른",
   "meaningAlt": [],
@@ -2350,7 +2350,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000439",
+  "id": "word_000544",
   "word": "honest",
   "meaning": "정직한",
   "meaningAlt": [],
@@ -2385,7 +2385,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000440",
+  "id": "word_000545",
   "word": "patient",
   "meaning": "참을성 있는",
   "meaningAlt": [],
@@ -2420,7 +2420,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000441",
+  "id": "word_000546",
   "word": "curious",
   "meaning": "호기심 많은",
   "meaningAlt": [],
@@ -2450,12 +2450,12 @@
    "natural",
    "honest",
    "active",
-   "careful"
+   "confident"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000442",
+  "id": "word_000547",
   "word": "creative",
   "meaning": "창의적인",
   "meaningAlt": [],
@@ -2490,7 +2490,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000443",
+  "id": "word_000548",
   "word": "active",
   "meaning": "활발한",
   "meaningAlt": [],
@@ -2525,7 +2525,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000444",
+  "id": "word_000549",
   "word": "healthy",
   "meaning": "건강한",
   "meaningAlt": [],
@@ -2551,16 +2551,16 @@
    "safety",
    "danger",
    "prevent",
-   "possible",
-   "impossible",
-   "similar",
-   "different",
-   "common"
+   "stomach",
+   "fever",
+   "rest",
+   "cough",
+   "skin"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000445",
+  "id": "word_000550",
   "word": "sick",
   "meaning": "아픈",
   "meaningAlt": [],
@@ -2584,18 +2584,18 @@
    "medicine",
    "exercise",
    "safety",
+   "skin",
    "danger",
    "prevent",
-   "safe",
-   "similar",
-   "serious",
-   "possible",
-   "impossible"
+   "stomach",
+   "fever",
+   "rest",
+   "safe"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000446",
+  "id": "word_000551",
   "word": "get up",
   "meaning": "일어나다",
   "meaningAlt": [],
@@ -2631,7 +2631,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000447",
+  "id": "word_000552",
   "word": "put on",
   "meaning": "입다",
   "meaningAlt": [],
@@ -2661,13 +2661,13 @@
    "find out",
    "take care of",
    "pants",
-   "shirt",
-   "shoes"
+   "cotton",
+   "shirt"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000448",
+  "id": "word_000553",
   "word": "take off",
   "meaning": "벗다",
   "meaningAlt": [],
@@ -2703,7 +2703,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000449",
+  "id": "word_000554",
   "word": "turn on",
   "meaning": "켜다",
   "meaningAlt": [],
@@ -2739,7 +2739,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000450",
+  "id": "word_000555",
   "word": "turn off",
   "meaning": "끄다",
   "meaningAlt": [],
@@ -2775,7 +2775,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000451",
+  "id": "word_000556",
   "word": "give up",
   "meaning": "포기하다",
   "meaningAlt": [],
@@ -2811,7 +2811,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000452",
+  "id": "word_000557",
   "word": "look after",
   "meaning": "돌보다",
   "meaningAlt": [],
@@ -2847,7 +2847,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000453",
+  "id": "word_000558",
   "word": "look for",
   "meaning": "찾아보다",
   "meaningAlt": [],
@@ -2883,7 +2883,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000454",
+  "id": "word_000559",
   "word": "find out",
   "meaning": "알아내다",
   "meaningAlt": [],
@@ -2919,7 +2919,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000455",
+  "id": "word_000560",
   "word": "take care of",
   "meaning": "보살피다",
   "meaningAlt": [],

@@ -15,19 +15,34 @@ import type { QuizType } from './types';
  *  · 동의어가 오답에 섞이면 → 정답을 골랐는데 오답 처리된다 (가장 나쁜 경우)
  */
 
+/*
+ * **운영과 같은 범위(L1~10) 를 로드한다.** 일부만 로드하면 안 된다 — `distractorPool` 은
+ * 1,000개 전체에서 계산되므로 L5 단어의 후보 12개가 전부 L6 일 수 있다. 실제로 L6~10 을
+ * 추가한 직후 `village` 의 후보가 museum 하나만 남아 generateQuiz 가 throw 했다.
+ * 그래서 아래 '로드된 DB 안에서 3개 이상' 테스트가 이 실수를 다시 잡는다.
+ */
 const bank = new WordBank();
-await bank.loadLevels([1, 2, 3, 4, 5]);
+await bank.loadLevels([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 
 const TYPES: QuizType[] = ['EN_TO_KO', 'KO_TO_EN'];
 
 describe('단어 DB', () => {
-  it('L1~5 가 로드된다', () => {
-    expect(bank.size).toBeGreaterThan(450);
+  it('L1~10 이 로드된다 (1,000개)', () => {
+    expect(bank.size).toBe(1000);
   });
 
   it('모든 단어가 4지선다를 만들 수 있다 (오답 후보 3개 이상)', () => {
     const thin = bank.all().filter((w) => w.distractorPool.length < 3);
     expect(thin.map((w) => w.word)).toEqual([]);
+  });
+
+  /* 부분 로드 방지 게이트 — main.ts 의 LEVELS 가 줄어들면 여기서 먼저 깨진다 */
+  it('오답 후보가 로드된 DB 안에서 3개 이상 해결된다', () => {
+    const thin = bank
+      .all()
+      .map((w) => ({ w, n: w.distractorPool.filter((p) => bank.get(p)).length }))
+      .filter(({ n }) => n < 3);
+    expect(thin.map(({ w, n }) => `${w.word}(${n}개)`)).toEqual([]);
   });
 
   it('오답 후보에 자기 자신이 없다', () => {
