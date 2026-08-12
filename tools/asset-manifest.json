@@ -7,70 +7,89 @@
     "★ 스킨드 캐릭터(애니메이션 있는 모델)는 bundle 하나에 하나만. 본 이름이 중복되면",
     "  three 가 _1 을 붙여 애니메이션 바인딩이 조용히 깨진다 — 파이프라인이 에러로 막는다."
   ],
-
   "bundles": [
     {
       "name": "player",
       "when": "eager",
       "note": "MVP 는 1캐릭터. 애니 32종 내장(idle/jump/die/emote-yes/emote-no …).",
       "dir": "mini-characters/Models/GLB format",
-      "models": ["character-male-a"]
+      "models": [
+        "character-male-a"
+      ]
     },
     {
       "name": "char-female-a",
       "when": "lazy",
       "note": "Phase 6 해금 캐릭터. 캐릭터는 리그가 같아도 bundle 을 합칠 수 없다(위 ★).",
       "dir": "mini-characters/Models/GLB format",
-      "models": ["character-female-a"]
+      "models": [
+        "character-female-a"
+      ]
     },
     {
       "name": "char-male-b",
       "when": "lazy",
       "dir": "mini-characters/Models/GLB format",
-      "models": ["character-male-b"]
+      "models": [
+        "character-male-b"
+      ]
     },
     {
       "name": "char-female-b",
       "when": "lazy",
       "dir": "mini-characters/Models/GLB format",
-      "models": ["character-female-b"]
+      "models": [
+        "character-female-b"
+      ]
     },
     {
       "name": "char-male-c",
       "when": "lazy",
       "dir": "mini-characters/Models/GLB format",
-      "models": ["character-male-c"]
+      "models": [
+        "character-male-c"
+      ]
     },
     {
       "name": "char-female-c",
       "when": "lazy",
       "dir": "mini-characters/Models/GLB format",
-      "models": ["character-female-c"]
+      "models": [
+        "character-female-c"
+      ]
     },
     {
       "name": "pet-fox",
       "when": "lazy",
       "note": "콤보 응원·수집 보상. 애니 8종(idle/walk/run/eat/dance/gesture±) 내장.",
       "dir": "cube-pets_1.0/Models/GLB format",
-      "models": ["animal-fox"]
+      "models": [
+        "animal-fox"
+      ]
     },
     {
       "name": "pet-cat",
       "when": "lazy",
       "dir": "cube-pets_1.0/Models/GLB format",
-      "models": ["animal-cat"]
+      "models": [
+        "animal-cat"
+      ]
     },
     {
       "name": "pet-panda",
       "when": "lazy",
       "dir": "cube-pets_1.0/Models/GLB format",
-      "models": ["animal-panda"]
+      "models": [
+        "animal-panda"
+      ]
     },
     {
       "name": "pet-penguin",
       "when": "lazy",
       "dir": "cube-pets_1.0/Models/GLB format",
-      "models": ["animal-penguin"]
+      "models": [
+        "animal-penguin"
+      ]
     },
     {
       "name": "world-forest",
@@ -96,7 +115,26 @@
         "plant_bush",
         "mushroom_red",
         "flower_yellowA",
-        "log"
+        "log",
+        "tree_oak",
+        "tree_detailed",
+        "tree_fat",
+        "tree_pineSmallA",
+        "rock_tallB",
+        "rock_tallE",
+        "stump_oldTall",
+        "statue_column",
+        "statue_obelisk",
+        "tent_smallOpen",
+        "campfire_logs",
+        "log_stack",
+        "plant_bushLarge",
+        "mushroom_tanGroup",
+        "flower_purpleA",
+        "flower_redA",
+        "grass_leafs",
+        "stone_smallA",
+        "rock_smallB"
       ]
     },
     {
@@ -118,7 +156,22 @@
         "flag-banner-long",
         "tower-square-base",
         "tower-square-mid",
-        "tower-square-top-roof"
+        "tower-square-top-roof",
+        "tower-hexagon-base",
+        "tower-hexagon-roof",
+        "tower-square-arch",
+        "wall-doorway",
+        "wall-narrow-wood-fence",
+        "rocks-large",
+        "rocks-small",
+        "tree-large",
+        "tree-small",
+        "tree-log",
+        "siege-catapult",
+        "siege-ballista",
+        "flag-pennant",
+        "flag-wide",
+        "bridge-straight"
       ]
     },
     {
@@ -126,14 +179,20 @@
       "when": "eager",
       "note": "계단 기믹 — 체크포인트 깃발·스프링. 1층부터 필요하므로 eager. (방향 표지판은 3/4 시점에서 읽히지 않아 제거하고 '다음 칸 밝게'로 대체했다)",
       "dir": "Platformer_Pack_1.0_FREE/Assets/gltf/neutral",
-      "models": ["signage_finish", "spring"]
+      "models": [
+        "signage_finish",
+        "spring"
+      ]
     },
     {
       "name": "pickup",
       "when": "eager",
       "note": "계단 위 수집물(크리스탈). 작아서 eager 로 둔다.",
       "dir": "tower-defense-kit/Models/GLB format",
-      "models": ["detail-crystal", "detail-crystal-large"]
+      "models": [
+        "detail-crystal",
+        "detail-crystal-large"
+      ]
     },
     {
       "name": "world-snow",
@@ -154,7 +213,15 @@
         "detail-crystal",
         "enemy-ufo-a",
         "enemy-ufo-b",
-        "enemy-ufo-c"
+        "enemy-ufo-c",
+        "snow-detail-dirt-large",
+        "snow-tile-tree-double",
+        "snow-tile-tree",
+        "snow-tile-crystal",
+        "snow-wood-structure-high",
+        "tower-round-crystals",
+        "detail-tree-large",
+        "detail-rocks-large"
       ]
     },
     {
@@ -178,7 +245,14 @@
         "spring",
         "signage_arrows_left",
         "signage_arrows_right",
-        "signage_finish"
+        "signage_finish",
+        "floor_wood_4x4",
+        "floor_wood_2x6",
+        "pillar_2x2x8",
+        "pillar_1x1x8",
+        "barrier_2x1x2",
+        "barrier_4x1x1",
+        "strut_horizontal"
       ]
     },
     {
@@ -219,35 +293,46 @@
       "when": "lazy",
       "note": "V2 보스. 캐릭터 glb 에는 애니메이션이 없다 — boss-anims 와 짝으로 쓴다(스파이크 A).",
       "dir": "Skeletons_1.1_FREE/characters/gltf",
-      "models": ["Skeleton_Warrior"]
+      "models": [
+        "Skeleton_Warrior"
+      ]
     },
     {
       "name": "boss-minion",
       "when": "lazy",
       "note": "4종 모두 Rig_Medium(23본) 동일 — boss-anims 의 클립 26종을 그대로 재사용한다.",
       "dir": "Skeletons_1.1_FREE/characters/gltf",
-      "models": ["Skeleton_Minion"]
+      "models": [
+        "Skeleton_Minion"
+      ]
     },
     {
       "name": "boss-mage",
       "when": "lazy",
       "note": "보스 2번째. 리그가 같아 클립을 공유한다.",
       "dir": "Skeletons_1.1_FREE/characters/gltf",
-      "models": ["Skeleton_Mage"]
+      "models": [
+        "Skeleton_Mage"
+      ]
     },
     {
       "name": "boss-rogue",
       "when": "lazy",
       "note": "보스 3번째.",
       "dir": "Skeletons_1.1_FREE/characters/gltf",
-      "models": ["Skeleton_Rogue"]
+      "models": [
+        "Skeleton_Rogue"
+      ]
     },
     {
       "name": "boss-anims",
       "when": "lazy",
       "note": "애니메이션 클립 전용(26종). 메시·머티리얼은 프루닝하고 리그+클립만 남긴다.",
       "dir": "Skeletons_1.1_FREE/Animations/gltf/Rig_Medium",
-      "models": ["Rig_Medium_General", "Rig_Medium_MovementBasic"],
+      "models": [
+        "Rig_Medium_General",
+        "Rig_Medium_MovementBasic"
+      ],
       "animationsOnly": true
     }
   ]

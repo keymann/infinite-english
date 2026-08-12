@@ -112,8 +112,17 @@ describe('방향 오선택 — 판이 끝난다', () => {
 });
 
 describe('계단 타이머 — 층이 높을수록 짧아지고 하한은 2초', () => {
-  it('0층은 시작값', () => {
+  it('0층은 시작값 3초', () => {
     expect(stairTimeFor(0)).toBe(STAIR_TIMER.startSec);
+    expect(STAIR_TIMER.startSec).toBe(3);
+  });
+
+  /* 층당 뺄셈이 아니라 **100층마다 비율**로 줄어든다 (요구 사항 4).
+     뺄셈은 시작값을 낮추면 하한에 닿는 층도 같이 당겨져 초반 난이도가 급변한다 */
+  it('100층마다 같은 비율로 줄어든다', () => {
+    const at = (f: number) => stairTimeFor(f);
+    expect(at(100) / at(0)).toBeCloseTo(STAIR_TIMER.ratioPer100Floors, 6);
+    expect(at(200) / at(100)).toBeCloseTo(STAIR_TIMER.ratioPer100Floors, 6);
   });
 
   it('층이 오르면 단조 감소한다', () => {
@@ -129,9 +138,19 @@ describe('계단 타이머 — 층이 높을수록 짧아지고 하한은 2초',
   });
 
   it('하한에 닿은 뒤에는 계속 2초다', () => {
-    const floorAtMin = (STAIR_TIMER.startSec - STAIR_TIMER.minSec) / STAIR_TIMER.decayPerFloor;
+    // 3.0 × 0.88^(층/100) = 2.0 → 층 ≈ 317
+    const floorAtMin =
+      100 * (Math.log(STAIR_TIMER.minSec / STAIR_TIMER.startSec) / Math.log(STAIR_TIMER.ratioPer100Floors));
     expect(stairTimeFor(floorAtMin)).toBeCloseTo(STAIR_TIMER.minSec, 6);
+    expect(stairTimeFor(floorAtMin + 1)).toBe(STAIR_TIMER.minSec);
     expect(stairTimeFor(floorAtMin + 500)).toBe(STAIR_TIMER.minSec);
+  });
+
+  /* 요구 사항: "최대값을 낮춘다" — 계단을 오를 때 루즈하지 않아야 한다 */
+  it('한 칸 대기 시간이 3초를 넘지 않는다', () => {
+    for (const floor of [0, 1, 50, 100, 500]) {
+      expect(stairTimeFor(floor)).toBeLessThanOrEqual(3);
+    }
   });
 
   /* 음수 층은 들어올 수 없지만, 들어와도 시작값보다 길어지면 안 된다 */

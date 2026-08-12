@@ -7,13 +7,13 @@ import { WordBank } from '../learning/words';
 import { Session } from './session';
 import {
   BOSS_EVERY,
-  BOSS_MIN_GAP_QUESTIONS,
   bossReward,
   canSpawnBoss,
   hitBoss,
   hpRatio,
   isBossFloor,
   missBoss,
+  nextBossFloor,
   questionsToDefeat,
   spawnBoss,
 } from './boss';
@@ -24,6 +24,7 @@ import {
   difficultyBonus,
   instantGold,
   rewardMultiplier,
+  rollBossEvent,
   rollEvent,
   tickEvent,
 } from './events';
@@ -122,35 +123,46 @@ describe('보스전', () => {
   });
 
   /**
-   * 한 구간이 최대 12칸이므로 보스 층을 두 번 지나칠 수 있다. 층 조건만 두면
-   * 보스가 연달아 등장한다 — 문제 수 간격이 그 병리적 경우를 막는다.
+   * **문제 수 간격 조건을 제거했다.** 문제를 보스전에서만 내게 되면서 계단을 오르는 동안
+   * `asked` 가 늘지 않는다 — 첫 보스(10층)에서 간격을 영원히 채우지 못해 **보스가 한 번도
+   * 나오지 않는 상태**가 됐다. 이 테스트가 그 회귀를 막는다.
    */
-  it('보스 사이에 최소 문제 수 간격을 둔다', () => {
-    // 보스 층에 닿았지만 직전 보스로부터 문제 수 간격을 못 채웠다 → 아직 안 낸다
-    expect(
-      canSpawnBoss({
-        floor: 20,
-        lastBossFloor: 0,
-        asked: BOSS_MIN_GAP_QUESTIONS - 1,
-        lastBossAsked: 0,
-      }),
-    ).toBe(false);
-    // 간격을 채우면 낸다
-    expect(
-      canSpawnBoss({ floor: 20, lastBossFloor: 0, asked: BOSS_MIN_GAP_QUESTIONS, lastBossAsked: 0 }),
-    ).toBe(true);
-    // 이미 잡은 보스 층은 다시 내지 않는다
-    expect(
-      canSpawnBoss({ floor: 25, lastBossFloor: 20, asked: 50, lastBossAsked: 10 }),
-    ).toBe(false);
-    // 다음 보스 층에 닿으면 다시 낸다
-    expect(
-      canSpawnBoss({ floor: 30, lastBossFloor: 20, asked: 50, lastBossAsked: 10 }),
-    ).toBe(true);
-    // 구간이 최대 12칸이라 보스 층을 뛰어넘어 도착해도 보스는 나온다
-    expect(
-      canSpawnBoss({ floor: 22, lastBossFloor: 0, asked: 30, lastBossAsked: 0 }),
-    ).toBe(true);
+  it('첫 보스가 반드시 나온다 — 문제를 한 번도 안 풀었어도', () => {
+    expect(canSpawnBoss({ floor: BOSS_EVERY, lastBossFloor: 0 })).toBe(true);
+  });
+
+  it('보스 층에 닿기 전에는 나오지 않는다', () => {
+    for (let floor = 1; floor < BOSS_EVERY; floor++) {
+      expect(canSpawnBoss({ floor, lastBossFloor: 0 })).toBe(false);
+    }
+  });
+
+  it('같은 보스 층에서 두 번 나오지 않는다', () => {
+    // 10층 보스를 잡고 11~19층을 오르는 동안은 조용하다
+    for (let floor = 10; floor < 20; floor++) {
+      expect(canSpawnBoss({ floor, lastBossFloor: 10 })).toBe(false);
+    }
+    // 다음 보스 층에 닿으면 나온다
+    expect(canSpawnBoss({ floor: 20, lastBossFloor: 10 })).toBe(true);
+  });
+
+  it('한 칸씩 올라도 모든 보스 층을 정확히 한 번 만난다', () => {
+    let lastBossFloor = 0;
+    let spawns = 0;
+    for (let floor = 1; floor <= 100; floor++) {
+      if (canSpawnBoss({ floor, lastBossFloor })) {
+        lastBossFloor = Math.floor(floor / BOSS_EVERY) * BOSS_EVERY;
+        spawns++;
+      }
+    }
+    expect(spawns).toBe(100 / BOSS_EVERY);
+  });
+
+  it('다음 보스 층을 알려 준다 (등반 중 화면 표시용)', () => {
+    expect(nextBossFloor(0)).toBe(BOSS_EVERY);
+    expect(nextBossFloor(1)).toBe(BOSS_EVERY);
+    expect(nextBossFloor(BOSS_EVERY)).toBe(BOSS_EVERY * 2);
+    expect(nextBossFloor(BOSS_EVERY + 1)).toBe(BOSS_EVERY * 2);
   });
 
   it('HP 비율은 0~1 이다', () => {
@@ -162,30 +174,63 @@ describe('보스전', () => {
   });
 });
 
-describe('보스전 출제 — 약점 단어 집중 (PRD 19장)', () => {
+describe('보스전 출제 — 약점 비중 2배, 그러나 신규도 낸다', () => {
   const bank = new WordBank();
 
-  it('취약 단어를 낸다', async () => {
+  /**
+   * **문제를 보스전에서만 내게 되면서 여기가 바뀌었다.**
+   *
+   * 이전에는 보스전이 `pickWord('weak')` 고정이었다 — 계단 구간에도 문제가 있었으니
+   * 신규 단어는 그쪽이 담당했다. 문제를 보스전으로 모으자 그 구조가
+   * **신규 단어를 영원히 내지 않는 상태**가 됐다. 어휘가 늘지 않으면 이 앱은 목적을 잃는다.
+   *
+   * 지금은 보스전도 비율 자루를 쓴다(BOSS_BAG: 신규 8 · 복습 5 · 취약 6 · 보너스 1).
+   */
+  it('신규 단어를 낸다 — 아는 단어만 반복하지 않는다', async () => {
     await bank.loadLevels([1, 2]);
     const engine = new LearningEngine(bank, createRng(5), () => 1_700_000_000_000);
 
-    // 3개 단어를 취약(정답률 낮음)으로 만든다
+    // 취약 단어를 3개 만든다 (이전 구현이라면 이 3개만 무한 반복했다)
     const weakWords = bank.all().slice(0, 3);
     for (const w of weakWords) {
       engine.progress[w.id] = { ...emptyProgress(), right: 1, wrong: 4, lastCorrectAt: 1 };
     }
-    // 나머지는 잘 아는 단어
-    for (const w of bank.all().slice(3, 40)) {
-      engine.progress[w.id] = { ...emptyProgress(), right: 5, wrong: 0, lastCorrectAt: 1 };
+
+    const picks = Array.from({ length: 40 }, () => engine.next({ boss: true }));
+    const categories = picks.map((p) => p.category);
+    expect(categories.filter((c) => c === 'new').length).toBeGreaterThan(8);
+    // 서로 다른 단어를 충분히 다양하게 낸다
+    expect(new Set(picks.map((p) => p.word.id)).size).toBeGreaterThan(10);
+  });
+
+  it('취약 비중이 평소의 두 배다 (보스는 약점을 집중 출제한다 — PRD 19장)', async () => {
+    await bank.loadLevels([1, 2]);
+    const weakOf = (seed: number, boss: boolean) => {
+      const engine = new LearningEngine(bank, createRng(seed), () => 1_700_000_000_000);
+      for (const w of bank.all().slice(0, 8)) {
+        engine.progress[w.id] = { ...emptyProgress(), right: 1, wrong: 4, lastCorrectAt: 1 };
+      }
+      const picks = Array.from({ length: 60 }, () => engine.next(boss ? { boss: true } : {}));
+      return picks.filter((p) => p.category === 'weak').length;
+    };
+    // 자루 비율: 평소 3/20(15%) → 보스 6/20(30%)
+    expect(weakOf(21, true)).toBeGreaterThan(weakOf(21, false));
+  });
+
+  /**
+   * 후보가 좁아도 바로 다음에 같은 단어를 내지 않는다 (PRD 19장).
+   *
+   * 단, **후보가 정확히 하나면 막을 수 없다** — 낼 단어가 그것뿐이다
+   * (`pool.length > 1` 가드, engine.ts). 취약 단어 3개는 실제로 자주 생기는 상황이다.
+   */
+  it('취약 후보가 좁아도 같은 단어를 연달아 내지 않는다', async () => {
+    await bank.loadLevels([1, 2]);
+    const engine = new LearningEngine(bank, createRng(9), () => 1_700_000_000_000);
+    for (const w of bank.all().slice(0, 3)) {
+      engine.progress[w.id] = { ...emptyProgress(), right: 1, wrong: 5, lastCorrectAt: 1 };
     }
 
-    const weakIds = new Set(weakWords.map((w) => w.id));
-    const picks = Array.from({ length: 8 }, () => engine.next({ boss: true }));
-    const hits = picks.filter((p) => weakIds.has(p.word.id)).length;
-
-    expect(picks.every((p) => p.category === 'boss')).toBe(true);
-    // 취약 단어 3개 안에서 돌아야 한다 (같은 단어를 연달아 내지는 않는다)
-    expect(hits).toBeGreaterThanOrEqual(6);
+    const picks = Array.from({ length: 40 }, () => engine.next({ boss: true }));
     for (let i = 1; i < picks.length; i++) {
       expect(picks[i].word.id).not.toBe(picks[i - 1].word.id);
     }
@@ -196,6 +241,52 @@ describe('보스전 출제 — 약점 단어 집중 (PRD 19장)', () => {
     const engine = new LearningEngine(bank, createRng(9), () => 1_700_000_000_000);
     const pick = engine.next({ boss: true });
     expect(pick.word).toBeTruthy();
+  });
+});
+
+describe('보스 등장 이벤트 — 출제 시점이 바뀌어 옮겼다', () => {
+  /**
+   * 문제를 보스전에서만 내게 되자 `rollEvent` 가 **영구히 죽었다** — 그 함수는 보스전 중에
+   * 굴리지 않는데(inBoss 가드) 보스전 밖에는 문제가 없다. 이 테스트가 그 회귀를 막는다.
+   */
+  it('보스전 중에는 기존 rollEvent 가 아무것도 내지 않는다 (그래서 옮겼다)', () => {
+    const rng = createRng(1);
+    for (let i = 0; i < 20; i++) {
+      expect(rollEvent({ asked: 5, floor: 50, rng, lastId: null, inBoss: true }).event).toBeNull();
+    }
+  });
+
+  it('보스가 등장하면 이벤트를 굴린다', () => {
+    const rng = createRng(7);
+    const fired = Array.from({ length: 40 }, () =>
+      rollBossEvent({ floor: 60, rng, lastId: null }),
+    ).filter((d) => d.event);
+    // 확률 0.55 — 40번 중 한 번도 안 나오면 굴리지 않는 것이다
+    expect(fired.length).toBeGreaterThan(10);
+  });
+
+  /* escape("시간 안에 계단을 올라라")는 보스전에 오를 계단이 없다.
+     계단을 오르는 동안의 시간 압박은 계단 타이머가 담당한다 */
+  it('escape 는 나오지 않는다', () => {
+    const rng = createRng(3);
+    for (let i = 0; i < 200; i++) {
+      expect(rollBossEvent({ floor: 999, rng, lastId: null }).event?.id).not.toBe('escape');
+    }
+  });
+
+  it('직전과 같은 이벤트를 연달아 내지 않는다', () => {
+    const rng = createRng(11);
+    for (let i = 0; i < 100; i++) {
+      expect(rollBossEvent({ floor: 999, rng, lastId: 'treasure' }).event?.id).not.toBe('treasure');
+    }
+  });
+
+  it('층이 낮으면 낮은 층 이벤트만 나온다', () => {
+    const rng = createRng(13);
+    for (let i = 0; i < 100; i++) {
+      const def = rollBossEvent({ floor: 1, rng, lastId: null }).event;
+      if (def) expect(def.fromFloor).toBeLessThanOrEqual(1);
+    }
   });
 });
 
@@ -219,7 +310,7 @@ describe('조작 실패로 판이 끝난다 — 방향 오선택 · 계단 시�
     expect(session.phase).toBe('over');
     expect(session.failReason).toBe('direction');
     expect(session.hp).toBe(hpBefore); // REVIVE 로 가지 않는다
-    expect(session.stepsLeft).toBe(0);
+    expect(session.quiz).toBeNull();
   });
 
   it('콤보를 잃는다 — 조작을 틀렸는데 콤보가 남으면 다음 판으로 새어 나간다', async () => {

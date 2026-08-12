@@ -98,6 +98,36 @@ export function rollEvent(options: {
   return { event: pool[pool.length - 1], attempted: true };
 }
 
+/**
+ * **보스가 등장할 때** 이벤트를 굴린다.
+ *
+ * 문제를 보스전에서만 내게 되자 `rollEvent` 가 영구히 죽었다 — 그 함수는 보스전 중에는
+ * 굴리지 않고(`inBoss` 가드), 이제 보스전 밖에는 문제가 없다. 그래서 이벤트가 붙는
+ * 시점을 "5문제마다"에서 "보스 등장마다"로 옮긴다. 버프는 그 보스전에 적용된다.
+ *
+ * `escape`(시간 안에 계단을 올라라)는 제외한다 — 보스전에는 오를 계단이 없고,
+ * 계단을 오르는 동안의 시간 압박은 계단 타이머가 이미 담당한다.
+ */
+export function rollBossEvent(options: {
+  floor: number;
+  rng: Rng;
+  lastId: EventId | null;
+}): EventDecision {
+  const { floor, rng, lastId } = options;
+  if (rng() > EVENT_CHANCE) return { event: null, attempted: true };
+
+  const pool = EVENTS.filter((e) => e.fromFloor <= floor && e.id !== lastId && e.id !== 'escape');
+  if (pool.length === 0) return { event: null, attempted: true };
+
+  const total = pool.reduce((sum, e) => sum + e.weight, 0);
+  let pick = rng() * total;
+  for (const def of pool) {
+    pick -= def.weight;
+    if (pick <= 0) return { event: def, attempted: true };
+  }
+  return { event: pool[pool.length - 1], attempted: true };
+}
+
 /** 이벤트가 정답 보상에 주는 배수 */
 export function rewardMultiplier(active: ActiveEvent | null, answeredFast: boolean): number {
   if (!active) return 1;

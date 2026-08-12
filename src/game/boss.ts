@@ -26,25 +26,25 @@
 export const BOSS_EVERY = 10;
 
 /**
- * 보스 사이 최소 문제 수.
+ * 보스를 지금 낼 수 있는지 — **층 조건만 본다.**
  *
- * 층 조건만 두면 한 구간(최대 12칸)에 보스 층을 두 번 지나칠 수 있어 연달아 등장한다.
- * 보스전 자체가 10문제 이상이므로 이 값은 그 병리적 경우만 막는 하한이다
- * (보스전이 끝나면 `asked` 가 이미 크게 늘어 조건을 넘는다).
+ * 이전에는 "보스 사이 최소 문제 수" 조건이 함께 있었다. 한 정답이 계단 12칸을 열던 때는
+ * 한 구간에 보스 층을 두 번 지나쳐 보스가 연달아 등장할 수 있었기 때문이다.
+ *
+ * **그 조건을 제거했다.** 문제를 보스전에서만 내게 되면서 계단을 오르는 동안 `asked` 가
+ * 늘지 않는다 — 첫 보스(10층)에서 `asked - lastBossAsked = 0` 이라 간격을 영원히 채우지
+ * 못하고 **보스가 한 번도 나오지 않았다.** 이제 한 칸씩 오르므로 각 보스 층을 정확히
+ * 한 번만 지나가고, `lastBossFloor` 만으로 중복이 막힌다.
  */
-export const BOSS_MIN_GAP_QUESTIONS = 3;
-
-/** 보스를 지금 낼 수 있는지 — 층 조건과 간격 조건을 모두 본다 */
-export function canSpawnBoss(options: {
-  floor: number;
-  lastBossFloor: number;
-  asked: number;
-  lastBossAsked: number;
-}): boolean {
-  const { floor, lastBossFloor, asked, lastBossAsked } = options;
+export function canSpawnBoss(options: { floor: number; lastBossFloor: number }): boolean {
+  const { floor, lastBossFloor } = options;
   const milestone = Math.floor(floor / BOSS_EVERY) * BOSS_EVERY;
-  if (milestone <= lastBossFloor || !isBossFloor(milestone)) return false;
-  return asked - lastBossAsked >= BOSS_MIN_GAP_QUESTIONS;
+  return milestone > lastBossFloor && isBossFloor(milestone);
+}
+
+/** 다음 보스가 기다리는 층 — 등반 중 "어디까지 오르면 되는지" 를 화면에 보여 준다 */
+export function nextBossFloor(floor: number): number {
+  return (Math.floor(floor / BOSS_EVERY) + 1) * BOSS_EVERY;
 }
 
 /** 첫 보스의 최대 HP — 기본 데미지 10 이면 12문제 */

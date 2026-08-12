@@ -12,7 +12,7 @@ import {
   activate,
   difficultyBonus,
   rewardMultiplier,
-  rollEvent,
+  rollBossEvent,
   tickEvent,
   type ActiveEvent,
   type EventDef,
@@ -20,12 +20,19 @@ import {
 } from './events';
 
 /**
- * 한 판의 진행 — 퀴즈 ↔ 계단 구간의 왕복.
+ * 한 판의 진행 — 자유 등반 ↔ 보스전.
  *
  * ```
- * 문제 → 정답 → 계단 구간 N칸 개방 → 좌/우 탭으로 오름 → 다음 문제
- *          └ 오답 → HP-1 → (HP 0 이면) REVIVE → 정답이면 부활, 오답이면 종료
+ * 계단을 자유롭게 오름 (계단 타이머만 압박) → 보스 층 도달 → 보스전
+ *                                              └ 문제는 **여기서만** 나온다
+ *                                                 정답 → 보스 HP 감소
+ *                                                 오답 → HP-1 → (HP 0) REVIVE
+ *                                              → 처치 → 다시 자유 등반
  * ```
+ *
+ * **"정답 → 계단 구간 개방" 구조를 없앴다.** 계단 몇 칸마다 문제가 끼어들어 오르는
+ * 집중이 끊긴다는 요청이었다. 이제 계단은 항상 열려 있고, 영어는 보스라는 관문에서만
+ * 묻는다. 계단 구간에서의 긴장은 방향 선택과 계단 타이머가 담당한다.
  *
  * **타이머를 이 클래스에 두지 않는다.** 피드백 표시 시간 같은 연출 지연은 UI 쪽에서
  * 관리하고, 여기서는 `answer()` → `next()` 라는 상태 전이만 제공한다.
@@ -92,8 +99,6 @@ export class Session {
   correctCount = 0;
   wrongCount = 0;
   quiz: Quiz | null = null;
-  /** 남은 계단 칸 수 — 0 이 되면 다음 문제로 넘어간다 */
-  stepsLeft = 0;
   /** 보스전 중이면 보스 상태 (PRD 18장) */
   boss: BossState | null = null;
   /** 이번 문제에 붙은 이벤트 (PRD 20장) */
@@ -145,24 +150,6 @@ export class Session {
     // 지속형 이벤트(Double XP)의 남은 문제 수를 깎는다
     this.event = tickEvent(this.event);
 
-    // 이벤트 판정 — 보스전 중에는 굴리지 않는다
-    if (!this.event) {
-      const decision = rollEvent({
-        asked: this.asked,
-        floor,
-        rng: this.rng,
-        lastId: this.lastEventId,
-        inBoss: this.boss !== null,
-      });
-      if (decision.attempted) this.eventRolls++;
-      if (decision.event) {
-        this.eventsFired++;
-        this.event = activate(decision.event);
-        this.pendingEvent = decision.event;
-        this.lastEventId = decision.event.id;
-      }
-    }
-
     this.pick = this.engine.next({
       boss: this.boss !== null,
       difficultyBonus: difficultyBonus(this.event?.def ?? null),
@@ -176,11 +163,24 @@ export class Session {
     return this.quiz;
   }
 
-  /** 보스 등장 — 계단은 잠기고 정답이 보스 HP 를 깎는다 */
+  /**
+   * 보스 등장 — 계단이 잠기고 정답이 보스 HP 를 깎는다.
+   *
+   * **이벤트를 여기서 굴린다.** 문제가 보스전에만 있으므로 "5문제마다" 라는 기존 시점이
+   * 성립하지 않는다 (events.rollBossEvent 의 주석 참고).
+   */
   startBoss(floor: number): BossState {
     this.boss = spawnBoss(floor);
-    this.stepsLeft = 0;
     this.event = null;
+
+    const decision = rollBossEvent({ floor, rng: this.rng, lastId: this.lastEventId });
+    if (decision.attempted) this.eventRolls++;
+    if (decision.event) {
+      this.eventsFired++;
+      this.event = activate(decision.event);
+      this.pendingEvent = decision.event;
+      this.lastEventId = decision.event.id;
+    }
     return this.boss;
   }
 
@@ -202,7 +202,12 @@ export class Session {
     this.phase = 'over';
     this.combo = 0;
     this.tierIndex = 0;
-    this.stepsLeft = 0;
+    this.quiz = null;
+  }
+
+  /** 자유 등반 시작 — 판 시작 시점과 보스 처치 직후 */
+  startClimb(): void {
+    this.phase = 'climbing';
     this.quiz = null;
   }
 
@@ -275,7 +280,6 @@ export class Session {
         const hit = hitBoss(this.boss, quiz.difficulty, this.combo);
         if (hit.defeated) {
           this.boss = null;
-          this.stepsLeft = tier.segment;
           this.phase = 'climbing';
         } else {
           this.phase = 'quiz';
@@ -283,6 +287,7 @@ export class Session {
         return {
           ...base,
           correct: true,
+          // 처치 시 콤보 단계만큼의 계단을 물들인다 (보상 연출 — 진행을 막지는 않는다)
           segment: hit.defeated ? tier.segment : 0,
           style: tier.style,
           tierUp: this.tierIndex > prevTier,
@@ -293,7 +298,8 @@ export class Session {
         };
       }
 
-      this.stepsLeft = tier.segment;
+      /* 보스전 밖에서는 문제를 내지 않으므로 여기에 도달하지 않는다.
+         방어적으로 자유 등반으로 되돌린다 — 문제가 뜬 채로 멈추는 것이 가장 나쁘다 */
       this.phase = 'climbing';
 
       return {
@@ -355,13 +361,6 @@ export class Session {
     this.phase = 'revive';
     this.shownAt = this.clock();
     return this.quiz;
-  }
-
-  /** 계단 한 칸을 올랐다 */
-  stepClimbed(): { done: boolean } {
-    if (this.phase !== 'climbing') return { done: false };
-    this.stepsLeft = Math.max(0, this.stepsLeft - 1);
-    return { done: this.stepsLeft === 0 };
   }
 
   get currentStyle(): StepStyle {

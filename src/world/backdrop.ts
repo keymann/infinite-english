@@ -146,9 +146,13 @@ export class Backdrop {
     this.stars.visible = false;
     this.group.add(this.stars);
 
-    /* ── 구름 — 납작한 상자를 겹쳐 뭉치처럼 보이게 한다 ── */
+    /* ── 구름 ──
+       **상자가 아니라 각진 덩어리다.** BoxGeometry 로 뒀더니 흰 평면의 하드 엣지가
+       그대로 보여 하늘에 뜬 구름이 아니라 **흰 사각형 판**으로 읽혔다 —
+       브라우저 검증에서 보스 옆에 흰 슬래브가 떠 있는 것으로 드러났다.
+       저폴리 화풍에 맞게 20면체를 납작하게 눌러 뭉치처럼 보이게 한다. */
     this.clouds = new THREE.InstancedMesh(
-      new THREE.BoxGeometry(1, 0.3, 0.7),
+      new THREE.IcosahedronGeometry(1, 0),
       new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.9, fog: false }),
       18,
     );
@@ -398,15 +402,18 @@ export class Backdrop {
       );
     }
 
-    // 구름 — 시야 위쪽 띠에서 천천히 흐른다
+    /* 구름 — 시야 **맨 위 띠**에서 천천히 흐른다.
+       피치를 4~9° 로 좁혔다. 이전 범위(5.5~17.5°)는 화면 중앙까지 내려와
+       계단·보스와 같은 자리를 다퉜다 — 보스 옆에 흰 판이 떠 보인 원인이다. */
     for (let i = 0; i < this.clouds.count; i++) {
       const drift = ((this.time * (1.4 + (i % 3) * 0.6) + i * 24) % 150) - 75;
       const dist = 62 + ((i * 17) % 34);
-      const pitch = CAM_PITCH_TOP + 1.5 + ((i * 11) % 12);
+      const pitch = CAM_PITCH_TOP + ((i * 7) % 5);
       skyPosition(this.pos, drift * 0.55, pitch, dist);
       this.quat.identity();
       const w = 9 + ((i * 5) % 12);
-      this.scale.set(w, 2.4 + (i % 3), w * 0.7);
+      // 납작하게 — 20면체를 그대로 두면 공처럼 보인다
+      this.scale.set(w, 1.6 + (i % 3) * 0.6, w * 0.62);
       this.matrix.compose(this.pos, this.quat, this.scale);
       this.clouds.setMatrixAt(i, this.matrix);
     }
