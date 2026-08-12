@@ -28,6 +28,13 @@ const SPAWN_SEC = 0.9;
 const ATTACK_SEC = 0.6;
 /** 공격 때 플레이어 쪽으로 파고드는 거리(월드 유닛) */
 const LUNGE = 0.85;
+/**
+ * 돌진이 정점에 닿는 지점 (0~1).
+ *
+ * **플레이어 피격을 이 순간에 맞춘다.** 타격이 닿는 프레임과 맞는 리액션이 어긋나면
+ * "왜 저기서 아픈가" 가 된다 — 그래서 시간(setTimeout)이 아니라 애니메이션 진행도로 잰다.
+ */
+const IMPACT_AT = 0.4;
 
 export class BossActor {
   private readonly actor: Actor;
@@ -40,6 +47,10 @@ export class BossActor {
   private hitLeft = 0;
   private attackLeft = 0;
   private dying = false;
+  /** 이번 공격에서 타격 순간을 이미 알렸는지 */
+  private impactFired = false;
+  /** 아직 소비되지 않은 타격 신호 */
+  private impact = false;
 
   constructor(actor: Actor) {
     this.actor = actor;
@@ -99,6 +110,8 @@ export class BossActor {
     if (this.dying) return;
     this.attackLeft = ATTACK_SEC;
     this.hitLeft = 0;
+    this.impactFired = false;
+    this.impact = false;
     this.faceTarget();
     this.play(['Throw', 'Interact', 'Use_Item', 'Idle_B'], { loop: false, timeScale: 1.3 });
   }
@@ -107,6 +120,7 @@ export class BossActor {
   die() {
     this.dying = true;
     this.attackLeft = 0;
+    this.impact = false;
     this.play(['Death_A', 'Idle_A'], { loop: false, timeScale: 1.1 });
   }
 
@@ -123,9 +137,21 @@ export class BossActor {
     return this.actor.playing;
   }
 
-  /** 지금 공격 연출 중인지 — 카메라 흔들림 타이밍을 맞추는 데 쓴다 */
+  /** 지금 공격 연출 중인지 */
   get attacking(): boolean {
     return this.attackLeft > 0;
+  }
+
+  /**
+   * 타격이 닿은 프레임에 **한 번만** true — 플레이어 피격 리액션을 여기에 맞춘다.
+   *
+   * 신호를 소비하는 방식(consume)인 이유: 호출하는 쪽이 매 프레임 물어보고, 받은 프레임에
+   * 리액션을 시작한다. 불리언을 계속 켜 두면 리액션이 매 프레임 다시 시작된다.
+   */
+  takeImpact(): boolean {
+    if (!this.impact) return false;
+    this.impact = false;
+    return true;
   }
 
   update(dt: number) {
@@ -141,7 +167,12 @@ export class BossActor {
       this.attackLeft -= dt;
       const t = 1 - Math.max(0, this.attackLeft) / ATTACK_SEC;
       // 0~0.4 돌진, 0.4~1 복귀
-      const reach = t < 0.4 ? t / 0.4 : 1 - (t - 0.4) / 0.6;
+      const reach = t < IMPACT_AT ? t / IMPACT_AT : 1 - (t - IMPACT_AT) / (1 - IMPACT_AT);
+      // 돌진이 가장 깊이 들어간 프레임 — 여기서 플레이어가 맞는다
+      if (!this.impactFired && t >= IMPACT_AT) {
+        this.impactFired = true;
+        this.impact = true;
+      }
       this.scratch.subVectors(this.playerAt, this.base);
       const len = this.scratch.length() || 1;
       this.actor.root.position
