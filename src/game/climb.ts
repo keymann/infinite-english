@@ -4,25 +4,31 @@ import type { Actor } from '../three/actor';
 import type { Stairs } from '../world/stairs';
 import { CLIMB, PLAYER } from './balance';
 
-export type ClimbState = 'stand' | 'jump' | 'stumble';
+export type ClimbState = 'stand' | 'jump' | 'stumble' | 'dead';
 
 export type ClimbEvents = {
   onLand?(floor: number): void;
-  onStumble?(): void;
+  /** 방향을 틀렸다 — **판이 끝난다.** 호출한 쪽이 연출과 종료를 맡는다 */
+  onWrongDir?(): void;
 };
 
 /**
  * 계단 오르기 상태머신.
  *
- * Phase 1 은 퀴즈 없이 이 루프만 돌린다: 방향 입력 → 맞으면 한 칸 점프, 틀리면 휘청.
- * **틀려도 죽지 않는다.** HP 는 영어 오답 전용이고, 조작 실수는 콤보·시간만 잃는다
- * (기획서 3.2절). 조작 실수로 판이 끝나면 "영어를 틀려서 실패했다"는 인과가 무너진다.
+ * 방향 입력 → 맞으면 한 칸 점프, **틀리면 판이 끝난다.**
+ *
+ * 이전에는 틀려도 휘청이기만 했다 (PRD 3.2절: "조작 실수로 판이 끝나면 영어를 틀려서
+ * 실패했다는 인과가 무너진다"). 그 판단을 **뒤집었다** — 원작의 긴장이 방향 선택에서
+ * 오고, 실수해도 죽지 않으면 계단이 그냥 통과 구간이 된다는 요청이었다.
+ *
+ * 인과 문제는 남는다. 완화 장치를 그대로 둔다:
+ *  · `?autodir=1` — 방향 자동 보정. 조작이 어려운 아이는 방향으로 죽지 않는다
+ *  · 종료 화면이 "방향을 틀렸다"와 "영어를 틀렸다"를 구분해 보여 준다 (main.ts)
  */
 export class Climb {
   floor = 0;
   state: ClimbState = 'stand';
-  /** 방향 실수 누적 — 같은 칸에서 3번 틀리면 그냥 올려 보낸다 */
-  missesHere = 0;
+  /** 이번 판에서 방향을 틀린 횟수 — 이제 1 이면 판이 끝난다 (종료 사유 판별용) */
   totalMisses = 0;
 
   private timer = 0;
@@ -64,7 +70,6 @@ export class Climb {
   reset() {
     this.floor = 0;
     this.state = 'stand';
-    this.missesHere = 0;
     this.totalMisses = 0;
     this.timer = 0;
     this.buffered = null;
@@ -82,20 +87,16 @@ export class Climb {
       this.buffered = dir;
       this.bufferAge = 0;
     }
-    // 휘청이는 동안의 입력은 버린다 — 페널티가 페널티로 느껴져야 한다
+    // 'stumble'·'dead' 상태의 입력은 버린다 — 이미 판이 끝났다
   }
 
   private resolve(dir: Dir) {
-    if (dir === this.nextDir || this.missesHere >= 2) {
-      this.startJump();
-    } else {
-      this.startStumble();
-    }
+    if (dir === this.nextDir) this.startJump();
+    else this.fallOff();
   }
 
   private startJump() {
     this.floor++;
-    this.missesHere = 0;
     this.state = 'jump';
     this.timer = 0;
     this.from.copy(this.actor.root.position);
@@ -107,13 +108,19 @@ export class Climb {
     this.actor.play('jump', { loop: false, fade: 0.05, restart: true, timeScale: 1.6 });
   }
 
-  private startStumble() {
+  /**
+   * 방향을 틀렸다 — 판이 끝난다.
+   *
+   * 즉시 `dead` 로 가지 않고 `stumble` 을 거치는 이유: 아이가 **무엇을 틀렸는지 볼 시간**이
+   * 필요하다. 이 동안 입력은 받지 않으므로 다음 칸으로 올라가지지는 않는다.
+   */
+  private fallOff() {
     this.state = 'stumble';
     this.timer = 0;
-    this.missesHere++;
     this.totalMisses++;
+    this.buffered = null;
     this.actor.play('emote-no', { loop: false, fade: 0.05, restart: true, timeScale: 1.4 });
-    this.events.onStumble?.();
+    this.events.onWrongDir?.();
   }
 
   update(dt: number) {
@@ -144,14 +151,13 @@ export class Climb {
         break;
       }
       case 'stumble': {
+        // 연출이 끝나면 'dead' 로 굳는다. 'stand' 로 돌아가지 않는다 — 판은 이미 끝났다
         this.timer += dt;
-        if (this.timer >= CLIMB.stumbleSec) {
-          this.state = 'stand';
-          this.actor.play('idle', { fade: 0.1 });
-        }
+        if (this.timer >= CLIMB.stumbleSec) this.state = 'dead';
         break;
       }
       case 'stand':
+      case 'dead':
         break;
     }
   }

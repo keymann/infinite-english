@@ -24,11 +24,44 @@ export const CLIMB = {
   jumpSec: 0.17,
   /** 점프 아치 높이 */
   hopHeight: 0.22,
-  /** 방향을 틀렸을 때 휘청이는 시간(초). HP 는 줄지 않는다 (기획서 3.2절) */
-  stumbleSec: 0.4,
+  /**
+   * 방향을 틀렸을 때 판이 끝나기까지의 연출 시간(초).
+   *
+   * **방향 오선택은 즉시 판을 끝낸다.** 원작(무한의 계단)의 규칙이고 요청 사항이다.
+   * 이전에는 휘청이기만 하고 죽지 않았다(PRD 3.2절) — 그 판단을 뒤집었다.
+   * 아이가 "왜 끝났는지" 볼 시간은 필요하므로 즉시 암전하지 않고 이 시간만큼 보여 준다.
+   * 조작이 어려운 아이에게는 `?autodir=1`(방향 자동 보정)이 그대로 남아 있다.
+   */
+  stumbleSec: 0.55,
   /** 연속 입력 버퍼 — 점프 중 누른 입력을 이 시간 안에는 기억한다 */
   inputBufferSec: 0.12,
 } as const;
+
+/**
+ * 계단 타이머 (한 칸에 머무를 수 있는 시간).
+ *
+ * 한 칸을 밟을 때마다 다시 찬다. 0 이 되면 판이 끝난다 — 계단을 오르는 구간에
+ * "생각할 시간"이 아니라 "리듬"을 요구하는 장치다.
+ *
+ * **높은 층일수록 짧아지고 하한은 2초다.** 하한이 없으면 어느 층부터는 인간이
+ * 반응할 수 없는 시간이 되어 실력과 무관하게 끝난다.
+ * **보스전에는 적용하지 않는다** — 보스전은 계단이 잠기고 문제를 푸는 구간이므로
+ * 계단 시간을 재는 것이 의미가 없고, 문제를 읽을 시간을 빼앗으면 안 된다.
+ */
+export const STAIR_TIMER = {
+  /** 0층에서의 제한 시간(초) */
+  startSec: 5,
+  /** 한 층마다 줄어드는 양(초) — 300층에서 하한에 닿는다 */
+  decayPerFloor: 0.01,
+  /** 하한(초). 요구 사항의 최소값 */
+  minSec: 2,
+} as const;
+
+/** 그 층에서 한 칸에 허용되는 시간(초) */
+export function stairTimeFor(floor: number): number {
+  const raw = STAIR_TIMER.startSec - Math.max(0, floor) * STAIR_TIMER.decayPerFloor;
+  return Math.max(STAIR_TIMER.minSec, raw);
+}
 
 export const CAMERA = {
   fov: 42,
@@ -57,14 +90,18 @@ export const CAMERA = {
  * 콤보 단계.
  *
  * **콤보가 곧 계단 길이다** — 정답 보상이 점수 숫자가 아니라 게임 액션으로 나타난다
- * (PRD 35장 3항). 5연속이면 한 문제로 3칸을 오르고, 계단 색까지 바뀐다.
+ * (PRD 35장 3항).
+ *
+ * 구간을 1~4칸에서 **4~12칸으로 늘렸다.** 1칸이면 한 문제 풀고 한 번 탭하는 것이라
+ * 계단을 오르는 감각이 생기기 전에 문제가 다시 뜬다 — "몇 칸 오를 때마다 문제가 나와
+ * 집중이 끊긴다"는 지적이 정확했다. 문제 총량은 보스전으로 옮겼다 (game/boss.ts).
  */
 export const COMBO_TIERS = [
-  { min: 0, segment: 1, style: 'normal', label: '' },
-  { min: 3, segment: 2, style: 'normal', label: 'COMBO x3' },
-  { min: 5, segment: 3, style: 'gold', label: 'GOLD STEP' },
-  { min: 10, segment: 4, style: 'fire', label: 'FIRE STEP' },
-  { min: 20, segment: 4, style: 'lightning', label: 'ULTRA COMBO' },
+  { min: 0, segment: 4, style: 'normal', label: '' },
+  { min: 3, segment: 6, style: 'normal', label: 'COMBO x3' },
+  { min: 5, segment: 8, style: 'gold', label: 'GOLD STEP' },
+  { min: 10, segment: 10, style: 'fire', label: 'FIRE STEP' },
+  { min: 20, segment: 12, style: 'lightning', label: 'ULTRA COMBO' },
 ] as const;
 
 export type StepStyle = (typeof COMBO_TIERS)[number]['style'];

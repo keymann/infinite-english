@@ -1,4 +1,4 @@
-import type { SessionStats } from '../game/session';
+import type { FailReason, SessionStats } from '../game/session';
 import type { LevelUp } from '../progress/player';
 
 /** 한 판의 보상 — 결과 화면에서 "이만큼 자랐다"를 보여 준다 */
@@ -14,6 +14,20 @@ export type ResultReward = {
   chest: boolean;
   /** 이번 판에 처치한 보스 수 */
   bossDefeated: number;
+  /**
+   * 판이 끝난 이유.
+   *
+   * 이유마다 문구가 다르다 — "아깝다!"만 보여 주면 아이는 **무엇을 고쳐야 하는지** 모른다.
+   * 방향을 틀려서 끝난 판과 단어를 틀려서 끝난 판은 다음에 해야 할 일이 다르다.
+   */
+  reason: FailReason;
+};
+
+/** 종료 사유별 문구 */
+const FAIL_TEXT: Record<FailReason, { title: string; hint: string }> = {
+  quiz: { title: '아깝다!', hint: '틀린 단어를 다시 만나면 그때 맞히면 돼.' },
+  direction: { title: '방향을 틀렸어!', hint: '다음 칸 색을 먼저 보고 눌러 보자.' },
+  timeout: { title: '시간이 다 됐어!', hint: '계단은 망설이지 말고 리듬을 타면 쉬워.' },
 };
 
 /**
@@ -92,8 +106,8 @@ export class Overlays {
     const wrongList = stats.wrongWords.slice(0, 6);
     this.resultEl.innerHTML = `
       <div class="result-card">
-        <h2>아깝다!</h2>
-        <p class="result-sub">${stats.floor}층까지 올라갔어. 다음엔 더 높이 갈 수 있어.</p>
+        <h2>${FAIL_TEXT[reward.reason].title}</h2>
+        <p class="result-sub">${stats.floor}층까지 올라갔어. ${FAIL_TEXT[reward.reason].hint}</p>
         <dl class="result-stats">
           <div><dt>최고 층수</dt><dd>${stats.floor}</dd></div>
           <div><dt>점수</dt><dd>${stats.score}</dd></div>
