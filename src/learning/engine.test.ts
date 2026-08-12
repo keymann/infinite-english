@@ -22,8 +22,9 @@ import { WordBank } from './words';
  * 그래서 시간(`clock`)과 난수(`rng`)를 전부 주입받게 만들었다.
  */
 
+/** 운영과 같은 범위 (초3~중3, 1,000개) — adaptive 밴드가 L6~10 까지 보고 고른다 */
 const bank = new WordBank();
-await bank.loadLevels([1, 2, 3, 4, 5]);
+await bank.loadLevels([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 
 /** 조작 가능한 시계 */
 function fakeClock(start = 1_700_000_000_000) {

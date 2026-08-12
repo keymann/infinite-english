@@ -1,0 +1,111 @@
+word	level	grade	pos	meaning	meaningAlt	synonyms	tags	freq	example	exampleKo	image
+purpose	7	middle_1	noun	목적			thought|society	high	The purpose of this test is simple.	이 시험의 목적은 간단하다.
+goal	7	middle_1	noun	목표			thought|study	high	My goal is to read ten books.	내 목표는 책 열 권을 읽는 것이다.
+method	7	middle_1	noun	방법			thought|study	high	This method is easy for children.	이 방법은 아이들에게 쉽다.
+system	7	middle_1	noun	체계			thought|society	mid	Our school has a new system.	우리 학교는 새 체계를 가지고 있다.
+process	7	middle_1	noun	과정			thought|study	mid	The process takes a long time.	그 과정은 오랜 시간이 걸린다.
+pattern	7	middle_1	noun	양식			thought|quality	mid	This pattern repeats every week.	이 양식은 매주 반복된다.
+amount	7	middle_1	noun	양(수량)			quantity	mid	A small amount of salt is enough.	적은 양의 소금이면 충분하다.
+degree	7	middle_1	noun	정도			quantity	mid	The degree of danger is low.	위험의 정도가 낮다.
+value	7	middle_1	noun	가치			thought|society	high	The value of this idea is high.	이 생각의 가치는 높다.
+quality	7	middle_1	noun	품질			quality|society	mid	The quality of this bread is good.	이 빵의 품질은 좋다.
+condition	7	middle_1	noun	상태			quality|health	mid	The condition of the old bridge is bad.	오래된 다리의 상태가 나쁘다.
+situation	7	middle_1	noun	상황			thought|society	mid	The situation is difficult for us.	그 상황은 우리에게 어렵다.
+position	7	middle_1	noun	위치			place|quantity	mid	Draw the position of the moon.	달의 위치를 그려라.
+direction	7	middle_1	noun	방향			place|motion	high	Follow the direction of the river.	강의 방향을 따라가라.
+distance	7	middle_1	noun	거리			quantity|place	mid	The distance to the village is short.	마을까지의 거리는 짧다.
+speed	7	middle_1	noun	속도			quantity|speed	high	The speed of this train is high.	이 기차의 속도는 빠르다.
+weight	7	middle_1	noun	무게			quantity	mid	The weight of the box is heavy.	그 상자의 무게는 무겁다.
+height	7	middle_1	noun	높이			quantity|size	mid	Measure the height of the tree.	나무의 높이를 재라.
+length	7	middle_1	noun	길이			quantity|size	mid	The length of the river is long.	그 강의 길이는 길다.
+width	7	middle_1	noun	너비			quantity|size	mid	Measure the width of the window.	창문의 너비를 재라.
+shape	7	middle_1	noun	모양			quality|size	high	The shape of this leaf is round.	이 잎의 모양은 둥글다.
+size	7	middle_1	noun	크기			size|quantity	high	The size of my shoes is small.	내 신발의 크기는 작다.
+level	7	middle_1	noun	수준			study|quantity	mid	This book is for my level.	이 책은 내 수준에 맞다.
+consider	7	middle_1	verb	고려하다			thought	mid	Please consider my opinion.	제 의견을 고려해 주세요.
+suggest	7	middle_1	verb	제안하다			speech	mid	I suggest a new plan for us.	나는 우리를 위한 새 계획을 제안한다.
+discuss	7	middle_1	verb	논의하다			speech|school	mid	We discuss the problem in class.	우리는 수업에서 그 문제를 논의한다.
+argue	7	middle_1	verb	다투다			speech|emotion	mid	They argue about small things.	그들은 작은 일로 다툰다.
+mention	7	middle_1	verb	언급하다			speech	mid	She mentioned your name today.	그녀가 오늘 네 이름을 언급했다.
+announce	7	middle_1	verb	알리다			speech	mid	The teacher announced the test result.	선생님이 시험 결과를 알렸다.
+report	7	middle_1	verb	보고하다			speech|school	mid	Report the news to your teacher.	그 소식을 선생님께 보고해라.
+advise	7	middle_1	verb	조언하다			speech	mid	The doctor advised more exercise.	의사가 운동을 더 하라고 조언했다.
+warn	7	middle_1	verb	경고하다			speech|safety	mid	The sign warns about the deep water.	그 표지는 깊은 물에 대해 경고한다.
+complain	7	middle_1	verb	불평하다			speech|emotion	mid	He complains about the cold weather.	그는 추운 날씨에 대해 불평한다.
+apologize	7	middle_1	verb	사과하다			speech|society	mid	I apologize for my mistake.	나는 내 실수를 사과한다.
+thank	7	middle_1	verb	감사하다			speech|society	high	I thank my parents every day.	나는 매일 부모님께 감사한다.
+praise	7	middle_1	verb	칭찬하다			speech|emotion	mid	The teacher praised my essay.	선생님이 내 글짓기를 칭찬했다.
+blame	7	middle_1	verb	비난하다			speech|emotion	mid	Do not blame your classmate.	네 반 친구를 비난하지 마라.
+admit	7	middle_1	verb	인정하다			speech|thought	mid	He admitted his own mistake.	그는 자기 실수를 인정했다.
+deny	7	middle_1	verb	부인하다			speech|thought	mid	She denied the whole story.	그녀는 그 이야기 전체를 부인했다.
+doubt	7	middle_1	verb	의심하다			thought	mid	I doubt his answer.	나는 그의 답을 의심한다.
+realize	7	middle_1	verb	깨닫다			thought	mid	I realized my mistake too late.	나는 너무 늦게 내 실수를 깨달았다.
+notice	7	middle_1	verb	알아차리다			thought	high	Did you notice the new curtain?	새 커튼을 알아차렸니?
+recognize	7	middle_1	verb	알아보다			thought	mid	I recognize your voice.	나는 네 목소리를 알아본다.
+expect	7	middle_1	verb	기대하다			thought|emotion	high	We expect good weather tomorrow.	우리는 내일 좋은 날씨를 기대한다.
+suppose	7	middle_1	verb	가정하다			thought	mid	Suppose you have one hundred books.	책 백 권이 있다고 가정해 보라.
+judge	7	middle_1	verb	판단하다			thought	mid	Do not judge a book by its cover.	표지로 책을 판단하지 마라.
+society	7	middle_1	noun	사회			society	high	Every society has its own rules.	모든 사회는 자기 규칙이 있다.
+government	7	middle_1	noun	정부			society	mid	The government built a new bridge.	정부가 새 다리를 지었다.
+law	7	middle_1	noun	법			society	high	Everyone must follow the law.	모두가 법을 따라야 한다.
+right	7	middle_1	noun	권리			society	high	Every child has a right to learn.	모든 아이는 배울 권리가 있다.
+duty	7	middle_1	noun	의무			society	mid	It is my duty to help them.	그들을 돕는 것은 내 의무다.
+freedom	7	middle_1	noun	자유			society	high	Birds have freedom in the sky.	새들은 하늘에서 자유를 누린다.
+peace	7	middle_1	noun	평화			society|emotion	high	The quiet village is full of peace.	조용한 마을은 평화로 가득하다.
+justice	7	middle_1	noun	정의			society	mid	The story is about justice.	그 이야기는 정의에 관한 것이다.
+citizen	7	middle_1	noun	시민			society	mid	Every citizen votes in the election.	모든 시민이 선거에서 투표한다.
+public	7	middle_1	noun	대중			society	mid	The museum is open to the public.	그 박물관은 대중에게 열려 있다.
+election	7	middle_1	noun	선거			society	mid	The election is next month.	선거는 다음 달이다.
+tax	7	middle_1	noun	세금			society|money	mid	People pay tax to the government.	사람들은 정부에 세금을 낸다.
+money	7	middle_1	noun	돈			money|daily	high	I save money for a bicycle.	나는 자전거를 위해 돈을 모은다.
+price	7	middle_1	noun	가격			money	high	The price of this coat is high.	이 외투의 가격은 비싸다.
+cost	7	middle_1	noun	비용			money	high	The cost of the trip is small.	그 여행의 비용은 적다.
+business	7	middle_1	noun	사업			money|job	mid	My aunt started a small business.	우리 이모가 작은 사업을 시작했다.
+company	7	middle_1	noun	회사			money|job	high	My dad works for a big company.	우리 아빠는 큰 회사에서 일한다.
+trade	7	middle_1	noun	무역			money|society	mid	Trade between the two countries grew.	두 나라 사이의 무역이 늘었다.
+career	7	middle_1	noun	경력			job	mid	Her career as a nurse is long.	간호사로서 그녀의 경력은 길다.
+technology	7	middle_1	noun	기술			science|society	high	New technology helps every student.	새 기술은 모든 학생을 돕는다.
+invention	7	middle_1	noun	발명품			science	mid	The wheel was a great invention.	바퀴는 위대한 발명품이었다.
+experiment	7	middle_1	noun	실험			science|study	mid	The science experiment was safe.	그 과학 실험은 안전했다.
+theory	7	middle_1	noun	이론			science|thought	mid	His theory explains the result.	그의 이론은 그 결과를 설명한다.
+research	7	middle_1	noun	연구			science|study	mid	Her research is about ocean animals.	그녀의 연구는 바다 동물에 관한 것이다.
+data	7	middle_1	noun	자료			science|study	mid	The data shows a clear pattern.	그 자료는 분명한 양식을 보여 준다.
+engine	7	middle_1	noun	엔진			machine|transport	mid	The engine of this bus is strong.	이 버스의 엔진은 강하다.
+battery	7	middle_1	noun	건전지			machine|thing	mid	My clock needs a new battery.	내 시계는 새 건전지가 필요하다.
+signal	7	middle_1	noun	신호			machine|society	mid	Wait for the green signal.	초록 신호를 기다려라.
+screen	7	middle_1	noun	화면			machine|thing	high	The computer screen is bright.	컴퓨터 화면이 밝다.
+device	7	middle_1	noun	장치			machine|thing	mid	This small device measures speed.	이 작은 장치는 속도를 잰다.
+program	7	middle_1	noun	프로그램			machine|study	high	I use a program for my homework.	나는 숙제에 프로그램을 사용한다.
+network	7	middle_1	noun	망			machine|society	mid	The subway network covers the city.	지하철 망이 그 도시를 덮는다.
+electricity	7	middle_1	noun	전기			science|machine	mid	Electricity moves the machine.	전기가 그 기계를 움직인다.
+fuel	7	middle_1	noun	연료			science|transport	mid	The airplane needs more fuel.	그 비행기는 연료가 더 필요하다.
+metal	7	middle_1	noun	금속			material	mid	This spoon is made of metal.	이 숟가락은 금속으로 만들어졌다.
+plastic	7	middle_1	noun	플라스틱			material	high	Do not throw plastic into the river.	플라스틱을 강에 던지지 마라.
+glass	7	middle_1	noun	유리			material	high	The window is made of glass.	그 창문은 유리로 만들어졌다.
+wood	7	middle_1	noun	목재			material|nature	mid	This chair is made of wood.	이 의자는 목재로 만들어졌다.
+paper	7	middle_1	noun	종이			material|school	high	Write your name on the paper.	종이에 네 이름을 써라.
+cotton	7	middle_1	noun	면			material|clothes	mid	This shirt is soft cotton.	이 셔츠는 부드러운 면이다.
+necessary	7	middle_1	adjective	필요한			quality	high	Water is necessary for every plant.	물은 모든 식물에 필요하다.
+enough	7	middle_1	adjective	충분한			quantity|quality	high	We have enough bread for lunch.	우리는 점심에 충분한 빵이 있다.
+empty	7	middle_1	adjective	빈			quality|size	high	The bowl on the desk is empty.	책상 위의 그릇은 비어 있다.
+full	7	middle_1	adjective	가득한			quality|size	high	My bag is full of books.	내 가방은 책으로 가득하다.
+several	7	middle_1	adjective	몇몇의			quantity	mid	Several students joined the contest.	몇몇 학생이 그 대회에 참가했다.
+various	7	middle_1	adjective	다양한			quantity|quality	mid	The market sells various fruits.	그 시장은 다양한 과일을 판다.
+certain	7	middle_1	adjective	확실한			quality|thought	mid	I am certain about the answer.	나는 그 답에 확실하다.
+clear	7	middle_1	adjective	분명한			quality	high	Her voice is clear and calm.	그녀의 목소리는 분명하고 침착하다.
+exact	7	middle_1	adjective	정확한			quality	mid	Tell me the exact time.	정확한 시간을 말해 줘.
+correct	7	middle_1	adjective	옳은			quality|study	high	Your answer is correct.	네 답은 옳다.
+wrong	7	middle_1	adjective	틀린			quality|study	high	My first guess was wrong.	내 첫 짐작은 틀렸다.
+true	7	middle_1	adjective	참인			quality|thought	high	This story is true.	이 이야기는 참이다.
+false	7	middle_1	adjective	거짓인			quality|thought	mid	His answer was false.	그의 답은 거짓이었다.
+main	7	middle_1	adjective	주요한			quality	high	The main reason is very simple.	주요한 이유는 아주 간단하다.
+local	7	middle_1	adjective	지역의			place|society	mid	The local market opens early.	지역 시장은 일찍 문을 연다.
+national	7	middle_1	adjective	전국의			place|society	mid	This is a national contest.	이것은 전국 대회다.
+foreign	7	middle_1	adjective	외국의			place|language	mid	She studies a foreign language.	그녀는 외국어를 공부한다.
+global	7	middle_1	adjective	세계적인			place|society	mid	Global weather is changing fast.	세계적인 날씨가 빠르게 바뀌고 있다.
+total	7	middle_1	adjective	전체의			quantity	mid	The total price is one hundred.	전체 가격은 백이다.
+single	7	middle_1	adjective	하나의			quantity	mid	Not a single cloud is in the sky.	하늘에 구름 하나도 없다.
+double	7	middle_1	adjective	두 배의			quantity	mid	The double price is too high.	두 배의 가격은 너무 비싸다.
+equal	7	middle_1	adjective	같은			quantity|quality	mid	Cut the cake into equal pieces.	케이크를 같은 조각으로 잘라라.
+huge	7	middle_1	adjective	거대한			size	mid	A huge rock blocked the road.	거대한 바위가 길을 막았다.
+tiny	7	middle_1	adjective	아주 작은			size	mid	A tiny ant walks on my hand.	아주 작은 개미가 내 손 위를 걷는다.

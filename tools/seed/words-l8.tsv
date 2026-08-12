@@ -1,0 +1,111 @@
+word	level	grade	pos	meaning	meaningAlt	synonyms	tags	freq	example	exampleKo	image
+education	8	middle_2	noun	교육			study|society	high	Education is important for every child.	교육은 모든 아이에게 중요하다.
+knowledge	8	middle_2	noun	지식			study|thought	high	Books give us useful knowledge.	책은 우리에게 유용한 지식을 준다.
+skill	8	middle_2	noun	기량			study|quality	high	Her skill in music is special.	음악에서 그녀의 기량은 특별하다.
+talent	8	middle_2	noun	재능			study|quality	mid	He has a talent for drawing.	그는 그리기에 재능이 있다.
+ability	8	middle_2	noun	능력			study|quality	high	The ability to listen is necessary.	듣는 능력은 필요하다.
+graduate	8	middle_2	verb	졸업하다			school|study	mid	My sister will graduate this year.	우리 언니는 올해 졸업할 것이다.
+attend	8	middle_2	verb	참석하다			school|society	mid	I attend the science class every week.	나는 매주 과학 수업에 참석한다.
+review	8	middle_2	verb	복습하다			study|school	high	Review the new vocabulary before the test.	시험 전에 새 어휘를 복습해라.
+memorize	8	middle_2	verb	암기하다			study|school	mid	I memorize ten new words every day.	나는 매일 새 단어 열 개를 암기한다.
+concentrate	8	middle_2	verb	집중하다			study|thought	mid	Concentrate on the difficult question.	어려운 문제에 집중해라.
+analyze	8	middle_2	verb	분석하다			study|thought	mid	Analyze the data of the experiment.	그 실험의 자료를 분석해라.
+calculate	8	middle_2	verb	계산하다			study|quantity	mid	Calculate the total cost of the trip.	그 여행의 전체 비용을 계산해라.
+define	8	middle_2	verb	정의하다			study|language	mid	Define this word in one sentence.	이 단어를 한 문장으로 정의해라.
+translate	8	middle_2	verb	번역하다			language|study	mid	Translate the letter into Korean.	그 편지를 한국어로 번역해라.
+pronounce	8	middle_2	verb	발음하다			language|speech	mid	Pronounce the word slowly and clearly.	그 단어를 천천히 분명하게 발음해라.
+summarize	8	middle_2	verb	요약하다			study|language	mid	Summarize the story in one paragraph.	그 이야기를 한 단락으로 요약해라.
+quote	8	middle_2	verb	인용하다			language|study	mid	The writer quoted an old poem.	그 작가는 옛 시를 인용했다.
+pollution	8	middle_2	noun	오염			environment|society	high	Air pollution is a serious problem.	대기 오염은 심각한 문제다.
+climate	8	middle_2	noun	기후			environment|weather	high	The climate of this island is warm.	이 섬의 기후는 따뜻하다.
+temperature	8	middle_2	noun	온도			science|weather	high	The temperature of the water is low.	물의 온도가 낮다.
+atmosphere	8	middle_2	noun	대기			science|environment	mid	The atmosphere protects us from the sun.	대기는 해로부터 우리를 보호한다.
+recycle	8	middle_2	verb	재활용하다			environment|daily	high	We recycle paper and plastic at school.	우리는 학교에서 종이와 플라스틱을 재활용한다.
+waste	8	middle_2	verb	낭비하다			environment|daily	high	Do not waste clean water.	깨끗한 물을 낭비하지 마라.
+damage	8	middle_2	verb	손상시키다			environment	mid	The storm damaged the roof.	그 폭풍이 지붕을 손상시켰다.
+destroy	8	middle_2	verb	파괴하다			environment	mid	A flood can destroy a bridge.	홍수는 다리를 파괴할 수 있다.
+preserve	8	middle_2	verb	보존하다			environment|society	mid	We must preserve the old forest.	우리는 오래된 숲을 보존해야 한다.
+survive	8	middle_2	verb	살아남다			environment|health	mid	These plants survive in the cold desert.	이 식물들은 추운 사막에서 살아남는다.
+extinct	8	middle_2	adjective	멸종한			environment|animal	mid	Many large animals are extinct now.	많은 큰 동물이 지금은 멸종했다.
+species	8	middle_2	noun	종(생물)			science|animal	mid	This species lives only on one island.	이 종은 한 섬에만 산다.
+resource	8	middle_2	noun	자원			environment|society	mid	Water is the most important resource.	물은 가장 중요한 자원이다.
+flood	8	middle_2	noun	홍수			weather|environment	mid	The flood covered the whole village.	홍수가 마을 전체를 덮었다.
+drought	8	middle_2	noun	가뭄			weather|environment	mid	The long drought dried the river.	긴 가뭄이 강을 말렸다.
+earthquake	8	middle_2	noun	지진			nature|safety	mid	The earthquake shook every window.	지진이 모든 창문을 흔들었다.
+disaster	8	middle_2	noun	재난			safety|society	mid	The village prepared for the disaster.	그 마을은 재난에 대비했다.
+fear	8	middle_2	noun	두려움			emotion	high	My fear of the dark cave is real.	어두운 동굴에 대한 내 두려움은 진짜다.
+anger	8	middle_2	noun	분노			emotion	mid	His anger disappeared after a rest.	휴식 후에 그의 분노가 사라졌다.
+joy	8	middle_2	noun	기쁨			emotion	mid	The prize brought joy to our team.	그 상은 우리 팀에 기쁨을 가져왔다.
+sorrow	8	middle_2	noun	슬픔			emotion	mid	The song is full of sorrow.	그 노래는 슬픔으로 가득하다.
+pride	8	middle_2	noun	자부심			emotion	mid	She has pride in her own work.	그녀는 자기 일에 자부심이 있다.
+shame	8	middle_2	noun	수치심			emotion	mid	He felt shame about his mistake.	그는 자기 실수에 수치심을 느꼈다.
+regret	8	middle_2	verb	후회하다			emotion|thought	mid	I regret my careless answer.	나는 내 부주의한 답을 후회한다.
+relief	8	middle_2	noun	안도			emotion	mid	The good news brought great relief.	좋은 소식이 큰 안도를 가져왔다.
+stress	8	middle_2	noun	스트레스			emotion|health	high	Too much stress is bad for health.	너무 많은 스트레스는 건강에 나쁘다.
+pressure	8	middle_2	noun	압박			emotion|science	mid	The pressure of the test was heavy.	그 시험의 압박은 무거웠다.
+comfort	8	middle_2	verb	위로하다			emotion|society	mid	I comforted my worried friend.	나는 걱정하는 친구를 위로했다.
+encourage	8	middle_2	verb	격려하다			emotion|society	high	My teacher encouraged me before the contest.	선생님이 대회 전에 나를 격려했다.
+inspire	8	middle_2	verb	영감을 주다			emotion|thought	mid	The artist inspires young students.	그 예술가는 어린 학생들에게 영감을 준다.
+satisfy	8	middle_2	verb	만족시키다			emotion	mid	The simple dinner satisfied everyone.	간단한 저녁이 모두를 만족시켰다.
+disappoint	8	middle_2	verb	실망시키다			emotion	mid	The bad result disappointed my parents.	나쁜 결과가 부모님을 실망시켰다.
+impress	8	middle_2	verb	감명을 주다			emotion	mid	Her brave answer impressed the class.	그녀의 용감한 답이 반에 감명을 주었다.
+amaze	8	middle_2	verb	놀라게 하다			emotion	mid	The huge waterfall amazed the children.	거대한 폭포가 아이들을 놀라게 했다.
+bother	8	middle_2	verb	귀찮게 하다			emotion|daily	mid	Do not bother your sister now.	지금 여동생을 귀찮게 하지 마라.
+annoy	8	middle_2	verb	짜증나게 하다			emotion|daily	mid	The noisy machine annoys everyone.	그 시끄러운 기계는 모두를 짜증나게 한다.
+relationship	8	middle_2	noun	관계			society|family	high	The relationship between them is good.	그들 사이의 관계는 좋다.
+friendship	8	middle_2	noun	우정			society|emotion	high	Our friendship began in the third grade.	우리 우정은 3학년에 시작되었다.
+trust	8	middle_2	verb	신뢰하다			society|emotion	high	I trust my old neighbor.	나는 오래된 이웃을 신뢰한다.
+cooperate	8	middle_2	verb	협력하다			society|group	mid	Every member must cooperate in the contest.	모든 회원이 대회에서 협력해야 한다.
+compete	8	middle_2	verb	경쟁하다			society|group	mid	Two teams compete for the prize.	두 팀이 상을 위해 경쟁한다.
+communicate	8	middle_2	verb	소통하다			society|speech	high	We communicate with a foreign friend.	우리는 외국 친구와 소통한다.
+participate	8	middle_2	verb	참여하다			society|group	mid	Many students participate in the festival.	많은 학생이 축제에 참여한다.
+volunteer	8	middle_2	verb	자원봉사하다			society	mid	They volunteer at the animal hospital.	그들은 동물 병원에서 자원봉사한다.
+donate	8	middle_2	verb	기부하다			society	mid	Our class donated old books.	우리 반은 낡은 책을 기부했다.
+contribute	8	middle_2	verb	기여하다			society	mid	Every idea contributes to the plan.	모든 생각이 그 계획에 기여한다.
+lead	8	middle_2	verb	이끌다			society|motion	high	The captain leads our team well.	주장이 우리 팀을 잘 이끈다.
+obey	8	middle_2	verb	따르다			society	mid	Please obey the safety rules.	안전 규칙을 따라 주세요.
+treat	8	middle_2	verb	대하다			society	high	Treat every classmate with respect.	모든 반 친구를 존중으로 대해라.
+ignore	8	middle_2	verb	무시하다			society|thought	mid	Do not ignore the warning signal.	경고 신호를 무시하지 마라.
+forgive	8	middle_2	verb	용서하다			society|emotion	mid	Please forgive my careless mistake.	내 부주의한 실수를 용서해 주세요.
+complex	8	middle_2	adjective	복잡한			quality|thought	mid	This machine has a complex system.	이 기계는 복잡한 체계를 가지고 있다.
+obvious	8	middle_2	adjective	뻔한			quality|thought	mid	The answer was obvious to everyone.	그 답은 모두에게 뻔했다.
+specific	8	middle_2	adjective	구체적인			quality|thought	mid	Give me a specific example.	구체적인 예시를 주세요.
+general	8	middle_2	adjective	일반적인			quality|thought	high	This is the general opinion of the class.	이것은 반의 일반적인 의견이다.
+typical	8	middle_2	adjective	전형적인			quality	mid	This is a typical summer storm.	이것은 전형적인 여름 폭풍이다.
+unusual	8	middle_2	adjective	별난			quality	mid	The bird has an unusual shape.	그 새는 별난 모양을 가지고 있다.
+normal	8	middle_2	adjective	정상적인			quality|health	high	His temperature is normal today.	그의 온도는 오늘 정상적이다.
+strange	8	middle_2	adjective	이상한			quality	high	A strange bird appeared in the garden.	이상한 새가 정원에 나타났다.
+familiar	8	middle_2	adjective	익숙한			quality|thought	mid	This street is familiar to me.	이 거리는 나에게 익숙하다.
+unknown	8	middle_2	adjective	알려지지 않은			quality|thought	mid	The writer of this letter is unknown.	이 편지의 작가는 알려지지 않았다.
+sudden	8	middle_2	adjective	갑작스러운			quality|time	mid	A sudden wind closed the window.	갑작스러운 바람이 창문을 닫았다.
+gradual	8	middle_2	adjective	점진적인			quality|time	mid	The gradual change was hard to notice.	그 점진적인 변화는 알아차리기 어려웠다.
+constant	8	middle_2	adjective	끊임없는			quality|time	mid	The constant noise annoys the neighbor.	끊임없는 소음이 이웃을 짜증나게 한다.
+temporary	8	middle_2	adjective	일시적인			quality|time	mid	This is only a temporary problem.	이것은 일시적인 문제일 뿐이다.
+permanent	8	middle_2	adjective	영구적인			quality|time	mid	The damage to the wood is permanent.	목재의 손상은 영구적이다.
+recent	8	middle_2	adjective	최근의			time|quality	high	The recent news surprised our village.	최근 소식이 우리 마을을 놀라게 했다.
+current	8	middle_2	adjective	현재의			time|quality	high	The current price is too high.	현재 가격은 너무 비싸다.
+previous	8	middle_2	adjective	이전의			time|quality	mid	My previous answer was wrong.	내 이전 답은 틀렸다.
+future	8	middle_2	noun	미래			time	high	I plan my future carefully.	나는 내 미래를 신중하게 계획한다.
+past	8	middle_2	noun	과거			time	high	We learn history from the past.	우리는 과거로부터 역사를 배운다.
+present	8	middle_2	noun	현재			time	high	Live in the present and be happy.	현재에 살고 행복해라.
+century	8	middle_2	noun	세기			time|history	mid	This castle is from an old century.	이 성은 오래된 세기의 것이다.
+decade	8	middle_2	noun	십 년			time	mid	The city changed in one decade.	그 도시는 십 년 만에 바뀌었다.
+moment	8	middle_2	noun	순간			time	high	Wait for one moment, please.	한 순간만 기다려 주세요.
+period	8	middle_2	noun	기간			time	mid	The rainy period lasts two months.	비가 오는 기간은 두 달 동안 이어진다.
+schedule	8	middle_2	noun	일정			time|daily	high	My schedule for the week is full.	이번 주 내 일정은 가득하다.
+deadline	8	middle_2	noun	기한			time|school	mid	The deadline for the essay is tomorrow.	글짓기 기한은 내일이다.
+delay	8	middle_2	verb	지연시키다			time|transport	mid	The storm delayed every train.	폭풍이 모든 기차를 지연시켰다.
+disease	8	middle_2	noun	질병			health	high	This disease spreads through dirty water.	이 질병은 더러운 물을 통해 퍼진다.
+injury	8	middle_2	noun	부상			health|safety	mid	His injury is not serious.	그의 부상은 심각하지 않다.
+symptom	8	middle_2	noun	증상			health	mid	A fever is the first symptom.	열이 첫 증상이다.
+treatment	8	middle_2	noun	치료			health	mid	The treatment takes about one week.	그 치료는 약 한 주가 걸린다.
+operation	8	middle_2	noun	수술			health	mid	The operation on his knee was safe.	그의 무릎 수술은 안전했다.
+recover	8	middle_2	verb	회복하다			health	mid	He recovered from the disease quickly.	그는 그 질병에서 빨리 회복했다.
+cure	8	middle_2	verb	치료하다			health	mid	This medicine cures a bad cough.	이 약은 심한 기침을 치료한다.
+breathe	8	middle_2	verb	숨쉬다			health|body	high	Breathe slowly through your nose.	코로 천천히 숨쉬어라.
+novel	8	middle_2	noun	소설			art|study	high	I read a long novel every month.	나는 매달 긴 소설을 읽는다.
+poem	8	middle_2	noun	시			art|language	mid	She wrote a short poem about spring.	그녀는 봄에 대한 짧은 시를 썼다.
+drama	8	middle_2	noun	연극			art	mid	Our class prepared a school drama.	우리 반은 학교 연극을 준비했다.
+painting	8	middle_2	noun	그림			art	high	This painting shows an ancient city.	이 그림은 고대 도시를 보여 준다.
+concert	8	middle_2	noun	음악회			art|group	mid	The singer gave a free concert.	그 가수는 무료 음악회를 열었다.
+audience	8	middle_2	noun	관객			art|group	mid	The audience was quiet during the drama.	연극 동안 관객은 조용했다.

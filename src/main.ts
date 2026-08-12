@@ -64,8 +64,18 @@ import { WORLD_SETS, bandProgress, hasAmbientFlyers, themeForFloor, type Theme }
 const params = new URLSearchParams(location.search);
 const app = document.querySelector<HTMLDivElement>('#app')!;
 
-/** MVP 범위 = Level 1~5 (PRD 32장) */
-const LEVELS = [1, 2, 3, 4, 5];
+/**
+ * 단어 DB 전 범위 = Level 1~10 (초3~중3, 1,000개).
+ *
+ * **일부 레벨만 로드하면 안 된다.** `distractorPool` 은 빌드 시점에 1,000개 전체에서
+ * 계산되므로, L5 단어의 오답 후보 12개가 전부 L6 일 수 있다 (`village` 가 실제로 그랬다 —
+ * museum 하나만 남아 4지선다를 만들 수 없었다). 생성기는 없는 단어를 걸러내지만
+ * 걸러낸 뒤 3개가 남는다는 보장이 없다.
+ *
+ * 아이가 만나는 난이도는 로드 범위가 아니라 **adaptive(theta) 가 정한다** —
+ * 초3 이 L10 단어를 받는 일은 출제 밴드에서 막힌다 (learning/adaptive.ts).
+ */
+const LEVELS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
 async function boot() {
   const profile = resolveProfile();

@@ -1,0 +1,106 @@
+word	level	grade	pos	meaning	meaningAlt	synonyms	tags	freq	example	exampleKo	image
+philosophy	10	middle_3	noun	철학			study|thought	mid	Her philosophy of life is very simple.	그녀의 삶의 철학은 아주 간단하다.
+psychology	10	middle_3	noun	심리학			study|science	mid	Psychology explains human behavior.	심리학은 인간 행동을 설명한다.
+economy	10	middle_3	noun	경제			society|money	high	The economy of this country improved recently.	이 나라의 경제가 최근에 향상되었다.
+politics	10	middle_3	noun	정치			society	mid	Politics affects the daily life of citizens.	정치는 시민의 일상에 영향을 준다.
+religion	10	middle_3	noun	종교			society|history	mid	Every religion has its own tradition.	모든 종교는 자기 전통을 가지고 있다.
+civilization	10	middle_3	noun	문명			history|society	mid	An ancient civilization built this city.	고대 문명이 이 도시를 지었다.
+democracy	10	middle_3	noun	민주주의			society	mid	Democracy protects the freedom of every citizen.	민주주의는 모든 시민의 자유를 보호한다.
+literature	10	middle_3	noun	문학			study|art	mid	Korean literature includes many famous novels.	한국 문학은 많은 유명한 소설을 포함한다.
+architecture	10	middle_3	noun	건축			art|society	mid	The architecture of this castle is remarkable.	이 성의 건축은 놀랍다.
+agriculture	10	middle_3	noun	농업			society|nature	mid	Agriculture depends on the climate.	농업은 기후에 의존한다.
+industry	10	middle_3	noun	산업			society|money	high	The car industry employs many engineers.	자동차 산업은 많은 기술자를 고용한다.
+assume	10	middle_3	verb	추정하다			thought	mid	Do not assume the result before the experiment.	실험 전에 결과를 추정하지 마라.
+indicate	10	middle_3	verb	나타내다			thought|science	mid	The data indicates a gradual change.	그 자료는 점진적인 변화를 나타낸다.
+demonstrate	10	middle_3	verb	입증하다			thought|science	mid	The experiment demonstrated his theory.	그 실험이 그의 이론을 입증했다.
+illustrate	10	middle_3	verb	예를 들어 보이다			thought|study	mid	This story illustrates the value of honesty.	이 이야기는 정직의 가치를 예를 들어 보인다.
+emphasize	10	middle_3	verb	강조하다			speech|study	mid	The teacher emphasized the main point.	선생님이 주요한 점을 강조했다.
+interpret	10	middle_3	verb	해석하다			thought|language	mid	Interpret this poem in your own words.	이 시를 네 말로 해석해라.
+evaluate	10	middle_3	verb	평가하다			thought|study	mid	The judges evaluate every essay carefully.	심사원들이 모든 글짓기를 신중하게 평가한다.
+estimate	10	middle_3	verb	추산하다			thought|quantity	mid	Estimate the weight of this rock.	이 바위의 무게를 추산해라.
+predict	10	middle_3	verb	예측하다			thought|science	mid	Scientists predict the weather with data.	과학자들은 자료로 날씨를 예측한다.
+criticize	10	middle_3	verb	비판하다			speech|thought	mid	Do not criticize without clear evidence.	분명한 증거 없이 비판하지 마라.
+justify	10	middle_3	verb	정당화하다			thought|speech	mid	He could not justify his careless mistake.	그는 자기 부주의한 실수를 정당화할 수 없었다.
+distinguish	10	middle_3	verb	구별하다			thought	mid	Distinguish a fact from an opinion.	사실을 의견과 구별해라.
+determine	10	middle_3	verb	결정짓다			thought	mid	Effort determines the final result.	노력이 최종 결과를 결정짓는다.
+reveal	10	middle_3	verb	드러내다			speech|thought	mid	The research revealed a surprising fact.	그 연구가 놀라운 사실을 드러냈다.
+significant	10	middle_3	adjective	중대한			quality|thought	high	This is a significant moment for us.	이것은 우리에게 중대한 순간이다.
+essential	10	middle_3	adjective	필수적인			quality	high	Sleep is essential for good health.	잠은 좋은 건강에 필수적이다.
+fundamental	10	middle_3	adjective	근본적인			quality|thought	mid	Reading is a fundamental skill.	읽기는 근본적인 기량이다.
+potential	10	middle_3	adjective	잠재적인			quality|thought	mid	Every student has potential ability.	모든 학생은 잠재적인 능력이 있다.
+efficient	10	middle_3	adjective	효율적인			quality|machine	mid	This engine is very efficient.	이 엔진은 아주 효율적이다.
+effective	10	middle_3	adjective	효과적인			quality|health	high	The medicine is effective against a fever.	그 약은 열에 효과적이다.
+appropriate	10	middle_3	adjective	적절한			quality|society	mid	Choose an appropriate word for this sentence.	이 문장에 적절한 단어를 골라라.
+reasonable	10	middle_3	adjective	합리적인			quality|thought	mid	The price of this device is reasonable.	이 장치의 가격은 합리적이다.
+remarkable	10	middle_3	adjective	놀라운			quality	mid	Her progress this year is remarkable.	올해 그녀의 진전은 놀랍다.
+abstract	10	middle_3	adjective	추상적인			quality|thought	mid	This painting is abstract and strange.	이 그림은 추상적이고 이상하다.
+relative	10	middle_3	adjective	상대적인			quality|thought	mid	Speed is a relative idea.	속도는 상대적인 생각이다.
+absolute	10	middle_3	adjective	절대적인			quality|thought	mid	There is no absolute truth here.	여기에 절대적인 진실은 없다.
+objective	10	middle_3	adjective	객관적인			quality|thought	mid	A reporter needs an objective attitude.	기자는 객관적인 태도가 필요하다.
+subjective	10	middle_3	adjective	주관적인			quality|thought	mid	His conclusion is too subjective.	그의 결론은 너무 주관적이다.
+accurate	10	middle_3	adjective	정밀한			quality|science	mid	This clock is accurate to one moment.	이 시계는 한 순간까지 정밀하다.
+ethics	10	middle_3	noun	윤리			society|thought	mid	Ethics guides the work of every doctor.	윤리는 모든 의사의 일을 이끈다.
+moral	10	middle_3	adjective	도덕적인			society|quality	mid	Helping a neighbor is a moral duty.	이웃을 돕는 것은 도덕적인 의무다.
+responsibility	10	middle_3	noun	책임			society	high	Safety is the responsibility of every member.	안전은 모든 구성원의 책임이다.
+authority	10	middle_3	noun	권위			society	mid	The principal has authority in this school.	교장은 이 학교에서 권위를 가진다.
+privilege	10	middle_3	noun	특권			society	mid	Education should not be a privilege.	교육은 특권이 되어서는 안 된다.
+conflict	10	middle_3	noun	갈등			society|emotion	mid	The conflict between two members ended quickly.	두 구성원 사이의 갈등은 빨리 끝났다.
+compromise	10	middle_3	noun	타협			society|thought	mid	They reached a fair compromise.	그들은 공정한 타협에 이르렀다.
+negotiate	10	middle_3	verb	협상하다			society|speech	mid	The two companies negotiated a new price.	두 회사가 새 가격을 협상했다.
+agreement	10	middle_3	noun	합의			society|speech	mid	Every member signed the agreement.	모든 구성원이 그 합의에 서명했다.
+contract	10	middle_3	noun	계약			society|money	mid	The contract with the factory is clear.	그 공장과의 계약은 분명하다.
+chemical	10	middle_3	noun	화학 물질			science|material	mid	This chemical damages the river.	이 화학 물질은 강을 손상시킨다.
+physical	10	middle_3	adjective	물리적인			science|body	high	Exercise improves physical condition.	운동은 물리적인 상태를 향상시킨다.
+biology	10	middle_3	noun	생물학			science|subject	mid	Biology explains how a cell works.	생물학은 세포가 어떻게 작동하는지 설명한다.
+chemistry	10	middle_3	noun	화학			science|subject	mid	Chemistry class starts after lunch.	화학 수업은 점심 후에 시작한다.
+physics	10	middle_3	noun	물리학			science|subject	mid	Physics explains gravity and speed.	물리학은 중력과 속도를 설명한다.
+artificial	10	middle_3	adjective	인공적인			science|machine	mid	This lake is artificial.	이 호수는 인공적이다.
+automatic	10	middle_3	adjective	자동의			machine	mid	The door of this bus is automatic.	이 버스의 문은 자동이다.
+digital	10	middle_3	adjective	디지털의			machine	high	My digital clock shows the exact time.	내 디지털 시계는 정확한 시간을 보여 준다.
+electronic	10	middle_3	adjective	전자의			machine	mid	This electronic device needs a battery.	이 전자 장치는 건전지가 필요하다.
+mechanical	10	middle_3	adjective	기계적인			machine	mid	The problem was a mechanical error.	그 문제는 기계적인 오류였다.
+anxiety	10	middle_3	noun	불안			emotion|health	mid	Deep breath reduces anxiety before a test.	깊은 숨은 시험 전 불안을 줄인다.
+motivation	10	middle_3	noun	동기			emotion|study	mid	A clear goal gives strong motivation.	분명한 목표는 강한 동기를 준다.
+attitude	10	middle_3	noun	태도			quality|society	high	His polite attitude impressed the teacher.	그의 예의 바른 태도가 선생님에게 감명을 주었다.
+behavior	10	middle_3	noun	행동			society|quality	high	The behavior of this animal is unusual.	이 동물의 행동은 별나다.
+personality	10	middle_3	noun	성격			quality|emotion	high	Her cheerful personality helps the team.	그녀의 밝은 성격이 팀을 돕는다.
+emotion	10	middle_3	noun	감정			emotion	high	Music expresses deep emotion.	음악은 깊은 감정을 표현한다.
+memory	10	middle_3	noun	기억			thought|study	high	My memory of that summer is clear.	그 여름에 대한 내 기억은 분명하다.
+imagination	10	middle_3	noun	상상력			thought|art	mid	A novel grows from imagination.	소설은 상상력에서 자란다.
+curiosity	10	middle_3	noun	호기심			thought|emotion	mid	Curiosity leads every young scientist.	호기심이 모든 어린 과학자를 이끈다.
+author	10	middle_3	noun	저자			art|study	high	The author of this novel is famous.	이 소설의 저자는 유명하다.
+publish	10	middle_3	verb	출판하다			art|society	mid	The company published her first poem.	그 회사가 그녀의 첫 시를 출판했다.
+article	10	middle_3	noun	기사			society|study	high	I read an article about pollution.	나는 오염에 관한 기사를 읽었다.
+chapter	10	middle_3	noun	장(책)			study|art	high	The first chapter of this novel is short.	이 소설의 첫 장은 짧다.
+title	10	middle_3	noun	제목			study|art	high	The title of the poem is beautiful.	그 시의 제목은 아름답다.
+plot	10	middle_3	noun	줄거리			art|study	mid	The plot of this drama is complex.	이 연극의 줄거리는 복잡하다.
+translation	10	middle_3	noun	번역			language|study	mid	The translation of this sentence is wrong.	이 문장의 번역은 틀렸다.
+dialogue	10	middle_3	noun	대화			language|speech	mid	The dialogue in this drama is natural.	이 연극의 대화는 자연스럽다.
+expression	10	middle_3	noun	표현			language|speech	high	This expression is common in Korean.	이 표현은 한국어에서 흔하다.
+empire	10	middle_3	noun	제국			history|society	mid	The ancient empire built long roads.	그 고대 제국은 긴 길을 지었다.
+colony	10	middle_3	noun	식민지			history|society	mid	The island was a colony long ago.	그 섬은 오래전에 식민지였다.
+revolution	10	middle_3	noun	혁명			history|society	mid	The revolution changed the whole society.	그 혁명이 사회 전체를 바꾸었다.
+independence	10	middle_3	noun	독립			history|society	high	The nation celebrates its independence today.	그 국가는 오늘 독립을 기념한다.
+border	10	middle_3	noun	국경			place|society	mid	The river forms the border of two nations.	그 강이 두 국가의 국경을 이룬다.
+territory	10	middle_3	noun	영토			place|society	mid	This island is national territory.	이 섬은 전국의 영토다.
+nation	10	middle_3	noun	국가			society|place	high	Every nation has its own history.	모든 국가는 자기 역사를 가지고 있다.
+international	10	middle_3	adjective	국제적인			society|place	high	This is an international science contest.	이것은 국제적인 과학 대회다.
+historical	10	middle_3	adjective	역사적인			history|study	mid	The museum shows historical data.	그 박물관은 역사적인 자료를 보여 준다.
+benefit	10	middle_3	noun	이점			thought|society	high	Daily exercise has a clear benefit.	매일 하는 운동은 분명한 이점이 있다.
+advantage	10	middle_3	noun	유리한 점			thought|society	high	Her height is an advantage in sport.	그녀의 키는 운동에서 유리한 점이다.
+disadvantage	10	middle_3	noun	불리한 점			thought|society	mid	The high cost is a disadvantage.	높은 비용은 불리한 점이다.
+challenge	10	middle_3	noun	도전			thought|society	high	The final floor was a great challenge.	마지막 층은 큰 도전이었다.
+solution	10	middle_3	noun	해결책			thought|study	high	We found a simple solution together.	우리는 함께 간단한 해결책을 찾았다.
+strategy	10	middle_3	noun	전략			thought|society	mid	Our strategy for the contest was clear.	대회를 위한 우리 전략은 분명했다.
+progress	10	middle_3	noun	진전			study|thought	high	Your progress in English is remarkable.	영어에서 네 진전은 놀랍다.
+development	10	middle_3	noun	발전			society|study	high	The development of this city was fast.	이 도시의 발전은 빨랐다.
+improvement	10	middle_3	noun	개선			study|quality	high	The improvement of the road took one decade.	그 길의 개선은 십 년이 걸렸다.
+therefore	10	middle_3	adverb	그러므로			thought|speech	high	It rained, therefore the contest stopped.	비가 왔고, 그러므로 대회가 멈췄다.
+however	10	middle_3	adverb	그러나			thought|speech	high	The test was hard, however I finished it.	시험은 어려웠지만, 그러나 나는 끝냈다.
+moreover	10	middle_3	adverb	더욱이			thought|speech	mid	The plan is simple, moreover it is cheap.	그 계획은 간단하고, 더욱이 값이 싸다.
+otherwise	10	middle_3	adverb	그렇지 않으면			thought|speech	mid	Study now, otherwise you will regret it.	지금 공부해라, 그렇지 않으면 후회할 것이다.
+nevertheless	10	middle_3	adverb	그럼에도			thought|speech	mid	He was tired, nevertheless he continued.	그는 피곤했지만, 그럼에도 계속했다.
+instead	10	middle_3	adverb	대신에			thought|speech	high	Drink water instead of soda.	탄산음료 대신에 물을 마셔라.
+besides	10	middle_3	adverb	게다가			thought|speech	mid	Besides, the schedule is already full.	게다가 일정은 이미 가득하다.
+meanwhile	10	middle_3	adverb	그동안			time|speech	mid	Meanwhile the audience waited quietly.	그동안 관객은 조용히 기다렸다.
+rather	10	middle_3	adverb	오히려			thought|speech	high	The result was rather surprising.	그 결과는 오히려 놀라웠다.

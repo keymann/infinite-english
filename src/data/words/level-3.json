@@ -1,6 +1,6 @@
 [
  {
-  "id": "word_000200",
+  "id": "word_000305",
   "word": "shoulder",
   "meaning": "어깨",
   "meaningAlt": [],
@@ -25,17 +25,17 @@
    "neck",
    "toe",
    "tongue",
+   "skin",
    "hand",
    "foot",
    "head",
    "nose",
-   "mouth",
-   "ear"
+   "mouth"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000201",
+  "id": "word_000306",
   "word": "knee",
   "meaning": "무릎",
   "meaningAlt": [],
@@ -61,16 +61,16 @@
    "tooth",
    "tongue",
    "nose",
+   "bone",
    "eye",
    "knife",
    "uncle",
-   "hand",
-   "foot"
+   "hand"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000202",
+  "id": "word_000307",
   "word": "finger",
   "meaning": "손가락",
   "meaningAlt": [],
@@ -105,7 +105,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000203",
+  "id": "word_000308",
   "word": "toe",
   "meaning": "발가락",
   "meaningAlt": [],
@@ -140,7 +140,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000204",
+  "id": "word_000309",
   "word": "tooth",
   "meaning": "치아",
   "meaningAlt": [],
@@ -175,7 +175,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000205",
+  "id": "word_000310",
   "word": "tongue",
   "meaning": "혀",
   "meaningAlt": [],
@@ -200,17 +200,17 @@
    "knee",
    "finger",
    "neck",
+   "bone",
    "hand",
    "foot",
    "head",
    "nose",
-   "mouth",
-   "ear"
+   "mouth"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000206",
+  "id": "word_000311",
   "word": "neck",
   "meaning": "목",
   "meaningAlt": [],
@@ -245,7 +245,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000207",
+  "id": "word_000312",
   "word": "shirt",
   "meaning": "셔츠",
   "meaningAlt": [],
@@ -280,7 +280,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000208",
+  "id": "word_000313",
   "word": "pants",
   "meaning": "바지",
   "meaningAlt": [],
@@ -315,7 +315,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000209",
+  "id": "word_000314",
   "word": "skirt",
   "meaning": "치마",
   "meaningAlt": [],
@@ -350,7 +350,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000210",
+  "id": "word_000315",
   "word": "coat",
   "meaning": "외투",
   "meaningAlt": [],
@@ -376,16 +376,16 @@
    "shirt",
    "pants",
    "shoes",
+   "cotton",
    "cook",
    "tooth",
    "cloud",
-   "class",
-   "aunt"
+   "class"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000211",
+  "id": "word_000316",
   "word": "shoes",
   "meaning": "신발",
   "meaningAlt": [],
@@ -420,7 +420,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000212",
+  "id": "word_000317",
   "word": "socks",
   "meaning": "양말",
   "meaningAlt": [],
@@ -455,7 +455,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000213",
+  "id": "word_000318",
   "word": "hat",
   "meaning": "모자",
   "meaningAlt": [],
@@ -490,7 +490,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000214",
+  "id": "word_000319",
   "word": "gloves",
   "meaning": "장갑",
   "meaningAlt": [],
@@ -525,7 +525,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000215",
+  "id": "word_000320",
   "word": "cloud",
   "meaning": "구름",
   "meaningAlt": [],
@@ -560,7 +560,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000216",
+  "id": "word_000321",
   "word": "wind",
   "meaning": "바람",
   "meaningAlt": [],
@@ -595,7 +595,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000217",
+  "id": "word_000322",
   "word": "storm",
   "meaning": "폭풍",
   "meaningAlt": [],
@@ -630,7 +630,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000218",
+  "id": "word_000323",
   "word": "fog",
   "meaning": "안개",
   "meaningAlt": [],
@@ -665,7 +665,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000219",
+  "id": "word_000324",
   "word": "rainbow",
   "meaning": "무지개",
   "meaningAlt": [],
@@ -693,14 +693,14 @@
    "cool",
    "snow",
    "ruler",
-   "river",
-   "shoulder",
-   "knee"
+   "thunder",
+   "lightning",
+   "sunlight"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000220",
+  "id": "word_000325",
   "word": "warm",
   "meaning": "따뜻한",
   "meaningAlt": [],
@@ -736,7 +736,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000221",
+  "id": "word_000326",
   "word": "cool",
   "meaning": "시원한",
   "meaningAlt": [],
@@ -772,7 +772,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000222",
+  "id": "word_000327",
   "word": "dry",
   "meaning": "마른",
   "meaningAlt": [],
@@ -808,7 +808,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000223",
+  "id": "word_000328",
   "word": "wet",
   "meaning": "젖은",
   "meaningAlt": [],
@@ -844,7 +844,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000224",
+  "id": "word_000329",
   "word": "bus",
   "meaning": "버스",
   "meaningAlt": [],
@@ -879,7 +879,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000225",
+  "id": "word_000330",
   "word": "train",
   "meaning": "기차",
   "meaningAlt": [],
@@ -907,14 +907,14 @@
    "tea",
    "test",
    "team",
-   "toe",
-   "tooth",
-   "tongue"
+   "station",
+   "traffic",
+   "toe"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000226",
+  "id": "word_000331",
   "word": "subway",
   "meaning": "지하철",
   "meaningAlt": [],
@@ -949,7 +949,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000227",
+  "id": "word_000332",
   "word": "airplane",
   "meaning": "비행기",
   "meaningAlt": [],
@@ -974,17 +974,17 @@
    "bus",
    "train",
    "bicycle",
+   "airport",
    "aunt",
    "adult",
+   "pilot",
    "autumn",
-   "shoulder",
-   "knee",
-   "finger"
+   "shoulder"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000228",
+  "id": "word_000333",
   "word": "bicycle",
   "meaning": "자전거",
   "meaningAlt": [],
@@ -1010,16 +1010,16 @@
    "ship",
    "taxi",
    "baby",
+   "station",
    "breakfast",
    "shirt",
    "pants",
-   "shoes",
-   "hat"
+   "shoes"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000229",
+  "id": "word_000334",
   "word": "ship",
   "meaning": "배(선박)",
   "meaningAlt": [],
@@ -1049,12 +1049,12 @@
    "soup",
    "shirt",
    "shoes",
-   "spoon"
+   "pilot"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000230",
+  "id": "word_000335",
   "word": "taxi",
   "meaning": "택시",
   "meaningAlt": [],
@@ -1089,7 +1089,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000231",
+  "id": "word_000336",
   "word": "class",
   "meaning": "수업",
   "meaningAlt": [],
@@ -1124,7 +1124,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000232",
+  "id": "word_000337",
   "word": "homework",
   "meaning": "숙제",
   "meaningAlt": [],
@@ -1159,7 +1159,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000233",
+  "id": "word_000338",
   "word": "test",
   "meaning": "시험",
   "meaningAlt": [],
@@ -1194,7 +1194,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000234",
+  "id": "word_000339",
   "word": "question",
   "meaning": "질문",
   "meaningAlt": [],
@@ -1229,7 +1229,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000235",
+  "id": "word_000340",
   "word": "answer",
   "meaning": "답",
   "meaningAlt": [],
@@ -1264,7 +1264,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000236",
+  "id": "word_000341",
   "word": "subject",
   "meaning": "과목",
   "meaningAlt": [],
@@ -1299,7 +1299,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000237",
+  "id": "word_000342",
   "word": "notebook",
   "meaning": "공책",
   "meaningAlt": [],
@@ -1334,7 +1334,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000238",
+  "id": "word_000343",
   "word": "eraser",
   "meaning": "지우개",
   "meaningAlt": [],
@@ -1363,13 +1363,13 @@
    "answer",
    "notebook",
    "glue",
-   "book",
-   "pencil"
+   "grade",
+   "essay"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000239",
+  "id": "word_000344",
   "word": "ruler",
   "meaning": "자(문구)",
   "meaningAlt": [],
@@ -1404,7 +1404,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000240",
+  "id": "word_000345",
   "word": "scissors",
   "meaning": "가위",
   "meaningAlt": [],
@@ -1439,7 +1439,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000241",
+  "id": "word_000346",
   "word": "glue",
   "meaning": "풀(접착제)",
   "meaningAlt": [],
@@ -1468,13 +1468,13 @@
    "notebook",
    "eraser",
    "scissors",
-   "toe",
-   "gloves"
+   "grade",
+   "toe"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000242",
+  "id": "word_000347",
   "word": "begin",
   "meaning": "시작하다",
   "meaningAlt": [],
@@ -1511,7 +1511,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000243",
+  "id": "word_000348",
   "word": "start",
   "meaning": "출발하다",
   "meaningAlt": [],
@@ -1548,7 +1548,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000244",
+  "id": "word_000349",
   "word": "finish",
   "meaning": "끝내다",
   "meaningAlt": [],
@@ -1583,7 +1583,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000245",
+  "id": "word_000350",
   "word": "choose",
   "meaning": "고르다",
   "meaningAlt": [],
@@ -1618,7 +1618,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000246",
+  "id": "word_000351",
   "word": "push",
   "meaning": "밀다",
   "meaningAlt": [],
@@ -1647,13 +1647,13 @@
    "cross",
    "climb",
    "run",
-   "jump",
-   "walk"
+   "pass",
+   "jump"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000247",
+  "id": "word_000352",
   "word": "pull",
   "meaning": "당기다",
   "meaningAlt": [],
@@ -1688,7 +1688,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000248",
+  "id": "word_000353",
   "word": "build",
   "meaning": "짓다",
   "meaningAlt": [],
@@ -1723,7 +1723,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000249",
+  "id": "word_000354",
   "word": "break",
   "meaning": "부수다",
   "meaningAlt": [],
@@ -1758,7 +1758,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000250",
+  "id": "word_000355",
   "word": "fix",
   "meaning": "고치다",
   "meaningAlt": [],
@@ -1793,7 +1793,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000251",
+  "id": "word_000356",
   "word": "hide",
   "meaning": "숨다",
   "meaningAlt": [],
@@ -1821,14 +1821,14 @@
    "catch",
    "throw",
    "swim",
+   "hang",
    "sit",
-   "fix",
-   "run"
+   "wipe"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000252",
+  "id": "word_000357",
   "word": "follow",
   "meaning": "따라가다",
   "meaningAlt": [],
@@ -1856,14 +1856,14 @@
    "enter",
    "cross",
    "climb",
+   "fold",
    "run",
-   "jump",
-   "walk"
+   "jump"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000253",
+  "id": "word_000358",
   "word": "arrive",
   "meaning": "도착하다",
   "meaningAlt": [],
@@ -1898,7 +1898,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000254",
+  "id": "word_000359",
   "word": "leave",
   "meaning": "떠나다",
   "meaningAlt": [],
@@ -1933,7 +1933,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000255",
+  "id": "word_000360",
   "word": "enter",
   "meaning": "들어가다",
   "meaningAlt": [],
@@ -1968,7 +1968,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000256",
+  "id": "word_000361",
   "word": "return",
   "meaning": "돌아오다",
   "meaningAlt": [],
@@ -2003,7 +2003,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000257",
+  "id": "word_000362",
   "word": "invite",
   "meaning": "초대하다",
   "meaningAlt": [],
@@ -2038,7 +2038,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000258",
+  "id": "word_000363",
   "word": "borrow",
   "meaning": "빌리다",
   "meaningAlt": [],
@@ -2073,7 +2073,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000259",
+  "id": "word_000364",
   "word": "cross",
   "meaning": "건너다",
   "meaningAlt": [],
@@ -2101,14 +2101,14 @@
    "follow",
    "throw",
    "swim",
+   "drop",
    "choose",
-   "run",
-   "jump"
+   "pass"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000260",
+  "id": "word_000365",
   "word": "count",
   "meaning": "세다",
   "meaningAlt": [],
@@ -2143,7 +2143,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000261",
+  "id": "word_000366",
   "word": "young",
   "meaning": "어린",
   "meaningAlt": [],
@@ -2178,7 +2178,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000262",
+  "id": "word_000367",
   "word": "poor",
   "meaning": "가난한",
   "meaningAlt": [],
@@ -2213,7 +2213,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000263",
+  "id": "word_000368",
   "word": "rich",
   "meaning": "부유한",
   "meaningAlt": [],
@@ -2248,7 +2248,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000264",
+  "id": "word_000369",
   "word": "wide",
   "meaning": "넓은",
   "meaningAlt": [],
@@ -2277,13 +2277,13 @@
    "weak",
    "warm",
    "rich",
-   "small",
-   "tall"
+   "huge",
+   "small"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000265",
+  "id": "word_000370",
   "word": "narrow",
   "meaning": "좁은",
   "meaningAlt": [],
@@ -2318,7 +2318,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000266",
+  "id": "word_000371",
   "word": "deep",
   "meaning": "깊은",
   "meaningAlt": [],
@@ -2353,7 +2353,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000267",
+  "id": "word_000372",
   "word": "thick",
   "meaning": "두꺼운",
   "meaningAlt": [],
@@ -2377,18 +2377,18 @@
    "narrow",
    "deep",
    "large",
+   "tiny",
    "tall",
    "rich",
    "spicy",
    "big",
    "small",
-   "short",
-   "quick"
+   "short"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000268",
+  "id": "word_000373",
   "word": "thin",
   "meaning": "얇은",
   "meaningAlt": [],
@@ -2414,16 +2414,16 @@
    "large",
    "tall",
    "big",
+   "tiny",
    "small",
    "short",
    "thirsty",
-   "kind",
-   "dry"
+   "kind"
   ],
   "imageAsset": null
  },
  {
-  "id": "word_000269",
+  "id": "word_000374",
   "word": "soft",
   "meaning": "부드러운",
   "meaningAlt": [],
@@ -2458,7 +2458,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000270",
+  "id": "word_000375",
   "word": "fresh",
   "meaning": "신선한",
   "meaningAlt": [],
@@ -2493,7 +2493,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000271",
+  "id": "word_000376",
   "word": "sweet",
   "meaning": "달콤한",
   "meaningAlt": [],
@@ -2528,7 +2528,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000272",
+  "id": "word_000377",
   "word": "sour",
   "meaning": "신맛의",
   "meaningAlt": [],
@@ -2563,7 +2563,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000273",
+  "id": "word_000378",
   "word": "salty",
   "meaning": "짠",
   "meaningAlt": [],
@@ -2598,7 +2598,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000274",
+  "id": "word_000379",
   "word": "spicy",
   "meaning": "매운",
   "meaningAlt": [],
@@ -2633,7 +2633,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000275",
+  "id": "word_000380",
   "word": "bitter",
   "meaning": "쓴맛의",
   "meaningAlt": [],
@@ -2668,7 +2668,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000276",
+  "id": "word_000381",
   "word": "parents",
   "meaning": "부모",
   "meaningAlt": [],
@@ -2703,7 +2703,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000277",
+  "id": "word_000382",
   "word": "cousin",
   "meaning": "사촌",
   "meaningAlt": [],
@@ -2738,7 +2738,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000278",
+  "id": "word_000383",
   "word": "uncle",
   "meaning": "삼촌",
   "meaningAlt": [],
@@ -2773,7 +2773,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000279",
+  "id": "word_000384",
   "word": "aunt",
   "meaning": "이모",
   "meaningAlt": [],
@@ -2808,7 +2808,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000280",
+  "id": "word_000385",
   "word": "baby",
   "meaning": "아기",
   "meaningAlt": [],
@@ -2843,7 +2843,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000281",
+  "id": "word_000386",
   "word": "child",
   "meaning": "아이",
   "meaningAlt": [],
@@ -2878,7 +2878,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000282",
+  "id": "word_000387",
   "word": "adult",
   "meaning": "어른",
   "meaningAlt": [],
@@ -2913,7 +2913,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000283",
+  "id": "word_000388",
   "word": "neighbor",
   "meaning": "이웃",
   "meaningAlt": [],
@@ -2948,7 +2948,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000284",
+  "id": "word_000389",
   "word": "tea",
   "meaning": "차(음료)",
   "meaningAlt": [],
@@ -2984,7 +2984,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000285",
+  "id": "word_000390",
   "word": "coffee",
   "meaning": "커피",
   "meaningAlt": [],
@@ -3020,7 +3020,7 @@
   "imageAsset": null
  },
  {
-  "id": "word_000286",
+  "id": "word_000391",
   "word": "soda",
   "meaning": "탄산음료",
   "meaningAlt": [],

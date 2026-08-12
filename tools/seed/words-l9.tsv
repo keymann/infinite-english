@@ -1,0 +1,111 @@
+word	level	grade	pos	meaning	meaningAlt	synonyms	tags	freq	example	exampleKo	image
+evidence	9	middle_2	noun	증거			thought|society	high	The scientist showed clear evidence.	그 과학자는 분명한 증거를 보여 주었다.
+conclusion	9	middle_2	noun	결론			thought|study	high	My conclusion is different from yours.	내 결론은 네 것과 다르다.
+argument	9	middle_2	noun	논쟁			thought|speech	mid	Their argument about the rule continued.	규칙에 대한 그들의 논쟁이 계속되었다.
+logic	9	middle_2	noun	논리			thought|study	mid	The logic of his answer is clear.	그의 답의 논리는 분명하다.
+fact	9	middle_2	noun	사실			thought	high	This is a simple fact about nature.	이것은 자연에 관한 간단한 사실이다.
+truth	9	middle_2	noun	진실			thought|society	high	Tell me the truth about the accident.	그 사고에 대한 진실을 말해 줘.
+detail	9	middle_2	noun	세부 사항			thought|study	high	Describe every detail of the picture.	그림의 모든 세부 사항을 묘사해라.
+summary	9	middle_2	noun	요약			study|language	mid	Write a short summary of the novel.	그 소설의 짧은 요약을 써라.
+aspect	9	middle_2	noun	측면			thought	mid	Every aspect of the plan is important.	그 계획의 모든 측면이 중요하다.
+factor	9	middle_2	noun	요인			thought|science	mid	Weather is the main factor here.	날씨가 여기서 주요한 요인이다.
+element	9	middle_2	noun	요소			science|thought	mid	Water is a necessary element of life.	물은 생명의 필요한 요소다.
+feature	9	middle_2	noun	특징			quality|thought	high	The bird has one unusual feature.	그 새는 별난 특징 하나를 가지고 있다.
+function	9	middle_2	noun	기능			machine|thought	high	The function of this device is simple.	이 장치의 기능은 간단하다.
+structure	9	middle_2	noun	구조			thought|place	mid	The structure of the bridge is strong.	그 다리의 구조는 튼튼하다.
+achieve	9	middle_2	verb	달성하다			thought|study	high	She achieved her goal this year.	그녀는 올해 목표를 달성했다.
+establish	9	middle_2	verb	설립하다			society	mid	They established a school in the village.	그들은 마을에 학교를 설립했다.
+maintain	9	middle_2	verb	유지하다			daily|health	mid	Maintain a healthy habit every day.	매일 건강한 습관을 유지해라.
+obtain	9	middle_2	verb	얻다			daily	mid	I obtained useful data from the research.	나는 그 연구에서 유용한 자료를 얻었다.
+require	9	middle_2	verb	필요로 하다			thought|society	high	This work requires great effort.	이 일은 큰 노력을 필요로 한다.
+demand	9	middle_2	verb	요구하다			speech|society	mid	The customer demanded a new bowl.	그 손님은 새 그릇을 요구했다.
+supply	9	middle_2	verb	공급하다			society|money	mid	The factory supplies paper to our school.	그 공장은 우리 학교에 종이를 공급한다.
+expand	9	middle_2	verb	확장하다			motion|society	mid	The company expanded its business abroad.	그 회사는 사업을 해외로 확장했다.
+decrease	9	middle_2	verb	감소하다			quantity	mid	The number of birds decreased last year.	새의 수가 지난해 감소했다.
+replace	9	middle_2	verb	대체하다			daily|machine	mid	Replace the old battery with a new one.	낡은 건전지를 새것으로 대체해라.
+remove	9	middle_2	verb	제거하다			daily|motion	high	Remove the plastic from the box.	상자에서 플라스틱을 제거해라.
+include	9	middle_2	verb	포함하다			quantity|thought	high	The price includes breakfast.	그 가격은 아침 식사를 포함한다.
+exclude	9	middle_2	verb	제외하다			quantity|thought	mid	Exclude the wrong data from the report.	보고서에서 틀린 자료를 제외해라.
+contain	9	middle_2	verb	담고 있다			quantity|food	high	This soup contains various vegetables.	이 수프는 다양한 채소를 담고 있다.
+involve	9	middle_2	verb	관련시키다			society|thought	mid	The plan involves every class member.	그 계획은 모든 반 구성원을 관련시킨다.
+affect	9	middle_2	verb	영향을 주다			science|society	high	Pollution affects the whole climate.	오염은 기후 전체에 영향을 준다.
+influence	9	middle_2	noun	영향력			society|thought	high	A good leader has great influence.	훌륭한 지도자는 큰 영향력을 가진다.
+depend	9	middle_2	verb	의존하다			society|thought	high	Young animals depend on their parents.	어린 동물은 부모에게 의존한다.
+responsible	9	middle_2	adjective	책임감 있는			quality|society	high	A responsible student keeps every promise.	책임감 있는 학생은 모든 약속을 지킨다.
+independent	9	middle_2	adjective	독립적인			quality|society	mid	My brother is independent and brave.	우리 형은 독립적이고 용감하다.
+ambitious	9	middle_2	adjective	야망 있는			quality	mid	The ambitious singer practices every night.	야망 있는 그 가수는 매일 밤 연습한다.
+mature	9	middle_2	adjective	성숙한			quality	mid	Her opinion is very mature.	그녀의 의견은 아주 성숙하다.
+loyal	9	middle_2	adjective	충실한			quality|animal	mid	A dog is a loyal friend.	개는 충실한 친구다.
+reliable	9	middle_2	adjective	믿음직한			quality	mid	This old machine is still reliable.	이 낡은 기계는 여전히 믿음직하다.
+flexible	9	middle_2	adjective	융통성 있는			quality	mid	Our schedule is flexible this week.	우리 일정은 이번 주에 융통성 있다.
+stubborn	9	middle_2	adjective	고집 센			quality	mid	The stubborn goat did not move.	그 고집 센 염소는 움직이지 않았다.
+sensitive	9	middle_2	adjective	민감한			quality|health	mid	My skin is sensitive to sunlight.	내 피부는 햇빛에 민감하다.
+passionate	9	middle_2	adjective	열정적인			quality|emotion	mid	He is passionate about music.	그는 음악에 열정적이다.
+cautious	9	middle_2	adjective	신중한			quality|safety	mid	Be cautious near the high cliff.	높은 절벽 근처에서는 신중해라.
+careless	9	middle_2	adjective	부주의한			quality|safety	mid	One careless moment caused the injury.	한 부주의한 순간이 그 부상을 일으켰다.
+income	9	middle_2	noun	소득			money|society	mid	Their income increased this year.	그들의 소득이 올해 늘었다.
+profit	9	middle_2	noun	이익			money	mid	The bakery made a small profit.	그 빵집은 작은 이익을 냈다.
+salary	9	middle_2	noun	급여			money|job	mid	His salary supports the whole family.	그의 급여가 가족 전체를 지지한다.
+employ	9	middle_2	verb	고용하다			job|money	mid	The company employs many engineers.	그 회사는 많은 기술자를 고용한다.
+manage	9	middle_2	verb	관리하다			job|society	high	She manages a small hotel.	그녀는 작은 호텔을 관리한다.
+organize	9	middle_2	verb	조직하다			job|group	mid	Our club organized a music contest.	우리 동아리가 음악 대회를 조직했다.
+operate	9	middle_2	verb	운영하다			job|machine	mid	They operate a restaurant near the station.	그들은 역 근처에서 식당을 운영한다.
+invest	9	middle_2	verb	투자하다			money	mid	My aunt invested money in the business.	우리 이모는 그 사업에 돈을 투자했다.
+afford	9	middle_2	verb	형편이 되다			money	mid	We cannot afford a new car.	우리는 새 차를 살 형편이 되지 않는다.
+purchase	9	middle_2	verb	구매하다			money|daily	mid	I purchased a textbook and a notebook.	나는 교과서와 공책을 구매했다.
+advertise	9	middle_2	verb	광고하다			money|society	mid	The market advertises fresh fruit.	그 시장은 신선한 과일을 광고한다.
+deliver	9	middle_2	verb	배달하다			job|motion	high	The clerk delivers bread every morning.	그 점원은 매일 아침 빵을 배달한다.
+population	9	middle_2	noun	인구			society	high	The population of this city is large.	이 도시의 인구는 많다.
+poverty	9	middle_2	noun	빈곤			society	mid	Education can reduce poverty.	교육은 빈곤을 줄일 수 있다.
+equality	9	middle_2	noun	평등			society	mid	The law protects equality for everyone.	그 법은 모두를 위한 평등을 보호한다.
+crime	9	middle_2	noun	범죄			society|safety	mid	The guard prevented a crime.	그 경비원이 범죄를 막았다.
+punish	9	middle_2	verb	처벌하다			society	mid	The rule punishes careless drivers.	그 규칙은 부주의한 운전사를 처벌한다.
+protest	9	middle_2	verb	항의하다			society|speech	mid	Citizens protested against the new tax.	시민들이 새 세금에 항의했다.
+charity	9	middle_2	noun	자선			society	mid	Our school collected books for charity.	우리 학교는 자선을 위해 책을 모았다.
+welfare	9	middle_2	noun	복지			society	mid	The government improved animal welfare.	정부가 동물 복지를 향상시켰다.
+policy	9	middle_2	noun	정책			society	mid	The new policy helps poor families.	새 정책은 가난한 가족을 돕는다.
+journey	9	middle_2	noun	여정			travel|motion	mid	Our journey to the mountain was long.	산으로 가는 우리 여정은 길었다.
+destination	9	middle_2	noun	목적지			travel|place	mid	The island was our final destination.	그 섬이 우리 최종 목적지였다.
+passenger	9	middle_2	noun	승객			travel|transport	mid	Every passenger waited at the airport.	모든 승객이 공항에서 기다렸다.
+luggage	9	middle_2	noun	짐			travel|thing	mid	My luggage is heavy and large.	내 짐은 무겁고 크다.
+reservation	9	middle_2	noun	예약			travel|daily	mid	I made a reservation at the hotel.	나는 그 호텔에 예약을 했다.
+departure	9	middle_2	noun	출발			travel|time	mid	The departure of the train was late.	그 기차의 출발이 늦었다.
+arrival	9	middle_2	noun	도착			travel|time	mid	The arrival of the bus was sudden.	그 버스의 도착은 갑작스러웠다.
+route	9	middle_2	noun	경로			travel|place	mid	This route to school is short.	학교로 가는 이 경로는 짧다.
+traffic	9	middle_2	noun	교통			transport|society	high	Traffic near the bridge is heavy.	다리 근처의 교통이 혼잡하다.
+vehicle	9	middle_2	noun	차량			transport	mid	No vehicle can cross the old bridge.	어떤 차량도 그 낡은 다리를 건널 수 없다.
+fare	9	middle_2	noun	요금			transport|money	mid	The subway fare increased last month.	지하철 요금이 지난달에 올랐다.
+abroad	9	middle_2	adverb	해외에			travel|place	mid	My cousin studies abroad this year.	우리 사촌은 올해 해외에서 공부한다.
+recipe	9	middle_2	noun	조리법			food	mid	This recipe needs only three ingredients.	이 조리법은 재료 세 가지만 필요하다.
+ingredient	9	middle_2	noun	재료			food	mid	Every ingredient in this soup is fresh.	이 수프의 모든 재료는 신선하다.
+flavor	9	middle_2	noun	풍미			food|taste	mid	The flavor of this tea is special.	이 차의 풍미는 특별하다.
+nutrition	9	middle_2	noun	영양			food|health	mid	Fresh fruit gives good nutrition.	신선한 과일은 좋은 영양을 준다.
+vitamin	9	middle_2	noun	비타민			food|health	mid	A tomato contains much vitamin.	토마토는 비타민을 많이 담고 있다.
+protein	9	middle_2	noun	단백질			food|health	mid	An egg is full of protein.	달걀은 단백질로 가득하다.
+dessert	9	middle_2	noun	후식			food|meal	high	We ate cake for dessert.	우리는 후식으로 케이크를 먹었다.
+meal	9	middle_2	noun	식사			food|meal	high	This meal is healthy and delicious.	이 식사는 건강하고 맛있다.
+appetite	9	middle_2	noun	입맛			food|health	mid	My appetite returned after the disease.	그 질병 후에 내 입맛이 돌아왔다.
+universe	9	middle_2	noun	우주			science|nature	mid	The universe contains many stars.	우주는 많은 별을 담고 있다.
+planet	9	middle_2	noun	행성			science|nature	high	This planet has no water.	이 행성에는 물이 없다.
+gravity	9	middle_2	noun	중력			science	mid	Gravity pulls the apple to the ground.	중력이 사과를 땅으로 당긴다.
+surface	9	middle_2	noun	표면			science|place	high	The surface of the moon is cold.	달의 표면은 차갑다.
+liquid	9	middle_2	noun	액체			science	mid	Water is a common liquid.	물은 흔한 액체다.
+solid	9	middle_2	noun	고체			science	mid	Ice is the solid of water.	얼음은 물의 고체다.
+gas	9	middle_2	noun	기체			science	mid	This gas has no color.	이 기체는 색이 없다.
+oxygen	9	middle_2	noun	산소			science|health	mid	Every animal needs oxygen to breathe.	모든 동물은 숨쉬기 위해 산소가 필요하다.
+mineral	9	middle_2	noun	광물			science|nature	mid	This rock contains a rare mineral.	이 바위는 드문 광물을 담고 있다.
+cell	9	middle_2	noun	세포			science|body	mid	Every plant is made of cells.	모든 식물은 세포로 만들어졌다.
+bacteria	9	middle_2	noun	세균			science|health	mid	Wash your hands to remove bacteria.	세균을 제거하려면 손을 씻어라.
+probably	9	middle_2	adverb	아마			thought|time	high	He will probably arrive late.	그는 아마 늦게 도착할 것이다.
+certainly	9	middle_2	adverb	틀림없이			thought	high	She certainly knows the correct answer.	그녀는 틀림없이 옳은 답을 안다.
+exactly	9	middle_2	adverb	정확히			thought|quantity	high	Tell me exactly what happened.	무슨 일이 있었는지 정확히 말해 줘.
+especially	9	middle_2	adverb	특히			thought	high	This soup is especially delicious today.	이 수프는 오늘 특히 맛있다.
+recently	9	middle_2	adverb	최근에			time	high	I recently joined the science club.	나는 최근에 과학 동아리에 들어갔다.
+immediately	9	middle_2	adverb	즉시			time	high	Call the doctor immediately.	즉시 의사를 불러라.
+eventually	9	middle_2	adverb	결국			time	mid	Eventually the storm passed.	결국 폭풍이 지나갔다.
+rarely	9	middle_2	adverb	좀처럼			time	mid	It rarely snows in this village.	이 마을에는 좀처럼 눈이 오지 않는다.
+frequently	9	middle_2	adverb	빈번히			time	mid	He frequently visits the library.	그는 빈번히 도서관을 방문한다.
+quickly	9	middle_2	adverb	빠르게			speed|daily	high	Finish your homework quickly.	숙제를 빠르게 끝내라.
+carefully	9	middle_2	adverb	조심스럽게			quality|safety	high	Carry the glass bowl carefully.	유리 그릇을 조심스럽게 나르라.
+clearly	9	middle_2	adverb	명확하게			speech|quality	high	Explain your opinion clearly.	네 의견을 명확하게 설명해라.
+perhaps	9	middle_2	adverb	어쩌면			thought	high	Perhaps the weather will improve.	어쩌면 날씨가 좋아질 것이다.
