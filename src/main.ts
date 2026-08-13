@@ -1,5 +1,6 @@
 import './style.css';
 
+import * as THREE_NS from 'three';
 import type * as THREE from 'three';
 
 import { Sound } from './audio/sound';
@@ -35,7 +36,7 @@ import { Assets } from './three/assets';
 import { FollowCamera } from './three/camera';
 import { resolveProfile } from './three/profile';
 import { Renderer } from './three/renderer';
-import { attachWeapon, detachWeapon } from './three/weapon';
+import { alignHeld, attachWeapon, detachWeapon } from './three/weapon';
 import { BossBar } from './ui/bossBar';
 import { Hud } from './ui/hud';
 import { Overlays, praiseFor, type ResultReward } from './ui/overlays';
@@ -95,12 +96,28 @@ async function boot() {
 
   const assets = new Assets(profile.side);
   const bank = new WordBank();
+
+  /* 저장본을 **에셋보다 먼저** 읽는다.
+     고른 캐릭터·무기가 무엇인지 알아야 부팅 시 받을 번들을 정할 수 있다 —
+     상점 캐릭터로 저장한 뒤 다시 들어오면 `boss-anims` 가 없어 부팅이 깨졌다
+     (브라우저 검증에서 잡았다: "bundle 'boss-anims' 을 먼저 load() 해야 한다"). */
+  const saved = loadSave();
+  saved.missions = ensureToday(saved.missions, Date.now(), saved.player.level);
+
+  /**
+   * 부팅에 필요한 번들.
+   *
+   * 계단·플레이어는 첫 프레임에 필요하다. 거기에 **저장된 선택**을 더한다:
+   *  · 상점 캐릭터를 골랐으면 그 번들과 `boss-anims`(클립이 그 캐릭터 glb 에 없다)
+   *  · 무기를 장착했으면 `weapons` — 없으면 손이 빈 채로 시작한다
+   */
+  const bootBundles = ['player', 'world-forest', 'gimmick', 'pickup', 'blocks'];
+  const savedCharacter = characterOf(saved.collection, saved.player.level, saved.shop.owned);
+  if (savedCharacter.rig === 'rigMedium') bootBundles.push(savedCharacter.bundle, 'boss-anims');
+  if (saved.shop.weaponId) bootBundles.push('weapons');
+
   // 3D 에셋과 단어 DB 를 동시에 받는다 — 둘은 서로를 기다릴 이유가 없다
-  await Promise.all([
-    // blocks(계단 블록)는 첫 프레임에 필요하다 — 계단 없이 시작할 수 없다
-    assets.load(['player', 'world-forest', 'gimmick', 'pickup', 'blocks']),
-    bank.loadLevels(LEVELS),
-  ]);
+  await Promise.all([assets.load(bootBundles), bank.loadLevels(LEVELS)]);
   app.querySelector('#loading')?.remove();
 
   const seed = Number(params.get('seed')) || randomSeed();
@@ -151,15 +168,13 @@ async function boot() {
   scene.add(backdrop.group);
   backdrop.applyTheme(themeForFloor(0));
 
-  // 저장본에서 학습 상태·성장을 복원한다. 판이 끝나도 남아야 한다
-  const saved = loadSave();
-  saved.missions = ensureToday(saved.missions, Date.now(), saved.player.level);
-
   /* 캐릭터는 해금·선택으로 바뀐다. Actor 와 Climb 을 다시 만들어야 하므로 let 이다.
      교체는 홈 화면에서만 일어나므로 판 도중에 갈리는 일은 없다. */
-  let character = characterOf(saved.collection, saved.player.level, saved.shop.owned);
+  let character = savedCharacter;
   /** 들고 있는 무기 노드 — 교체할 때 지운다 */
   let weaponHolder: THREE.Object3D | null = null;
+  /** 다음 프레임에 무기 자세를 한 번 맞춰야 하는지 */
+  let weaponNeedsAlign = false;
 
   /**
    * 캐릭터 Actor 를 만든다.
@@ -193,9 +208,13 @@ async function boot() {
       character.rig === 'rigMedium' ? 'rigMedium' : 'kenney',
       item.extra ? assets.instance('weapons', item.extra) : null,
     );
+    // 본이 제 자리를 잡은 뒤(첫 프레임 이후) 한 번 정렬한다 — three/weapon.ts 주석 참고
+    weaponNeedsAlign = !!weaponHolder;
   };
 
   let actor = buildActor(character);
+  // 저장된 무기를 손에 붙인다 (번들은 위에서 함께 받았다)
+  fitWeapon();
   scene.add(actor.root);
   let shadow = createBlobShadow(actor.height * 0.34);
   scene.add(shadow);
@@ -1022,6 +1041,13 @@ async function boot() {
 
     climb.update(dt);
     actor.update(dt);
+
+    /* 무기 자세는 **애니메이션이 한 번 돈 뒤에** 맞춘다. 부착 시점에는 본의 월드 행렬이
+       확정되지 않아(bind pose) 계산이 틀린다 — 무기가 계속 옆으로 누웠던 원인이다 */
+    if (weaponNeedsAlign && weaponHolder) {
+      weaponNeedsAlign = false;
+      alignHeld(weaponHolder);
+    }
     placeIfNeeded(climb.floor);
 
     shadow.position.set(
@@ -1230,6 +1256,8 @@ async function boot() {
           missions: saved.missions,
           streak: saved.streak,
           collection: saved.collection,
+          shop: saved.shop,
+          levelBand: saved.levelBand,
           run: saved.run,
           saveVersion: saved.v,
         };
@@ -1274,6 +1302,53 @@ async function boot() {
       /** 잠금 상태 — 보스 예약·보스전 중에는 계단을 오를 수 없다 */
       get canClimb() {
         return canClimb();
+      },
+      /**
+       * 무기 장착 상태 — 붙었는지·어느 본에 붙었는지.
+       *
+       * 부착 지점은 리그마다 다르고(손 본이 없는 리그도 있다) 실패하면 조용히 무기가
+       * 안 보인다. 그래서 결과를 관측할 통로를 남긴다.
+       */
+      get weapon() {
+        const id = saved.shop.weaponId;
+        let bone: string | null = null;
+        let at: number[] | null = null;
+        if (weaponHolder) {
+          bone = (weaponHolder.parent as { name?: string } | null)?.name ?? null;
+          weaponHolder.updateMatrixWorld(true);
+          const e = weaponHolder.matrixWorld.elements;
+          at = [+e[12].toFixed(2), +e[13].toFixed(2), +e[14].toFixed(2)];
+        }
+        let axes: Record<string, number[]> | null = null;
+        if (weaponHolder) {
+          weaponHolder.updateMatrixWorld(true);
+          const q = new THREE_NS.Quaternion();
+          weaponHolder.getWorldQuaternion(q);
+          // 홀더 로컬 축이 월드에서 어디를 향하는지 — 어느 축이 위(y)를 향해야 한다
+          const dir = (x: number, y: number, z: number) => {
+            const v = new THREE_NS.Vector3(x, y, z).applyQuaternion(q);
+            return [+v.x.toFixed(2), +v.y.toFixed(2), +v.z.toFixed(2)];
+          };
+          axes = { x: dir(1, 0, 0), y: dir(0, 1, 0), z: dir(0, 0, 1) };
+        }
+        let size: number[] | null = null;
+        if (weaponHolder) {
+          const box = new THREE_NS.Box3().setFromObject(weaponHolder);
+          const s3 = box.getSize(new THREE_NS.Vector3());
+          size = [+s3.x.toFixed(3), +s3.y.toFixed(3), +s3.z.toFixed(3)];
+        }
+        return {
+          id,
+          rig: character.rig,
+          bundleReady: assets.ready('weapons'),
+          attached: !!weaponHolder,
+          bone,
+          at,
+          /** 월드 기준 크기 — 캐릭터 키 0.92 와 비교해 너무 작/크지 않은지 본다 */
+          size,
+          axes,
+          playerHeight: +actor.height.toFixed(2),
+        };
       },
       /** 로비에서 고른 문제 레벨 구간 — 실제로 제한이 걸렸는지 확인용 */
       get levelBand() {
