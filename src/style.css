@@ -750,11 +750,14 @@ body {
 
 /* ── 상점 ── */
 
+/* 세로 배치이므로 **justify-content 가 수직 정렬**이다. 기본값(flex-start)이면 글자가
+   버튼 위쪽에 붙는다 — min-height 46px 안에서 한 줄이 위로 몰려 보였다 */
 .shop-entry {
   display: flex;
   flex-direction: column;
   gap: 2px;
   align-items: center;
+  justify-content: center;
 }
 
 .shop-entry em {
