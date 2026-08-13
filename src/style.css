@@ -863,9 +863,41 @@ body {
 }
 
 .shop-ok,
-.shop-left {
+.shop-left,
+.shop-have {
   font-size: 0.68rem;
   font-style: normal;
+}
+
+.shop-have {
+  color: #4dd6a1;
+  font-weight: 700;
+}
+
+/* "사기" — 살 수 있을 때만 나온다. 눌러 봤는데 안 되는 버튼을 두지 않는다 */
+.shop-go {
+  min-height: 30px;
+  padding: 4px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: #ffd24a;
+  color: #2a2000;
+  font-family: inherit;
+  font-size: 0.76rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+/* 로비에서 장착한 무기 표시 */
+.equipped {
+  margin-left: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(255, 210, 74, 0.16);
+  color: #ffd24a;
+  font-size: 0.72rem;
+  font-weight: 700;
+  vertical-align: middle;
 }
 
 .shop-ok {

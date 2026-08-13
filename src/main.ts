@@ -1,5 +1,7 @@
 import './style.css';
 
+import type * as THREE from 'three';
+
 import { Sound } from './audio/sound';
 import { Input } from './core/input';
 import { startLoop } from './core/loop';
@@ -12,6 +14,7 @@ import { Session } from './game/session';
 import { LearningEngine } from './learning/engine';
 import { WordBank } from './learning/words';
 import { bandOf, levelsOf } from './learning/gradeBand';
+import { buy, shopItem } from './progress/shop';
 import { characterOf, newlyUnlocked, petOf } from './progress/collection';
 import { applyProgress, allDone, defOf, ensureToday, rewardFor } from './progress/mission';
 import {
@@ -27,11 +30,12 @@ import {
 import { load as loadSave, save as saveSoon, saveNow, type RunState } from './progress/save';
 import { applySession, report } from './progress/stats';
 import { touch as touchStreak } from './progress/streak';
-import { Actor } from './three/actor';
+import { Actor, KENNEY_VOCAB, RIG_MEDIUM_VOCAB } from './three/actor';
 import { Assets } from './three/assets';
 import { FollowCamera } from './three/camera';
 import { resolveProfile } from './three/profile';
 import { Renderer } from './three/renderer';
+import { attachWeapon, detachWeapon } from './three/weapon';
 import { BossBar } from './ui/bossBar';
 import { Hud } from './ui/hud';
 import { Overlays, praiseFor, type ResultReward } from './ui/overlays';
@@ -153,12 +157,45 @@ async function boot() {
 
   /* 캐릭터는 해금·선택으로 바뀐다. Actor 와 Climb 을 다시 만들어야 하므로 let 이다.
      교체는 홈 화면에서만 일어나므로 판 도중에 갈리는 일은 없다. */
-  let character = characterOf(saved.collection, saved.player.level);
-  let actor = new Actor(
-    assets.instance(character.bundle, character.node),
-    assets.clips(character.bundle),
-    PLAYER.height,
-  );
+  let character = characterOf(saved.collection, saved.player.level, saved.shop.owned);
+  /** 들고 있는 무기 노드 — 교체할 때 지운다 */
+  let weaponHolder: THREE.Object3D | null = null;
+
+  /**
+   * 캐릭터 Actor 를 만든다.
+   *
+   * **클립 출처가 리그마다 다르다.** 기본 캐릭터(Kenney)는 자기 glb 에 32종이 들어 있고,
+   * 상점 캐릭터(KayKit Adventurers)는 클립이 0개다 — 보스와 같은 `Rig_Medium` 이므로
+   * `boss-anims` 의 26종을 빌려 쓴다 (스파이크 A 에서 검증한 구조).
+   */
+  const buildActor = (item: typeof character): Actor => {
+    const rigMedium = item.rig === 'rigMedium';
+    const clips = rigMedium ? assets.clips('boss-anims') : assets.clips(item.bundle);
+    return new Actor(
+      assets.instance(item.bundle, item.node),
+      clips,
+      PLAYER.height,
+      rigMedium ? RIG_MEDIUM_VOCAB : KENNEY_VOCAB,
+    );
+  };
+
+  /** 장착한 무기를 손에 붙인다 (없으면 치운다) */
+  const fitWeapon = () => {
+    detachWeapon(weaponHolder);
+    weaponHolder = null;
+    const id = saved.shop.weaponId;
+    if (!id) return;
+    const item = shopItem(id);
+    if (!item || !assets.ready('weapons')) return;
+    weaponHolder = attachWeapon(
+      actor.root,
+      assets.instance('weapons', item.asset),
+      character.rig === 'rigMedium' ? 'rigMedium' : 'kenney',
+      item.extra ? assets.instance('weapons', item.extra) : null,
+    );
+  };
+
+  let actor = buildActor(character);
   scene.add(actor.root);
   let shadow = createBlobShadow(actor.height * 0.34);
   scene.add(shadow);
@@ -645,6 +682,9 @@ async function boot() {
       /* 보스전: 계단이 열리지 않고 보스 HP 가 깎인다 */
       if (result.bossHit) {
         const hit = result.bossHit;
+        /* **플레이어가 무기를 휘두른다.** 정답의 결과가 HP 바 숫자만 줄어드는 것이 아니라
+           화면에서 보여야 한다. 무기를 안 들었어도 동작은 나온다(맨손) */
+        climb.attack();
         bossActor?.hit(hit.critical);
         camera.shake(PLAYER.landShake * (hit.critical ? 2.4 : 1.4));
         if (hit.defeated) {
@@ -811,11 +851,41 @@ async function boot() {
     parentScreen.hide();
     showHome();
   });
-  /* 상점 — MVP 는 UI 만이다 ("추가 예정"). progress/shop.ts 주석 참고 */
-  const shopScreen = new ShopScreen(app, () => {
-    shopScreen.hide();
-    showHome();
-  });
+  const shopScreen = new ShopScreen(app);
+
+  /**
+   * 상점을 연다.
+   *
+   * 무기를 사면 `weapons` 번들을, 캐릭터를 사면 그 캐릭터 번들과 `boss-anims` 를 받는다 —
+   * **산 직후 바로 쓸 수 있어야 한다.** 로드는 뒤에서 돌리고 화면은 즉시 갱신한다.
+   */
+  const openShop = () => {
+    shopScreen.show(saved.player.gold, saved.shop.owned, {
+      onBuy: (id) => {
+        const result = buy(id, saved.player.gold, saved.shop.owned);
+        if (!result.ok) return;
+        const item = shopItem(id)!;
+        saved.player = { ...saved.player, gold: result.gold };
+        saved.shop = { ...saved.shop, owned: [...saved.shop.owned, id] };
+        saveNow(saved);
+        sound.tierUp(2);
+        // 산 것을 바로 쓸 수 있게 에셋을 받아 둔다
+        void assets
+          .load(item.category === 'weapon' ? ['weapons'] : [item.asset, 'boss-anims'])
+          .then(() => {
+            if (item.category === 'weapon' && saved.shop.weaponId === id) fitWeapon();
+          })
+          .catch(() => {
+            /* 못 받아도 목록에는 남는다 — 다음 로드에서 다시 시도한다 */
+          });
+        openShop();
+      },
+      onClose: () => {
+        shopScreen.hide();
+        showHome();
+      },
+    });
+  };
 
   const abilities = () =>
     abilitiesOf({
@@ -836,16 +906,20 @@ async function boot() {
       buildPet();
     } else {
       saved.collection = { ...saved.collection, characterId: id };
-      character = characterOf(saved.collection, saved.player.level);
-      await assets.load([character.bundle]);
+      character = characterOf(saved.collection, saved.player.level, saved.shop.owned);
+      /* 상점 캐릭터는 **클립이 없다** — `boss-anims` 를 함께 받아야 움직인다.
+         받지 못하면 T 포즈로 서 있게 되므로 여기서 같이 기다린다 */
+      await assets.load(
+        character.rig === 'rigMedium'
+          ? [character.bundle, 'boss-anims']
+          : [character.bundle],
+      );
       // Actor 를 새로 만들면 Climb 이 들고 있던 참조가 낡는다 — 같이 다시 만든다
       scene.remove(actor.root);
       scene.remove(shadow);
-      actor = new Actor(
-        assets.instance(character.bundle, character.node),
-        assets.clips(character.bundle),
-        PLAYER.height,
-      );
+      weaponHolder = null;
+      actor = buildActor(character);
+      fitWeapon();
       scene.add(actor.root);
       shadow = createBlobShadow(actor.height * 0.34);
       scene.add(shadow);
@@ -871,6 +945,7 @@ async function boot() {
         // 한 번도 문제를 푼 적이 없으면 조작 설명을 보여 준다
         firstTime: saved.stats.questions === 0,
         levelBand: saved.levelBand,
+        shop: saved.shop,
       },
       {
         onStart: () => {
@@ -894,7 +969,15 @@ async function boot() {
         },
         onOpenShop: () => {
           startScreen.hide();
-          shopScreen.show(saved.player.gold);
+          openShop();
+        },
+        /* 무기 장착 — **로비에서만 바꾼다.** 판 도중에 손에 든 것이 바뀌면
+           보스전 공격 연출 중간에 모델이 사라질 수 있다 */
+        onSelectWeapon: (id) => {
+          saved.shop = { ...saved.shop, weaponId: id };
+          fitWeapon();
+          saveSoon(saved);
+          showHome();
         },
         onOpenParent: () => {
           startScreen.hide();

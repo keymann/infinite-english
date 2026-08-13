@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 import { createRng } from '../core/rng';
 import { Stairs } from '../world/stairs';
-import type { Actor } from '../three/actor';
+import { Actor, KENNEY_VOCAB, RIG_MEDIUM_VOCAB, type ClipVocab } from '../three/actor';
 import { BossActor } from '../world/bossActor';
 import { CLIMB, PLAYER, STAIR_TIMER, stairTimeFor } from './balance';
 import { Climb } from './climb';
@@ -20,25 +20,20 @@ import { Climb } from './climb';
  */
 
 /**
- * @param clips 이 클립만 있는 것으로 취급한다. 피격·공격 클립 후보가 실제로 골라지는지
- *              보려면 어떤 클립이 있는지가 중요하다
+ * **실제 `Actor`** 를 쓴다 (스텁이 아니다).
+ *
+ * Climb 은 클립 이름을 직접 부르지 않고 **역할**(`idle`·`jump`·`hurt`·`no`·`attack`)로 부르고,
+ * 리그별 사전이 이름으로 옮긴다. 스텁으로 대체하면 그 사전이 검증되지 않는다 —
+ * 상점 캐릭터(Rig_Medium)에서 클립 이름이 전부 다르므로 여기가 조용히 깨지면
+ * 캐릭터를 사는 순간 애니메이션이 죽는다.
+ *
+ * @param clipNames 이 리그가 가진 클립 이름
  */
-function stubActor(clips: readonly string[] = []): Actor {
-  const played: string[] = [];
-  const actor = {
-    root: new THREE.Object3D(),
-    height: 0.92,
-    played,
-    play(name: string) {
-      played.push(name);
-    },
-    update() {},
-    has: (name: string) => clips.includes(name),
-    get playing() {
-      return played.at(-1) ?? null;
-    },
-  };
-  return actor as unknown as Actor;
+function stubActor(clipNames: readonly string[] = [], vocab: ClipVocab = KENNEY_VOCAB): Actor {
+  const root = new THREE.Object3D();
+  // 트랙이 없는 빈 클립 — 이름만 있으면 사전 해석을 검사할 수 있다
+  const clips = clipNames.map((name) => new THREE.AnimationClip(name, 0.5, []));
+  return new Actor(root, clips, undefined, vocab);
 }
 
 function makeClimb() {
@@ -174,31 +169,57 @@ describe('계단 타이머 — 층이 높을수록 짧아지고 하한은 2초',
 
 describe('보스 피격 — 보스 공격 모션에 맞춘 플레이어 리액션', () => {
   /** 플레이어 glb 에 실제로 있는 클립 중 피격 후보 */
-  const PLAYER_CLIPS = ['idle', 'jump', 'fall', 'crouch', 'emote-no'];
+  const PLAYER_CLIPS = ['idle', 'jump', 'fall', 'crouch', 'emote-no', 'attack-melee-right'];
 
-  function hurtSetup() {
+  function hurtSetup(vocab = KENNEY_VOCAB, clips = PLAYER_CLIPS) {
     const stairs = new Stairs([], createRng(4242));
-    const actor = stubActor(PLAYER_CLIPS);
+    const actor = stubActor(clips, vocab);
     const climb = new Climb(stairs, actor, {});
-    const played = () => (actor as unknown as { played: string[] }).played;
     // 보스는 계단 위쪽(안쪽)에 선다 — 밀려나는 방향이 그 반대여야 한다
     const bossPos = stairs.surfaceAt(3);
-    return { climb, actor, stairs, played, bossPos, at: () => actor.root.position.clone() };
+    return { climb, actor, stairs, bossPos, at: () => actor.root.position.clone() };
   }
 
   it('피격 클립을 재생한다 — 전용 클립이 없어 fall 을 쓴다', () => {
-    const { climb, played, bossPos } = hurtSetup();
+    const { climb, actor, bossPos } = hurtSetup();
     climb.hurt(bossPos);
-    expect(played().at(-1)).toBe('fall');
+    expect(actor.playing).toBe('fall');
+  });
+
+  /**
+   * 상점 캐릭터(KayKit Rig_Medium)는 클립 이름이 **완전히 다르다**.
+   * 이름을 코드에 박아 두면 캐릭터를 사는 순간 애니메이션이 전부 죽는다.
+   */
+  it('상점 캐릭터 리그에서는 그 리그의 클립을 쓴다', () => {
+    const rigClips = ['Idle_A', 'Jump_Full_Short', 'Hit_A', 'Death_A', 'Throw'];
+    const { climb, actor, bossPos } = hurtSetup(RIG_MEDIUM_VOCAB, rigClips);
+    climb.hurt(bossPos);
+    expect(actor.playing).toBe('Hit_A');
+    climb.attack();
+    expect(actor.playing).toBe('Throw');
+    climb.input((climb.nextDir * -1) as 1 | -1);
+    expect(actor.playing).toBe('Death_A');
+  });
+
+  it('보스전 정답이면 공격 동작을 낸다 — 무기가 없어도 맨손으로', () => {
+    const { climb, actor, bossPos } = hurtSetup();
+    void bossPos;
+    climb.attack();
+    expect(actor.playing).toBe('attack-melee-right');
+    expect(climb.attacking).toBe(true);
+    // 끝나면 idle 로 되돌린다 (정지 포즈에 굳지 않는다)
+    climb.update(0.5);
+    expect(climb.attacking).toBe(false);
+    expect(actor.playing).toBe('idle');
   });
 
   /* `emote-no` 는 방향 오선택(판 종료)에 쓴다. 두 사건이 같은 동작이면 아이가 구별하지 못한다 */
   it('방향 오선택과 다른 동작을 쓴다', () => {
-    const { climb, played, bossPos } = hurtSetup();
+    const { climb, actor, bossPos } = hurtSetup();
     climb.hurt(bossPos);
-    const hurtClip = played().at(-1);
+    const hurtClip = actor.playing;
     climb.input((climb.nextDir * -1) as 1 | -1);
-    expect(played().at(-1)).toBe('emote-no');
+    expect(actor.playing).toBe('emote-no');
     expect(hurtClip).not.toBe('emote-no');
   });
 
@@ -224,10 +245,10 @@ describe('보스 피격 — 보스 공격 모션에 맞춘 플레이어 리액�
   });
 
   it('리액션이 끝나면 idle 로 돌아온다 — 정지 포즈에 굳지 않는다', () => {
-    const { climb, played, bossPos } = hurtSetup();
+    const { climb, actor, bossPos } = hurtSetup();
     climb.hurt(bossPos);
     climb.update(CLIMB.hurtSec + 0.01);
-    expect(played().at(-1)).toBe('idle');
+    expect(actor.playing).toBe('idle');
     expect(climb.hurting).toBe(false);
   });
 

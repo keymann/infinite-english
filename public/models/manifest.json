@@ -394,6 +394,148 @@
       "gzip": 135378
     },
     {
+      "name": "weapons",
+      "when": "lazy",
+      "file": "models/weapons.glb",
+      "nodes": [
+        "dagger_A",
+        "dagger_B",
+        "sword_A",
+        "sword_B",
+        "sword_C",
+        "sword_D",
+        "sword_E",
+        "axe_A",
+        "axe_B",
+        "axe_C",
+        "fistweapon_A",
+        "fistweapon_B",
+        "hammer_A",
+        "hammer_B",
+        "hammer_C",
+        "halberd",
+        "spear_A",
+        "staff_A",
+        "staff_B",
+        "wand_A",
+        "bow_A_withString",
+        "bow_B_withString",
+        "arrow_A",
+        "arrow_B"
+      ],
+      "counts": {
+        "meshes": 24,
+        "materials": 1,
+        "textures": 1,
+        "animations": 0,
+        "skins": 0
+      },
+      "bytes": 861488,
+      "gzip": 445091
+    },
+    {
+      "name": "adv-knight",
+      "when": "lazy",
+      "file": "models/adv-knight.glb",
+      "nodes": [
+        "Knight"
+      ],
+      "counts": {
+        "meshes": 9,
+        "materials": 1,
+        "textures": 1,
+        "animations": 0,
+        "skins": 1
+      },
+      "bytes": 339308,
+      "gzip": 160670
+    },
+    {
+      "name": "adv-barbarian",
+      "when": "lazy",
+      "file": "models/adv-barbarian.glb",
+      "nodes": [
+        "Barbarian"
+      ],
+      "counts": {
+        "meshes": 7,
+        "materials": 1,
+        "textures": 1,
+        "animations": 0,
+        "skins": 1
+      },
+      "bytes": 384500,
+      "gzip": 194404
+    },
+    {
+      "name": "adv-rogue",
+      "when": "lazy",
+      "file": "models/adv-rogue.glb",
+      "nodes": [
+        "Rogue"
+      ],
+      "counts": {
+        "meshes": 7,
+        "materials": 1,
+        "textures": 1,
+        "animations": 0,
+        "skins": 1
+      },
+      "bytes": 394472,
+      "gzip": 200277
+    },
+    {
+      "name": "adv-rogue-hooded",
+      "when": "lazy",
+      "file": "models/adv-rogue-hooded.glb",
+      "nodes": [
+        "Rogue_Hooded"
+      ],
+      "counts": {
+        "meshes": 8,
+        "materials": 1,
+        "textures": 1,
+        "animations": 0,
+        "skins": 1
+      },
+      "bytes": 366552,
+      "gzip": 195783
+    },
+    {
+      "name": "adv-mage",
+      "when": "lazy",
+      "file": "models/adv-mage.glb",
+      "nodes": [
+        "Mage"
+      ],
+      "counts": {
+        "meshes": 8,
+        "materials": 1,
+        "textures": 1,
+        "animations": 0,
+        "skins": 1
+      },
+      "bytes": 337640,
+      "gzip": 178768
+    },
+    {
+      "name": "adv-ranger",
+      "when": "lazy",
+      "file": "models/adv-ranger.glb",
+      "nodes": [
+        "Ranger"
+      ],
+      "counts": {
+        "meshes": 8,
+        "materials": 1,
+        "textures": 1,
+        "animations": 0,
+        "skins": 1
+      },
+      "bytes": 469884,
+      "gzip": 230624
+    },
+    {
       "name": "food",
       "when": "lazy",
       "file": "models/food.glb",

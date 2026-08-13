@@ -34,6 +34,14 @@ export type RunState = {
   wrong: number;
 };
 
+/** 상점 소유·장착 상태 */
+export type ShopState = {
+  /** 산 아이템 id (무기·캐릭터 섞여 있다) */
+  owned: string[];
+  /** 장착한 무기 id. **기본은 없음(null)** */
+  weaponId: string | null;
+};
+
 export type SaveData = {
   v: number;
   ability: Ability;
@@ -52,6 +60,14 @@ export type SaveData = {
    * 경로가 하나 더 늘고, 그 경로마다 학습 기록을 잃을 위험이 생긴다.
    */
   levelBand: BandId;
+  /**
+   * 상점 — 산 것과 장착한 것.
+   *
+   * `levelBand` 와 같은 이유로 **스키마 버전을 올리지 않는다**: 없으면 기본값이 채워지는
+   * 필드이고(migrate 의 `{...base, ...raw}` 가 없는 키를 덮지 않는다), 버전을 올리면
+   * 마이그레이션 경로가 하나 늘고 그 경로마다 학습 기록을 잃을 위험이 생긴다.
+   */
+  shop: ShopState;
   /** 이어할 판이 없으면 null */
   run: RunState | null;
   meta: {
@@ -71,6 +87,7 @@ export function emptySave(): SaveData {
     streak: emptyStreak(),
     collection: emptyCollection(),
     levelBand: 'auto',
+    shop: { owned: [], weaponId: null },
     run: null,
     meta: { lastSeed: 0, lastPlayedAt: 0 },
   };

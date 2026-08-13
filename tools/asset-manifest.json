@@ -259,6 +259,92 @@
       ]
     },
     {
+      "name": "weapons",
+      "when": "lazy",
+      "note": "상점 무기 (KayKit Fantasy Weapons Bits, CC0). 정적 메시라 한 번들에 모아도 된다. 화살은 활에 종속되므로 상점 항목이 아니고, 활을 장착했을 때 함께 들린다. 방패는 공격 모션에 쓸 수 없어 제외했다.",
+      "dir": "FantasyWeaponsBits_1.0_kit/Assets/gltf",
+      "models": [
+        "dagger_A",
+        "dagger_B",
+        "sword_A",
+        "sword_B",
+        "sword_C",
+        "sword_D",
+        "sword_E",
+        "axe_A",
+        "axe_B",
+        "axe_C",
+        "fistweapon_A",
+        "fistweapon_B",
+        "hammer_A",
+        "hammer_B",
+        "hammer_C",
+        "halberd",
+        "spear_A",
+        "staff_A",
+        "staff_B",
+        "wand_A",
+        "bow_A_withString",
+        "bow_B_withString",
+        "arrow_A",
+        "arrow_B"
+      ]
+    },
+    {
+      "name": "adv-knight",
+      "when": "lazy",
+      "note": "상점 캐릭터 (KayKit Adventurers, CC0). 애니메이션이 없다 — 보스와 같은 `Rig_Medium` 리그이므로 `boss-anims` 의 클립 26종을 그대로 쓴다(스파이크 A 와 같은 구조). **스킨드 캐릭터는 번들 하나에 하나만** 이므로 6종을 따로 둔다.",
+      "dir": "Adventurers_2.0_Kit/Characters/gltf",
+      "models": [
+        "Knight"
+      ]
+    },
+    {
+      "name": "adv-barbarian",
+      "when": "lazy",
+      "note": "상점 캐릭터 (KayKit Adventurers, CC0). 애니메이션이 없다 — 보스와 같은 `Rig_Medium` 리그이므로 `boss-anims` 의 클립 26종을 그대로 쓴다(스파이크 A 와 같은 구조). **스킨드 캐릭터는 번들 하나에 하나만** 이므로 6종을 따로 둔다.",
+      "dir": "Adventurers_2.0_Kit/Characters/gltf",
+      "models": [
+        "Barbarian"
+      ]
+    },
+    {
+      "name": "adv-rogue",
+      "when": "lazy",
+      "note": "상점 캐릭터 (KayKit Adventurers, CC0). 애니메이션이 없다 — 보스와 같은 `Rig_Medium` 리그이므로 `boss-anims` 의 클립 26종을 그대로 쓴다(스파이크 A 와 같은 구조). **스킨드 캐릭터는 번들 하나에 하나만** 이므로 6종을 따로 둔다.",
+      "dir": "Adventurers_2.0_Kit/Characters/gltf",
+      "models": [
+        "Rogue"
+      ]
+    },
+    {
+      "name": "adv-rogue-hooded",
+      "when": "lazy",
+      "note": "상점 캐릭터 (KayKit Adventurers, CC0). 애니메이션이 없다 — 보스와 같은 `Rig_Medium` 리그이므로 `boss-anims` 의 클립 26종을 그대로 쓴다(스파이크 A 와 같은 구조). **스킨드 캐릭터는 번들 하나에 하나만** 이므로 6종을 따로 둔다.",
+      "dir": "Adventurers_2.0_Kit/Characters/gltf",
+      "models": [
+        "Rogue_Hooded"
+      ]
+    },
+    {
+      "name": "adv-mage",
+      "when": "lazy",
+      "note": "상점 캐릭터 (KayKit Adventurers, CC0). 애니메이션이 없다 — 보스와 같은 `Rig_Medium` 리그이므로 `boss-anims` 의 클립 26종을 그대로 쓴다(스파이크 A 와 같은 구조). **스킨드 캐릭터는 번들 하나에 하나만** 이므로 6종을 따로 둔다.",
+      "dir": "Adventurers_2.0_Kit/Characters/gltf",
+      "models": [
+        "Mage"
+      ]
+    },
+    {
+      "name": "adv-ranger",
+      "when": "lazy",
+      "note": "상점 캐릭터 (KayKit Adventurers, CC0). 애니메이션이 없다 — 보스와 같은 `Rig_Medium` 리그이므로 `boss-anims` 의 클립 26종을 그대로 쓴다(스파이크 A 와 같은 구조). **스킨드 캐릭터는 번들 하나에 하나만** 이므로 6종을 따로 둔다.",
+      "dir": "Adventurers_2.0_Kit/Characters/gltf",
+      "models": [
+        "Ranger"
+      ]
+    },
+    {
       "name": "food",
       "when": "lazy",
       "note": "TYPE_C(영어→그림) 문제용. 단어 ↔ 3D 모델 1:1 매핑. 회전 프리뷰로 출제한다.",
