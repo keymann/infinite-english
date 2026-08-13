@@ -28,6 +28,8 @@ const FAIL_TEXT: Record<FailReason, { title: string; hint: string }> = {
   quiz: { title: '아깝다!', hint: '틀린 단어를 다시 만나면 그때 맞히면 돼.' },
   direction: { title: '방향을 틀렸어!', hint: '다음 칸 색을 먼저 보고 눌러 보자.' },
   timeout: { title: '시간이 다 됐어!', hint: '계단은 망설이지 말고 리듬을 타면 쉬워.' },
+  // 갈래 길에서 가짜를 밟았다 — 방향을 틀린 것과 원인이 다르므로 문구도 달라야 한다
+  fake: { title: '가짜 계단이었어!', hint: '생김새가 다른 블록은 밟으면 안 돼.' },
 };
 
 /**

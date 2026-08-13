@@ -48,7 +48,7 @@ export type Phase = 'quiz' | 'climbing' | 'revive' | 'over';
  * 판이 끝난 이유. 종료 화면의 문구가 달라진다 — 아이가 "무엇 때문에 끝났는지"를
  * 알아야 다음 판에 고칠 수 있다.
  */
-export type FailReason = 'quiz' | 'direction' | 'timeout';
+export type FailReason = 'quiz' | 'direction' | 'timeout' | 'fake';
 
 export type AnswerResult = {
   correct: boolean;

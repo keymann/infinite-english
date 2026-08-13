@@ -3,12 +3,14 @@ import {
   PETS,
   isUnlocked,
   nextUnlock,
+  purchasedCharacters,
   type Collectible,
   type CollectionState,
 } from '../progress/collection';
 import { GRADE_BANDS, bandOf } from '../learning/gradeBand';
 import { allDone, defOf, type MissionState } from '../progress/mission';
-import { nextGoal } from '../progress/shop';
+import type { ShopState } from '../progress/save';
+import { nextGoal, ownedWeapons, shopItem } from '../progress/shop';
 import { expRatio, expToNext, type Abilities, type PlayerState } from '../progress/player';
 import type { RunState } from '../progress/save';
 import type { StreakState } from '../progress/streak';
@@ -32,6 +34,8 @@ export type StartScreenData = {
   firstTime: boolean;
   /** 지금 고른 문제 레벨 구간 (learning/gradeBand.ts) */
   levelBand: string;
+  /** 상점 소유·장착 */
+  shop: ShopState;
 };
 
 export type StartScreenHandlers = {
@@ -43,6 +47,8 @@ export type StartScreenHandlers = {
   /** 문제 레벨 구간을 바꿨다 */
   onSelectBand(id: string): void;
   onOpenShop(): void;
+  /** 무기를 골랐다 (null = 없음) */
+  onSelectWeapon(id: string | null): void;
 };
 
 const escapeHtml = (s: string) =>
@@ -50,9 +56,11 @@ const escapeHtml = (s: string) =>
 
 function collectibleChip(item: Collectible, level: number, selectedId: string, kind: string): string {
   const open = isUnlocked(item, level);
+  // 상점에서 산 캐릭터는 레벨 조건이 없다(unlockLevel 0) — 잠금 표기를 붙이지 않는다
+  const bought = item.unlockLevel === 0 && item.rig === 'rigMedium';
   return `<button type="button" class="chip" data-kind="${kind}" data-id="${item.id}"
     data-selected="${item.id === selectedId}" ${open ? '' : 'disabled'}>
-      <span>${escapeHtml(item.name)}</span>
+      <span>${bought ? '⭐ ' : ''}${escapeHtml(item.name)}</span>
       ${open ? '' : `<em>Lv.${item.unlockLevel}</em>`}
     </button>`;
 }
@@ -76,6 +84,7 @@ export class StartScreen {
       else if (kind === 'char' && id) this.handlers.onSelectCharacter(id);
       else if (kind === 'pet' && id) this.handlers.onSelectPet(id);
       else if (kind === 'band' && id) this.handlers.onSelectBand(id);
+      else if (kind === 'weapon') this.handlers.onSelectWeapon(id ?? null);
     });
   }
 
@@ -84,7 +93,11 @@ export class StartScreen {
     const { player, missions, streak, collection, run, abilities } = data;
     const next = nextUnlock(player.level);
     const band = bandOf(data.levelBand);
-    const goal = nextGoal(player.gold);
+    const goal = nextGoal(player.gold, data.shop.owned);
+    const weapons = ownedWeapons(data.shop.owned);
+    const equipped = data.shop.weaponId ? shopItem(data.shop.weaponId) : null;
+    // 레벨로 열린 캐릭터 + 상점에서 산 캐릭터를 한 목록에 섞는다 — 아이에게는 둘 다 "내 캐릭터"다
+    const characters = [...CHARACTERS, ...purchasedCharacters(data.shop.owned)];
 
     const missionRows = missions.list
       .map((mission) => {
@@ -149,9 +162,9 @@ export class StartScreen {
         ${
           data.firstTime
             ? `<ol class="howto">
-                 <li>아래 <b>4개 보기</b> 중 뜻이 맞는 것을 누른다</li>
-                 <li>맞히면 계단이 열린다 — <b>꺾이는 쪽</b>을 눌러 오른다</li>
-                 <li>연속으로 맞히면 한 번에 더 많이 오른다</li>
+                 <li>계단이 <b>꺾이는 쪽</b>을 눌러 올라간다 — 틀리면 끝!</li>
+                 <li><b>생김새가 다른 블록</b>은 가짜다. 밟으면 안 된다</li>
+                 <li>10층마다 <b>보스</b>가 막는다 — 영어 문제를 맞혀 물리친다</li>
                </ol>`
             : ''
         }
@@ -169,9 +182,28 @@ export class StartScreen {
         </section>
 
         <section class="block">
+          <h2>무기 ${equipped ? `<span class="equipped">${equipped.emoji} ${escapeHtml(equipped.name)}</span>` : ''}</h2>
+          <div class="chips">
+            <button type="button" class="chip" data-kind="weapon"
+              data-selected="${!data.shop.weaponId}">없음</button>
+            ${weapons
+              .map(
+                (w) => `<button type="button" class="chip" data-kind="weapon" data-id="${w.id}"
+                  data-selected="${w.id === data.shop.weaponId}">
+                    <span>${w.emoji} ${escapeHtml(w.name)}</span>
+                  </button>`,
+              )
+              .join('')}
+          </div>
+          ${
+            weapons.length === 0
+              ? `<p class="hint-text">상점에서 무기를 사면 여기에 담겨요. 무기를 들면 보스를 공격해요.</p>`
+              : ''
+          }
+
           <h2>캐릭터</h2>
           <div class="chips">
-            ${CHARACTERS.map((c) => collectibleChip(c, player.level, collection.characterId, 'char')).join('')}
+            ${characters.map((c) => collectibleChip(c, player.level, collection.characterId, 'char')).join('')}
           </div>
           <h2>펫</h2>
           <div class="chips">

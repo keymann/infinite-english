@@ -60,6 +60,11 @@ export class Assets {
     });
   }
 
+  /** 그 번들이 이미 받아져 있는지 — 아직이면 그 기능을 조용히 건너뛴다 */
+  ready(name: string): boolean {
+    return this.bundles.has(name);
+  }
+
   private bundle(name: string): GLTF {
     const gltf = this.bundles.get(name);
     if (!gltf) throw new Error(`bundle '${name}' 을 먼저 load() 해야 한다`);

@@ -94,28 +94,22 @@
     {
       "name": "world-forest",
       "when": "eager",
-      "note": "WORLD 1 Word Forest. nature-kit 은 텍스처 없이 머티리얼만 쓴다.",
+      "note": "WORLD 1 Word Forest. nature-kit 은 텍스처 없이 머티리얼만 쓴다. 계단 블록은 `blocks` 번들(Block Bits)로 옮겼으므로 여기에는 프롭·소품과 프롭을 받치는 섬만 남는다.",
       "dir": "nature-kit/Models/GLTF format",
       "models": [
-        "cliff_block_rock",
         "cliff_blockHalf_rock",
-        "cliff_steps_rock",
-        "cliff_top_rock",
         "tree_default",
         "tree_pineRoundA",
         "tree_pineTallA",
         "tree_small",
         "tree_thin",
-        "stump_round",
         "rock_smallA",
-        "rock_smallD",
         "rock_largeA",
         "grass",
         "grass_large",
         "plant_bush",
         "mushroom_red",
         "flower_yellowA",
-        "log",
         "tree_oak",
         "tree_detailed",
         "tree_fat",
@@ -143,18 +137,11 @@
       "note": "WORLD 3 Castle. 계단 본체 + 성벽·탑 프롭.",
       "dir": "castle-kit/Models/GLB format",
       "models": [
-        "stairs-stone",
-        "stairs-stone-square",
-        "wall-narrow-stairs",
-        "wall-narrow-stairs-rail",
-        "wall",
         "wall-half",
         "wall-pillar",
         "wall-corner",
         "gate",
-        "flag",
         "flag-banner-long",
-        "tower-square-base",
         "tower-square-mid",
         "tower-square-top-roof",
         "tower-hexagon-base",
@@ -195,12 +182,33 @@
       ]
     },
     {
+      "name": "blocks",
+      "when": "eager",
+      "note": "계단 블록 (KayKit Block Bits, CC0). 40종 중 14종만 쓴다 — 이 팩의 블록은 단순 큐브가 아니라 블록당 삼각형 108~2076개다(lava 2076 은 제외). 텍스처 1장(1024px, 30KB)을 전부 공유한다. 테마마다 3종씩 쓰고 마지막 2종은 **가짜 계단** 전용이다 — 스테이지와 이질적으로 보여야 한다.",
+      "dir": "BlockBits_1.0_kit/Assets/gltf",
+      "models": [
+        "grass",
+        "dirt_with_grass",
+        "gravel_with_grass",
+        "bricks_A",
+        "stone",
+        "stone_dark",
+        "snow",
+        "grass_with_snow",
+        "dirt_with_snow",
+        "glass",
+        "metal",
+        "wood",
+        "prototype",
+        "striped_block_red"
+      ]
+    },
+    {
       "name": "world-snow",
       "when": "lazy",
       "note": "WORLD 4 Snow. tower-defense-kit 의 눈 타일·크리스탈. 발판이 얇은 얼음판처럼 보인다.",
       "dir": "tower-defense-kit/Models/GLB format",
       "models": [
-        "snow-tile",
         "snow-tile-rock",
         "snow-detail-tree-large",
         "snow-detail-tree",
@@ -217,7 +225,6 @@
         "snow-detail-dirt-large",
         "snow-tile-tree-double",
         "snow-tile-tree",
-        "snow-tile-crystal",
         "snow-wood-structure-high",
         "tower-round-crystals",
         "detail-tree-large",
@@ -230,9 +237,7 @@
       "note": "WORLD 5 Sky. KayKit Platformer — **.gltf + .bin 포맷**이라 파이프라인이 확장자를 자동 탐지한다. 기믹(표지판·스프링)도 여기서 온다.",
       "dir": "Platformer_Pack_1.0_FREE/Assets/gltf/neutral",
       "models": [
-        "platform_wood_1x1x1",
         "floor_wood_2x2",
-        "pillar_1x1x2",
         "pillar_1x1x4",
         "pillar_2x2x4",
         "structure_A",
@@ -243,8 +248,6 @@
         "sign",
         "ball",
         "spring",
-        "signage_arrows_left",
-        "signage_arrows_right",
         "signage_finish",
         "floor_wood_4x4",
         "floor_wood_2x6",
@@ -253,6 +256,92 @@
         "barrier_2x1x2",
         "barrier_4x1x1",
         "strut_horizontal"
+      ]
+    },
+    {
+      "name": "weapons",
+      "when": "lazy",
+      "note": "상점 무기 (KayKit Fantasy Weapons Bits, CC0). 정적 메시라 한 번들에 모아도 된다. 화살은 활에 종속되므로 상점 항목이 아니고, 활을 장착했을 때 함께 들린다. 방패는 공격 모션에 쓸 수 없어 제외했다.",
+      "dir": "FantasyWeaponsBits_1.0_kit/Assets/gltf",
+      "models": [
+        "dagger_A",
+        "dagger_B",
+        "sword_A",
+        "sword_B",
+        "sword_C",
+        "sword_D",
+        "sword_E",
+        "axe_A",
+        "axe_B",
+        "axe_C",
+        "fistweapon_A",
+        "fistweapon_B",
+        "hammer_A",
+        "hammer_B",
+        "hammer_C",
+        "halberd",
+        "spear_A",
+        "staff_A",
+        "staff_B",
+        "wand_A",
+        "bow_A_withString",
+        "bow_B_withString",
+        "arrow_A",
+        "arrow_B"
+      ]
+    },
+    {
+      "name": "adv-knight",
+      "when": "lazy",
+      "note": "상점 캐릭터 (KayKit Adventurers, CC0). 애니메이션이 없다 — 보스와 같은 `Rig_Medium` 리그이므로 `boss-anims` 의 클립 26종을 그대로 쓴다(스파이크 A 와 같은 구조). **스킨드 캐릭터는 번들 하나에 하나만** 이므로 6종을 따로 둔다.",
+      "dir": "Adventurers_2.0_Kit/Characters/gltf",
+      "models": [
+        "Knight"
+      ]
+    },
+    {
+      "name": "adv-barbarian",
+      "when": "lazy",
+      "note": "상점 캐릭터 (KayKit Adventurers, CC0). 애니메이션이 없다 — 보스와 같은 `Rig_Medium` 리그이므로 `boss-anims` 의 클립 26종을 그대로 쓴다(스파이크 A 와 같은 구조). **스킨드 캐릭터는 번들 하나에 하나만** 이므로 6종을 따로 둔다.",
+      "dir": "Adventurers_2.0_Kit/Characters/gltf",
+      "models": [
+        "Barbarian"
+      ]
+    },
+    {
+      "name": "adv-rogue",
+      "when": "lazy",
+      "note": "상점 캐릭터 (KayKit Adventurers, CC0). 애니메이션이 없다 — 보스와 같은 `Rig_Medium` 리그이므로 `boss-anims` 의 클립 26종을 그대로 쓴다(스파이크 A 와 같은 구조). **스킨드 캐릭터는 번들 하나에 하나만** 이므로 6종을 따로 둔다.",
+      "dir": "Adventurers_2.0_Kit/Characters/gltf",
+      "models": [
+        "Rogue"
+      ]
+    },
+    {
+      "name": "adv-rogue-hooded",
+      "when": "lazy",
+      "note": "상점 캐릭터 (KayKit Adventurers, CC0). 애니메이션이 없다 — 보스와 같은 `Rig_Medium` 리그이므로 `boss-anims` 의 클립 26종을 그대로 쓴다(스파이크 A 와 같은 구조). **스킨드 캐릭터는 번들 하나에 하나만** 이므로 6종을 따로 둔다.",
+      "dir": "Adventurers_2.0_Kit/Characters/gltf",
+      "models": [
+        "Rogue_Hooded"
+      ]
+    },
+    {
+      "name": "adv-mage",
+      "when": "lazy",
+      "note": "상점 캐릭터 (KayKit Adventurers, CC0). 애니메이션이 없다 — 보스와 같은 `Rig_Medium` 리그이므로 `boss-anims` 의 클립 26종을 그대로 쓴다(스파이크 A 와 같은 구조). **스킨드 캐릭터는 번들 하나에 하나만** 이므로 6종을 따로 둔다.",
+      "dir": "Adventurers_2.0_Kit/Characters/gltf",
+      "models": [
+        "Mage"
+      ]
+    },
+    {
+      "name": "adv-ranger",
+      "when": "lazy",
+      "note": "상점 캐릭터 (KayKit Adventurers, CC0). 애니메이션이 없다 — 보스와 같은 `Rig_Medium` 리그이므로 `boss-anims` 의 클립 26종을 그대로 쓴다(스파이크 A 와 같은 구조). **스킨드 캐릭터는 번들 하나에 하나만** 이므로 6종을 따로 둔다.",
+      "dir": "Adventurers_2.0_Kit/Characters/gltf",
+      "models": [
+        "Ranger"
       ]
     },
     {

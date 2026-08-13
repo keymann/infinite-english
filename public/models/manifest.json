@@ -175,25 +175,19 @@
       "when": "eager",
       "file": "models/world-forest.glb",
       "nodes": [
-        "cliff_block_rock",
         "cliff_blockHalf_rock",
-        "cliff_steps_rock",
-        "cliff_top_rock",
         "tree_default",
         "tree_pineRoundA",
         "tree_pineTallA",
         "tree_small",
         "tree_thin",
-        "stump_round",
         "rock_smallA",
-        "rock_smallD",
         "rock_largeA",
         "grass",
         "grass_large",
         "plant_bush",
         "mushroom_red",
         "flower_yellowA",
-        "log",
         "tree_oak",
         "tree_detailed",
         "tree_fat",
@@ -215,32 +209,25 @@
         "rock_smallB"
       ],
       "counts": {
-        "meshes": 38,
+        "meshes": 32,
         "materials": 16,
         "textures": 0,
         "animations": 0,
         "skins": 0
       },
-      "bytes": 253876,
-      "gzip": 52781
+      "bytes": 220488,
+      "gzip": 47091
     },
     {
       "name": "world-castle",
       "when": "lazy",
       "file": "models/world-castle.glb",
       "nodes": [
-        "stairs-stone",
-        "stairs-stone-square",
-        "wall-narrow-stairs",
-        "wall-narrow-stairs-rail",
-        "wall",
         "wall-half",
         "wall-pillar",
         "wall-corner",
         "gate",
-        "flag",
         "flag-banner-long",
-        "tower-square-base",
         "tower-square-mid",
         "tower-square-top-roof",
         "tower-hexagon-base",
@@ -260,14 +247,14 @@
         "bridge-straight"
       ],
       "counts": {
-        "meshes": 37,
+        "meshes": 30,
         "materials": 1,
         "textures": 1,
         "animations": 0,
         "skins": 0
       },
-      "bytes": 411184,
-      "gzip": 74595
+      "bytes": 329684,
+      "gzip": 63048
     },
     {
       "name": "gimmick",
@@ -306,11 +293,40 @@
       "gzip": 20924
     },
     {
+      "name": "blocks",
+      "when": "eager",
+      "file": "models/blocks.glb",
+      "nodes": [
+        "grass",
+        "dirt_with_grass",
+        "gravel_with_grass",
+        "bricks_A",
+        "stone",
+        "stone_dark",
+        "snow",
+        "grass_with_snow",
+        "dirt_with_snow",
+        "glass",
+        "metal",
+        "wood",
+        "prototype",
+        "striped_block_red"
+      ],
+      "counts": {
+        "meshes": 14,
+        "materials": 2,
+        "textures": 1,
+        "animations": 0,
+        "skins": 0
+      },
+      "bytes": 474336,
+      "gzip": 194269
+    },
+    {
       "name": "world-snow",
       "when": "lazy",
       "file": "models/world-snow.glb",
       "nodes": [
-        "snow-tile",
         "snow-tile-rock",
         "snow-detail-tree-large",
         "snow-detail-tree",
@@ -327,30 +343,27 @@
         "snow-detail-dirt-large",
         "snow-tile-tree-double",
         "snow-tile-tree",
-        "snow-tile-crystal",
         "snow-wood-structure-high",
         "tower-round-crystals",
         "detail-tree-large",
         "detail-rocks-large"
       ],
       "counts": {
-        "meshes": 23,
+        "meshes": 21,
         "materials": 1,
         "textures": 1,
         "animations": 0,
         "skins": 0
       },
-      "bytes": 420016,
-      "gzip": 81825
+      "bytes": 385884,
+      "gzip": 76010
     },
     {
       "name": "world-sky",
       "when": "lazy",
       "file": "models/world-sky.glb",
       "nodes": [
-        "platform_wood_1x1x1",
         "floor_wood_2x2",
-        "pillar_1x1x2",
         "pillar_1x1x4",
         "pillar_2x2x4",
         "structure_A",
@@ -361,8 +374,6 @@
         "sign",
         "ball",
         "spring",
-        "signage_arrows_left",
-        "signage_arrows_right",
         "signage_finish",
         "floor_wood_4x4",
         "floor_wood_2x6",
@@ -373,14 +384,156 @@
         "strut_horizontal"
       ],
       "counts": {
+        "meshes": 20,
+        "materials": 1,
+        "textures": 1,
+        "animations": 0,
+        "skins": 0
+      },
+      "bytes": 327396,
+      "gzip": 135378
+    },
+    {
+      "name": "weapons",
+      "when": "lazy",
+      "file": "models/weapons.glb",
+      "nodes": [
+        "dagger_A",
+        "dagger_B",
+        "sword_A",
+        "sword_B",
+        "sword_C",
+        "sword_D",
+        "sword_E",
+        "axe_A",
+        "axe_B",
+        "axe_C",
+        "fistweapon_A",
+        "fistweapon_B",
+        "hammer_A",
+        "hammer_B",
+        "hammer_C",
+        "halberd",
+        "spear_A",
+        "staff_A",
+        "staff_B",
+        "wand_A",
+        "bow_A_withString",
+        "bow_B_withString",
+        "arrow_A",
+        "arrow_B"
+      ],
+      "counts": {
         "meshes": 24,
         "materials": 1,
         "textures": 1,
         "animations": 0,
         "skins": 0
       },
-      "bytes": 453208,
-      "gzip": 181362
+      "bytes": 861488,
+      "gzip": 445091
+    },
+    {
+      "name": "adv-knight",
+      "when": "lazy",
+      "file": "models/adv-knight.glb",
+      "nodes": [
+        "Knight"
+      ],
+      "counts": {
+        "meshes": 9,
+        "materials": 1,
+        "textures": 1,
+        "animations": 0,
+        "skins": 1
+      },
+      "bytes": 339308,
+      "gzip": 160670
+    },
+    {
+      "name": "adv-barbarian",
+      "when": "lazy",
+      "file": "models/adv-barbarian.glb",
+      "nodes": [
+        "Barbarian"
+      ],
+      "counts": {
+        "meshes": 7,
+        "materials": 1,
+        "textures": 1,
+        "animations": 0,
+        "skins": 1
+      },
+      "bytes": 384500,
+      "gzip": 194404
+    },
+    {
+      "name": "adv-rogue",
+      "when": "lazy",
+      "file": "models/adv-rogue.glb",
+      "nodes": [
+        "Rogue"
+      ],
+      "counts": {
+        "meshes": 7,
+        "materials": 1,
+        "textures": 1,
+        "animations": 0,
+        "skins": 1
+      },
+      "bytes": 394472,
+      "gzip": 200277
+    },
+    {
+      "name": "adv-rogue-hooded",
+      "when": "lazy",
+      "file": "models/adv-rogue-hooded.glb",
+      "nodes": [
+        "Rogue_Hooded"
+      ],
+      "counts": {
+        "meshes": 8,
+        "materials": 1,
+        "textures": 1,
+        "animations": 0,
+        "skins": 1
+      },
+      "bytes": 366552,
+      "gzip": 195783
+    },
+    {
+      "name": "adv-mage",
+      "when": "lazy",
+      "file": "models/adv-mage.glb",
+      "nodes": [
+        "Mage"
+      ],
+      "counts": {
+        "meshes": 8,
+        "materials": 1,
+        "textures": 1,
+        "animations": 0,
+        "skins": 1
+      },
+      "bytes": 337640,
+      "gzip": 178768
+    },
+    {
+      "name": "adv-ranger",
+      "when": "lazy",
+      "file": "models/adv-ranger.glb",
+      "nodes": [
+        "Ranger"
+      ],
+      "counts": {
+        "meshes": 8,
+        "materials": 1,
+        "textures": 1,
+        "animations": 0,
+        "skins": 1
+      },
+      "bytes": 469884,
+      "gzip": 230624
     },
     {
       "name": "food",

@@ -46,7 +46,7 @@ describe('보스전', () => {
     expect(isBossFloor(0)).toBe(false); // 시작 지점은 보스가 아니다
   });
 
-  it('첫 보스는 12문제로 처치할 수 있다', () => {
+  it('첫 보스는 6문제로 처치할 수 있다 — 관문이지 시험이 아니다', () => {
     const boss = spawnBoss(BOSS_EVERY);
     let asked = 0;
     // 평범한 난이도·콤보 없이 계속 맞히는 최악의 경우
@@ -54,8 +54,8 @@ describe('보스전', () => {
       hitBoss(boss, 0.2, 0);
       asked++;
     }
-    expect(asked).toBe(12);
-    expect(questionsToDefeat(spawnBoss(BOSS_EVERY))).toBe(12);
+    expect(asked).toBe(6);
+    expect(questionsToDefeat(spawnBoss(BOSS_EVERY))).toBe(6);
   });
 
   /**
@@ -70,9 +70,9 @@ describe('보스전', () => {
     for (let i = 1; i < counts.length; i++) {
       expect(counts[i]).toBeGreaterThanOrEqual(counts[i - 1]);
     }
-    expect(counts[0]).toBe(12);
-    // 상한 — 어느 층이든 24문제를 넘지 않는다 (기본 데미지 10 기준 최악의 경우)
-    expect(Math.max(...counts)).toBeLessThanOrEqual(24);
+    expect(counts[0]).toBe(6);
+    // 상한 — 어느 층이든 12문제를 넘지 않는다 (기본 데미지 10 기준 최악의 경우)
+    expect(Math.max(...counts)).toBeLessThanOrEqual(12);
     expect(spawnBoss(1000).maxHp).toBe(spawnBoss(5000).maxHp);
   });
 
