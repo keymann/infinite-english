@@ -16,8 +16,21 @@ import * as THREE from 'three';
 export type WorldSet = {
   id: string;
   bundle: string;
-  /** 계단 블록 */
-  step: string;
+  /**
+   * 계단 블록 — **여러 종류다** (`blocks` 번들, KayKit Block Bits).
+   *
+   * 한 종류만 쓰면 5,000층이 같은 블록 하나의 반복이다. 층마다 결정론적으로 골라
+   * 같은 테마 안에서도 계단이 섞여 보이게 한다. 종류를 늘리는 값은 draw call 이지만
+   * (블록 하나 = InstancedMesh 하나) 실제로 한 화면에 3종을 넘지 않는다.
+   */
+  blocks: readonly string[];
+  /**
+   * **가짜 계단** 블록 — 갈래 길의 함정.
+   *
+   * 이 테마의 블록들과 **한눈에 달라 보여야 한다.** 아이가 색·질감으로 판단할 수 있어야
+   * 함정이 불공정하지 않다 (`prototype` 은 회색 격자, `striped_block_red` 는 빨간 줄무늬).
+   */
+  fakeBlock: string;
   /** 배경 프롭을 받치는 떠 있는 섬 */
   island: string;
   /** 섬 위에 세우는 큰 프롭 (앞쪽이 자주 나온다) */
@@ -30,7 +43,8 @@ export const WORLD_SETS: Record<string, WorldSet> = {
   forest: {
     id: 'forest',
     bundle: 'world-forest',
-    step: 'cliff_block_rock',
+    blocks: ['grass', 'dirt_with_grass', 'gravel_with_grass'],
+    fakeBlock: 'prototype',
     island: 'cliff_blockHalf_rock',
     /* 종류를 늘리는 것은 draw call 을 늘리지 않는다 — 인스턴스 수가 0 인 종류는
        three 가 그리지 않는다. 한 화면에 보이는 프롭 수는 그대로이고 반복만 줄어든다 */
@@ -74,8 +88,9 @@ export const WORLD_SETS: Record<string, WorldSet> = {
   snow: {
     id: 'snow',
     bundle: 'world-snow',
-    // 눈 타일은 1×0.2×1 로 얇다 — 공중에 뜬 **얼음판**처럼 보여 숲·성과 확실히 구분된다
-    step: 'snow-tile',
+    blocks: ['snow', 'grass_with_snow', 'dirt_with_snow'],
+    // 흰 눈 계단에는 빨간 줄무늬가 가장 튄다
+    fakeBlock: 'striped_block_red',
     island: 'snow-tile-rock',
     props: [
       'snow-detail-tree-large',
@@ -100,7 +115,8 @@ export const WORLD_SETS: Record<string, WorldSet> = {
   sky: {
     id: 'sky',
     bundle: 'world-sky',
-    step: 'platform_wood_1x1x1',
+    blocks: ['wood', 'metal', 'glass'],
+    fakeBlock: 'striped_block_red',
     island: 'floor_wood_2x2',
     props: [
       'structure_C',
@@ -122,7 +138,8 @@ export const WORLD_SETS: Record<string, WorldSet> = {
   castle: {
     id: 'castle',
     bundle: 'world-castle',
-    step: 'tower-square-base',
+    blocks: ['stone', 'bricks_A', 'stone_dark'],
+    fakeBlock: 'prototype',
     island: 'wall-half',
     props: [
       'tower-square-mid',

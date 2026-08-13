@@ -25,6 +25,15 @@ export type GimmickKind = 'crystal' | 'spring' | null;
 
 /** 크리스탈이 놓일 확률 */
 const CRYSTAL_CHANCE = 0.16;
+/**
+ * 크리스탈 **군집** — 앞 칸에 크리스탈이 있으면 이어서 나올 확률.
+ *
+ * 같은 확률로 흩어 놓으면 어느 구간이나 "가끔 하나"가 되어 리듬이 없다. 두세 개가 이어지는
+ * 구간이 생기면 **"여기서 벌 수 있다"** 가 보이고, 그 구간만 빠르게 오르려는 동기가 생긴다.
+ */
+const CRYSTAL_RUN_CHANCE = 0.45;
+/** 한 군집의 최대 길이 — 넘으면 끊는다 */
+const CRYSTAL_RUN_MAX = 3;
 /** 스프링이 놓일 확률 (크리스탈보다 드물게 — 특별해야 한다) */
 const SPRING_CHANCE = 0.05;
 /** 처음 몇 칸은 아무것도 두지 않는다 — 조작을 익히는 구간 */
@@ -74,8 +83,29 @@ export class Gimmicks {
     if (this.taken.has(index)) return null;
     // 스프링을 먼저 본다. 한 칸에 둘을 놓지 않는다
     if (hash01(index, 3) < SPRING_CHANCE) return 'spring';
-    if (hash01(index, 1) < CRYSTAL_CHANCE) return 'crystal';
+    if (this.isCrystal(index)) return 'crystal';
     return null;
+  }
+
+  /**
+   * 크리스탈 판정 — 단독 확률 + **앞 칸에서 이어지는 군집**.
+   *
+   * `taken`(먹은 칸)을 보지 않는다: 먹었다고 뒤 칸의 군집이 끊기면 같은 층이 판마다
+   * 달라진다. 먹은 표시는 `kindAt` 이 따로 걸러낸다.
+   */
+  private isCrystal(index: number): boolean {
+    if (index <= QUIET_FLOORS) return false;
+    if (hash01(index, 3) < SPRING_CHANCE) return false; // 스프링 칸에는 두지 않는다
+    if (hash01(index, 1) < CRYSTAL_CHANCE) return true;
+
+    // 앞 칸들이 군집이면 이어 붙는다 (최대 길이까지)
+    let run = 0;
+    for (let k = index - 1; k > index - CRYSTAL_RUN_MAX && k > QUIET_FLOORS; k--) {
+      if (hash01(k, 3) < SPRING_CHANCE) break;
+      if (hash01(k, 1) < CRYSTAL_CHANCE || run > 0) run++;
+      else break;
+    }
+    return run > 0 && run < CRYSTAL_RUN_MAX && hash01(index, 5) < CRYSTAL_RUN_CHANCE;
   }
 
   /** 크리스탈을 먹었다 */

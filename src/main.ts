@@ -93,7 +93,8 @@ async function boot() {
   const bank = new WordBank();
   // 3D 에셋과 단어 DB 를 동시에 받는다 — 둘은 서로를 기다릴 이유가 없다
   await Promise.all([
-    assets.load(['player', 'world-forest', 'gimmick', 'pickup']),
+    // blocks(계단 블록)는 첫 프레임에 필요하다 — 계단 없이 시작할 수 없다
+    assets.load(['player', 'world-forest', 'gimmick', 'pickup', 'blocks']),
     bank.loadLevels(LEVELS),
   ]);
   app.querySelector('#loading')?.remove();
@@ -103,9 +104,12 @@ async function boot() {
   /** 월드 세트 하나를 계단·프롭에 등록한다 (모델이 로드된 뒤에만 호출된다) */
   const registerSet = (setId: string) => {
     const set = WORLD_SETS[setId];
+    /* 계단 블록은 **`blocks` 번들(Block Bits)**에서 온다 — 테마마다 3종을 섞고,
+       가짜 계단은 그 테마와 이질적인 블록을 쓴다. 프롭·소품은 각 월드 kit 그대로다 */
     stairs.addSet({
       setId,
-      step: assets.source(set.bundle, set.step),
+      steps: set.blocks.map((name) => assets.source('blocks', name)),
+      fake: assets.source('blocks', set.fakeBlock),
       decor: set.decor.map((name) => assets.source(set.bundle, name)),
     });
     props.addSet({
@@ -317,7 +321,7 @@ async function boot() {
       /* **방향을 틀리면 판이 끝난다.** 이전에는 휘청이고 계속했다 (PRD 3.2절) —
          원작의 긴장이 방향 선택에서 온다는 요청으로 뒤집었다.
          조작이 어려운 아이에게는 `?autodir=1` 이 그대로 남아 있다. */
-      onWrongDir: () => failRun('direction'),
+      onWrongDir: (onFake) => failRun(onFake ? 'fake' : 'direction'),
     });
   }
 
@@ -389,7 +393,7 @@ async function boot() {
    * HP·REVIVE 를 거치지 않는다 (`Session.fail`). 왜 끝났는지 보여 줄 시간을 준 뒤
    * 결과 화면으로 넘긴다 — 즉시 암전하면 아이가 원인을 못 본다.
    */
-  const failRun = (reason: 'direction' | 'timeout') => {
+  const failRun = (reason: 'direction' | 'timeout' | 'fake') => {
     if (!session || session.phase === 'over') return;
     bossPending = false;
     session.fail(reason);
@@ -400,7 +404,10 @@ async function boot() {
     sound.stumble();
     sound.wrong();
     camera.shake(PLAYER.landShake * 3.2);
-    overlays.banner(reason === 'direction' ? '방향을 틀렸다!' : '시간 초과!', 'fire');
+    overlays.banner(
+      reason === 'fake' ? '가짜 계단!' : reason === 'direction' ? '방향을 틀렸다!' : '시간 초과!',
+      'fire',
+    );
     stairs.setHint(-1);
     after(CLIMB.stumbleSec + 0.3, endGame);
   };

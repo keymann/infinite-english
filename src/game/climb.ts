@@ -21,8 +21,13 @@ export type ClimbState = 'stand' | 'jump' | 'stumble' | 'dead';
 
 export type ClimbEvents = {
   onLand?(floor: number): void;
-  /** 방향을 틀렸다 — **판이 끝난다.** 호출한 쪽이 연출과 종료를 맡는다 */
-  onWrongDir?(): void;
+  /**
+   * 방향을 틀렸다 — **판이 끝난다.** 호출한 쪽이 연출과 종료를 맡는다.
+   *
+   * @param onFake 그쪽에 **가짜 계단**이 있었는지. 빈 허공을 디딘 것과 함정을 밟은 것은
+   *               원인이 다르므로 종료 화면 문구가 갈린다
+   */
+  onWrongDir?(onFake: boolean): void;
 };
 
 /**
@@ -141,7 +146,7 @@ export class Climb {
     this.totalMisses++;
     this.buffered = null;
     this.actor.play('emote-no', { loop: false, fade: 0.05, restart: true, timeScale: 1.4 });
-    this.events.onWrongDir?.();
+    this.events.onWrongDir?.(this.stairs.hasFake(this.floor + 1));
   }
 
   /**
