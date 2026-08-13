@@ -86,6 +86,21 @@ export function availableCharacters(level: number, owned: readonly string[]): Co
   return [...CHARACTERS.filter((c) => isUnlocked(c, level)), ...purchasedCharacters(owned)];
 }
 
+/**
+ * 이 캐릭터를 화면에 세우는 데 **반드시 필요한 번들**.
+ *
+ * 부팅 시 이걸 안 받으면 게임이 열리지 않는다 — 실제로
+ * `bundle 'char-male-b' 을 먼저 load() 해야 한다` 로 첫 화면이 깨졌다.
+ * 조건을 리그로 나눠 두면(상점 캐릭터만 챙기는 식) 레벨 해금 캐릭터가 빠진다.
+ * **어느 캐릭터든 자기 번들이 필요하다** — 그것을 여기 한 곳에 적어 둔다.
+ */
+export function requiredBundles(character: Collectible): string[] {
+  // 상점 캐릭터는 클립이 0개다 — 보스와 같은 리그이므로 boss-anims 를 함께 받아야 움직인다
+  return character.rig === 'rigMedium'
+    ? [character.bundle, 'boss-anims']
+    : [character.bundle];
+}
+
 export function characterOf(
   state: CollectionState,
   level: number,

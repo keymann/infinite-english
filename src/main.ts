@@ -7,7 +7,7 @@ import { Sound } from './audio/sound';
 import { Input } from './core/input';
 import { startLoop } from './core/loop';
 import { createRng, randomSeed } from './core/rng';
-import { CHECKPOINT_EVERY, CLIMB, PLAYER, RULES, stairTimeFor } from './game/balance';
+import { CHECKPOINT_EVERY, CLIMB, PLAYER, RULES, STAIR_GAUGE, gaugeGainFor } from './game/balance';
 import { BOSS_EVERY, bossReward, canSpawnBoss, hpRatio, nextBossFloor } from './game/boss';
 import { Climb } from './game/climb';
 import { SPEED_LIMIT_SEC, instantGold } from './game/events';
@@ -16,7 +16,7 @@ import { LearningEngine } from './learning/engine';
 import { WordBank } from './learning/words';
 import { bandOf, levelsOf } from './learning/gradeBand';
 import { buy, shopItem } from './progress/shop';
-import { characterOf, newlyUnlocked, petOf } from './progress/collection';
+import { CHARACTERS, characterOf, newlyUnlocked, petOf, requiredBundles } from './progress/collection';
 import { applyProgress, allDone, defOf, ensureToday, rewardFor } from './progress/mission';
 import {
   abilitiesOf,
@@ -113,7 +113,12 @@ async function boot() {
    */
   const bootBundles = ['player', 'world-forest', 'gimmick', 'pickup', 'blocks'];
   const savedCharacter = characterOf(saved.collection, saved.player.level, saved.shop.owned);
-  if (savedCharacter.rig === 'rigMedium') bootBundles.push(savedCharacter.bundle, 'boss-anims');
+  /* **고른 캐릭터의 번들은 리그와 무관하게 필요하다.** 예전에는 상점 캐릭터(rigMedium)만
+     챙겨서, 레벨로 해금한 캐릭터를 고른 저장본이 부팅에서 깨졌다
+     (`bundle 'char-male-b' 을 먼저 load() 해야 한다`). */
+  for (const name of requiredBundles(savedCharacter)) {
+    if (!bootBundles.includes(name)) bootBundles.push(name);
+  }
   if (saved.shop.weaponId) bootBundles.push('weapons');
 
   // 3D 에셋과 단어 DB 를 동시에 받는다 — 둘은 서로를 기다릴 이유가 없다
@@ -183,7 +188,12 @@ async function boot() {
    * 상점 캐릭터(KayKit Adventurers)는 클립이 0개다 — 보스와 같은 `Rig_Medium` 이므로
    * `boss-anims` 의 26종을 빌려 쓴다 (스파이크 A 에서 검증한 구조).
    */
-  const buildActor = (item: typeof character): Actor => {
+  const buildActor = (want: typeof character): Actor => {
+    /* **꾸미기 선택이 게임을 막으면 안 된다.** 번들을 못 받았으면(오프라인·캐시 미스)
+       기본 캐릭터로 떨어진다 — 던지면 첫 화면이 통째로 열리지 않는다. */
+    const ready = requiredBundles(want).every((name) => assets.ready(name));
+    const item = ready ? want : CHARACTERS[0];
+    if (!ready) console.warn(`캐릭터 '${want.id}' 번들이 없어 기본 캐릭터로 시작한다`);
     const rigMedium = item.rig === 'rigMedium';
     const clips = rigMedium ? assets.clips('boss-anims') : assets.clips(item.bundle);
     return new Actor(
@@ -360,9 +370,9 @@ async function boot() {
 
         snapshotRun();
 
-        /* 계단은 항상 열려 있다 — 한 칸 올랐으니 계단 시간을 다시 채운다.
+        /* 계단은 항상 열려 있다 — 한 칸 올랐으니 게이지를 **조금** 채운다(되돌리지 않는다).
            **보스 층 검사는 매 착지마다 한다.** 예전에는 "열린 구간을 다 오른 시점"에만
-           봤지만, 이제 구간이라는 개념이 없다 (요구 사항 1). */
+           봤지만, 이제 구간이라는 개념이 없다. */
         if (canSpawnBoss({ floor: climb.floor, lastBossFloor })) {
           lastBossFloor = Math.floor(climb.floor / BOSS_EVERY) * BOSS_EVERY;
           // 연출을 기다리지 않고 **여기서 바로 잠근다** (bossPending 주석 참고)
@@ -371,7 +381,7 @@ async function boot() {
           stairs.setHint(-1);
           after(0.3, startBossFight);
         } else {
-          armStairTimer();
+          feedGauge();
         }
       },
       /* **방향을 틀리면 판이 끝난다.** 이전에는 휘청이고 계속했다 (PRD 3.2절) —
@@ -417,20 +427,32 @@ async function boot() {
   /* ── 계단 타이머 ──
      한 칸에 머무를 수 있는 시간. 0 이 되면 판이 끝난다.
      **보스전에는 돌지 않는다** — 계단이 잠긴 구간이고, 문제를 읽을 시간을 빼앗으면 안 된다. */
-  let stairLeft = 0;
-  let stairTotal = 0;
+  /** 남은 게이지(초). 0 이면 판이 끝난다 */
+  let gauge = 0;
+  /** 게이지가 도는 중인지 — 0 과 "꺼짐"을 구별해야 한다 */
+  let gaugeOn = false;
 
-  /** 한 칸을 밟을 때마다 다시 찬다. 층이 높으면 짧아진다 (balance.stairTimeFor) */
-  const armStairTimer = () => {
+  /** 게이지를 채우고 켠다 — 판 시작·보스 처치 직후 */
+  const startGauge = () => {
     if (!session || session.boss || session.phase === 'over') return;
-    stairTotal = stairTimeFor(climb.floor);
-    stairLeft = stairTotal;
-    bossBar.showStairTimer(1);
+    gauge = STAIR_GAUGE.startFill;
+    gaugeOn = true;
+    bossBar.showStairTimer(gauge / STAIR_GAUGE.capacity);
+  };
+
+  /**
+   * 한 칸 올랐다 — **되돌리지 않고 조금 채운다.**
+   *
+   * 이것이 원작의 리듬이다: 빠르게 오르면 상한까지 쌓이고, 망설이면 벌어 둔 만큼만 버틴다.
+   */
+  const feedGauge = () => {
+    if (!gaugeOn) return;
+    gauge = Math.min(STAIR_GAUGE.capacity, gauge + gaugeGainFor(climb.floor));
   };
 
   const stopStairTimer = () => {
-    stairLeft = 0;
-    stairTotal = 0;
+    gauge = 0;
+    gaugeOn = false;
     bossBar.hideStairTimer();
   };
 
@@ -440,7 +462,7 @@ async function boot() {
     bossPending = false;
     session.startClimb();
     panel.showPrompt(promptText());
-    armStairTimer();
+    startGauge();
   };
 
   /**
@@ -928,11 +950,7 @@ async function boot() {
       character = characterOf(saved.collection, saved.player.level, saved.shop.owned);
       /* 상점 캐릭터는 **클립이 없다** — `boss-anims` 를 함께 받아야 움직인다.
          받지 못하면 T 포즈로 서 있게 되므로 여기서 같이 기다린다 */
-      await assets.load(
-        character.rig === 'rigMedium'
-          ? [character.bundle, 'boss-anims']
-          : [character.bundle],
-      );
+      await assets.load(requiredBundles(character));
       // Actor 를 새로 만들면 Climb 이 들고 있던 참조가 낡는다 — 같이 다시 만든다
       scene.remove(actor.root);
       scene.remove(shadow);
@@ -1081,16 +1099,16 @@ async function boot() {
        `climb.state !== 'dead'` 를 보는 이유: 방향을 틀려 죽는 연출 중에 타이머가 0 이 되어
        종료 사유가 'timeout' 으로 덮이면 아이가 잘못된 이유를 보게 된다. */
     if (
-      stairTotal > 0 &&
+      gaugeOn &&
       session &&
       session.phase === 'climbing' &&
       !session.boss &&
       climb.state !== 'stumble' &&
       climb.state !== 'dead'
     ) {
-      stairLeft = Math.max(0, stairLeft - dt);
-      bossBar.showStairTimer(stairLeft / stairTotal);
-      if (stairLeft === 0) failRun('timeout');
+      gauge = Math.max(0, gauge - dt);
+      bossBar.showStairTimer(gauge / STAIR_GAUGE.capacity);
+      if (gauge === 0) failRun('timeout');
     }
 
     /* 이벤트 타이머. Speed 는 문제를 푸는 동안, Escape 는 계단을 오르는 동안 돈다.
@@ -1191,7 +1209,13 @@ async function boot() {
       },
       /** 계단 타이머 — 남은 시간·총 시간(초). total 0 이면 돌지 않는 상태다 */
       get stairTimer() {
-        return { left: +stairLeft.toFixed(2), total: stairTotal, floorTime: stairTimeFor(climb.floor) };
+        return {
+          left: +gauge.toFixed(2),
+          capacity: STAIR_GAUGE.capacity,
+          on: gaugeOn,
+          /** 이 층의 손익분기 속도(초/칸) — 이보다 빨리 밟으면 게이지가 쌓인다 */
+          gainPerStep: +gaugeGainFor(climb.floor).toFixed(3),
+        };
       },
       /** 판이 끝난 이유 — 'quiz' | 'direction' | 'timeout' */
       get failReason() {

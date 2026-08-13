@@ -5,7 +5,7 @@ import { createRng } from '../core/rng';
 import { Stairs } from '../world/stairs';
 import { Actor, KENNEY_VOCAB, RIG_MEDIUM_VOCAB, type ClipVocab } from '../three/actor';
 import { BossActor } from '../world/bossActor';
-import { CLIMB, PLAYER, STAIR_TIMER, stairTimeFor } from './balance';
+import { CLIMB, PLAYER, STAIR_GAUGE, gaugeGainFor } from './balance';
 import { Climb } from './climb';
 
 /**
@@ -119,51 +119,82 @@ describe('방향 오선택 — 판이 끝난다', () => {
   });
 });
 
-describe('계단 타이머 — 층이 높을수록 짧아지고 하한은 2초', () => {
-  it('0층은 시작값 3초', () => {
-    expect(stairTimeFor(0)).toBe(STAIR_TIMER.startSec);
-    expect(STAIR_TIMER.startSec).toBe(3);
+describe('계단 게이지 — 원작 방식(줄어들고, 밟으면 조금 채워진다)', () => {
+  /**
+   * **게이지를 직접 굴려 본다.** 이 규칙의 핵심은 숫자 하나가 아니라 "속도에 따라 쌓이거나
+   * 줄어드는가" 이므로, 값을 확인하는 것만으로는 검증이 되지 않는다.
+   *
+   * @param pace 한 칸을 밟는 데 걸리는 시간(초)
+   */
+  function climbAtPace(pace: number, steps: number, floor = 0) {
+    let gauge: number = STAIR_GAUGE.startFill;
+    for (let i = 0; i < steps; i++) {
+      gauge -= pace; // 그 시간만큼 줄고
+      if (gauge <= 0) return { gauge: 0, diedAt: i + 1 };
+      gauge = Math.min(STAIR_GAUGE.capacity, gauge + gaugeGainFor(floor + i)); // 한 칸 채운다
+    }
+    return { gauge, diedAt: null as number | null };
+  }
+
+  it('손익분기보다 빠르면 게이지가 상한까지 쌓인다', () => {
+    const fast = climbAtPace(gaugeGainFor(0) - 0.15, 40);
+    expect(fast.diedAt).toBeNull();
+    expect(fast.gauge).toBeCloseTo(STAIR_GAUGE.capacity, 5);
   });
 
-  /* 층당 뺄셈이 아니라 **100층마다 비율**로 줄어든다 (요구 사항 4).
-     뺄셈은 시작값을 낮추면 하한에 닿는 층도 같이 당겨져 초반 난이도가 급변한다 */
+  it('손익분기보다 느리면 결국 0 이 된다', () => {
+    const slow = climbAtPace(gaugeGainFor(0) + 0.15, 200);
+    expect(slow.diedAt).not.toBeNull();
+  });
+
+  /* 이것이 "리듬" 이다 — 칸마다 리셋되면 속도가 아무 의미가 없다 */
+  it('같은 속도라도 층이 높으면 더 빨리 마른다', () => {
+    const pace = 0.5;
+    const low = climbAtPace(pace, 300, 0);
+    const high = climbAtPace(pace, 300, 400);
+    expect(high.diedAt).not.toBeNull();
+    if (low.diedAt !== null) expect(high.diedAt!).toBeLessThan(low.diedAt);
+  });
+
+  it('상한을 넘겨 쌓이지 않는다 — 아무리 빨라도 3초까지', () => {
+    const veryFast = climbAtPace(0.05, 300);
+    expect(veryFast.gauge).toBeLessThanOrEqual(STAIR_GAUGE.capacity + 1e-9);
+    expect(STAIR_GAUGE.capacity).toBe(3);
+  });
+
+  /* 원작처럼 가득 찬 채 시작한다 — 첫 칸을 읽을 시간과 보스 직후의 한숨을 준다 */
+  it('가득 찬 채 시작하고, 가득 찼을 때 3초를 쉴 수 있다', () => {
+    expect(STAIR_GAUGE.capacity).toBeGreaterThanOrEqual(2);
+    expect(STAIR_GAUGE.startFill).toBe(STAIR_GAUGE.capacity);
+  });
+});
+
+describe('손익분기 속도 (층별)', () => {
+  it('층이 오르면 요구 속도가 빨라진다', () => {
+    for (let floor = 0; floor < 500; floor += 25) {
+      expect(gaugeGainFor(floor + 25)).toBeLessThanOrEqual(gaugeGainFor(floor));
+    }
+  });
+
   it('100층마다 같은 비율로 줄어든다', () => {
-    const at = (f: number) => stairTimeFor(f);
-    expect(at(100) / at(0)).toBeCloseTo(STAIR_TIMER.ratioPer100Floors, 6);
-    expect(at(200) / at(100)).toBeCloseTo(STAIR_TIMER.ratioPer100Floors, 6);
+    expect(gaugeGainFor(100) / gaugeGainFor(0)).toBeCloseTo(STAIR_GAUGE.gainRatioPer100, 6);
+    expect(gaugeGainFor(200) / gaugeGainFor(100)).toBeCloseTo(STAIR_GAUGE.gainRatioPer100, 6);
   });
 
-  it('층이 오르면 단조 감소한다', () => {
-    for (let floor = 0; floor < 400; floor += 20) {
-      expect(stairTimeFor(floor + 20)).toBeLessThanOrEqual(stairTimeFor(floor));
+  /** 점프가 0.17초다 — 하한이 그보다 충분히 커야 사람이 낼 수 있는 속도다 */
+  it('요구 속도의 하한이 점프 시간보다 넉넉하다', () => {
+    for (const floor of [0, 300, 1000, 9999]) {
+      expect(gaugeGainFor(floor)).toBeGreaterThanOrEqual(STAIR_GAUGE.minGain);
+      expect(gaugeGainFor(floor)).toBeGreaterThan(CLIMB.jumpSec * 1.8);
     }
   });
 
-  it('어떤 층에서도 2초 아래로 내려가지 않는다', () => {
-    for (const floor of [0, 100, 300, 500, 1000, 9999, 1e6]) {
-      expect(stairTimeFor(floor)).toBeGreaterThanOrEqual(STAIR_TIMER.minSec);
-    }
+  it('0층은 느긋해도 유지된다 — 0.6초/칸이면 충분하다', () => {
+    expect(gaugeGainFor(0)).toBeGreaterThan(0.55);
   });
 
-  it('하한에 닿은 뒤에는 계속 2초다', () => {
-    // 3.0 × 0.88^(층/100) = 2.0 → 층 ≈ 317
-    const floorAtMin =
-      100 * (Math.log(STAIR_TIMER.minSec / STAIR_TIMER.startSec) / Math.log(STAIR_TIMER.ratioPer100Floors));
-    expect(stairTimeFor(floorAtMin)).toBeCloseTo(STAIR_TIMER.minSec, 6);
-    expect(stairTimeFor(floorAtMin + 1)).toBe(STAIR_TIMER.minSec);
-    expect(stairTimeFor(floorAtMin + 500)).toBe(STAIR_TIMER.minSec);
-  });
-
-  /* 요구 사항: "최대값을 낮춘다" — 계단을 오를 때 루즈하지 않아야 한다 */
-  it('한 칸 대기 시간이 3초를 넘지 않는다', () => {
-    for (const floor of [0, 1, 50, 100, 500]) {
-      expect(stairTimeFor(floor)).toBeLessThanOrEqual(3);
-    }
-  });
-
-  /* 음수 층은 들어올 수 없지만, 들어와도 시작값보다 길어지면 안 된다 */
   it('음수 층에서도 시작값을 넘지 않는다', () => {
-    expect(stairTimeFor(-50)).toBe(STAIR_TIMER.startSec);
+    expect(gaugeGainFor(-50)).toBe(STAIR_GAUGE.gainAtFloor0);
   });
 });
 
