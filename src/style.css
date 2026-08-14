@@ -446,6 +446,17 @@ body {
   line-height: 1.5;
 }
 
+/* 결과 화면의 두 버튼 — 가로로 나란히. 손가락이 큰 버튼 두 개를 좌우로 구분한다 */
+.result-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.result-actions .again {
+  flex: 1;
+  min-width: 0;
+}
+
 .again {
   width: 100%;
   min-height: 56px;
@@ -461,6 +472,12 @@ body {
 
 .again:active {
   transform: scale(0.98);
+}
+
+/* "홈으로" — 같은 크기지만 주 동작이 아니다. 색으로만 구분한다 */
+.again.ghost {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--fg);
 }
 
 /* ── 전체 화면 (시작 · 부모) ──

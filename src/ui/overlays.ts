@@ -159,8 +159,10 @@ export class Overlays {
                </div>`
             : `<div class="result-words"><h3>틀린 단어가 없어!</h3></div>`
         }
-        <button type="button" class="again" id="again">한 판 더</button>
-        <button type="button" class="link" id="home">홈으로</button>
+        <div class="result-actions">
+          <button type="button" class="again" id="again">한번 더</button>
+          <button type="button" class="again ghost" id="home">홈으로</button>
+        </div>
       </div>`;
     this.resultEl.removeAttribute('hidden');
     this.resultEl.querySelector<HTMLButtonElement>('#again')!.addEventListener('click', handlers.onRestart);
