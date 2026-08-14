@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { availableCharacters, purchasedCharacters } from './collection';
+import {
+  CHARACTERS,
+  availableCharacters,
+  purchasedCharacters,
+  requiredBundles,
+} from './collection';
 import {
   SHOP_CATEGORIES,
   SHOP_ITEMS,
@@ -168,5 +173,37 @@ describe('산 캐릭터가 로비 목록에 들어온다', () => {
 
   it('무기를 사도 캐릭터 목록에는 들어가지 않는다', () => {
     expect(purchasedCharacters(['sword_A'])).toEqual([]);
+  });
+});
+
+describe('부팅에 필요한 번들 — 캐릭터를 고른 저장본이 열려야 한다', () => {
+  /**
+   * 이 목록이 틀리면 **첫 화면이 통째로 안 열린다.**
+   * 실제로 `bundle 'char-male-b' 을 먼저 load() 해야 한다` 로 깨졌다 —
+   * 상점 캐릭터(rigMedium)만 챙기고 레벨 해금 캐릭터를 빠뜨린 탓이었다.
+   */
+  it('레벨 해금 캐릭터도 자기 번들을 요구한다', () => {
+    for (const c of CHARACTERS) {
+      expect(requiredBundles(c), c.id).toContain(c.bundle);
+    }
+  });
+
+  it('상점 캐릭터는 자기 번들 + boss-anims 를 요구한다 — 클립이 0개다', () => {
+    for (const c of purchasedCharacters(['Knight', 'Mage'])) {
+      expect(requiredBundles(c), c.id).toEqual([c.bundle, 'boss-anims']);
+    }
+  });
+
+  it('기본 캐릭터는 boss-anims 를 요구하지 않는다 — 첫 로드를 무겁게 하지 않는다', () => {
+    expect(requiredBundles(CHARACTERS[0])).toEqual(['player']);
+  });
+
+  it('고를 수 있는 모든 캐릭터가 빠짐없이 처리된다', () => {
+    const all = availableCharacters(99, ['Knight', 'Barbarian', 'Mage', 'Ranger', 'Rogue', 'Rogue_Hooded']);
+    for (const c of all) {
+      const need = requiredBundles(c);
+      expect(need.length, c.id).toBeGreaterThan(0);
+      expect(need[0], c.id).toBe(c.bundle);
+    }
   });
 });
