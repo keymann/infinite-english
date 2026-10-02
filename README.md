@@ -6,6 +6,7 @@
 - 기획: [`prd.txt`](prd.txt)
 - 작업 계획: [`docs/영어계단-작업계획.md`](docs/영어계단-작업계획.md)
 - 배포: **Cloudflare Workers Static Assets** (`wrangler.jsonc`, `~/WorkSpace/elementary-math-warrior`와 동일 환경)
+  — **main 에 머지하면 Workers Builds 가 자동 배포한다** (아래 [배포](#배포))
 - 렌더링: three.js + glTF
 
 ## 현재 상태
@@ -559,6 +560,25 @@ KO→EN 문제의 정답이 둘이 된다 — 빌드가 이를 막고, 표기를
 > 직접 불러서, 잠금을 넣은 뒤에도 검증이 계속 통과했다 —
 > **검증 도구가 실제보다 관대하면 검증은 거짓말이 된다.**
 **보기 클릭·입력과 같은 경로를 타므로** "테스트만 통과하는 코드"가 되지 않는다.
+
+### 배포
+
+**main 에 머지하면 Cloudflare Workers Builds 가 빌드·배포한다.** GitHub Actions 는 쓰지 않는다
+(`elementary-math-warrior` 와 같은 방식). 결과는 커밋의 `Workers Builds: infinite-english` 체크로 보인다.
+
+| Workers & Pages → infinite-english → Settings → Builds | 값 |
+|---|---|
+| 저장소 | `keymann/infinite-english` |
+| Production branch | `main` |
+| Build command | 비워 둔다 — `wrangler.jsonc` 의 `build.command` 가 배포 직전에 `npm run build` 를 돈다 |
+| Deploy command | `npx wrangler deploy` |
+| Root directory | `/` |
+
+- Worker 이름은 `wrangler.jsonc` 의 `name`(`infinite-english`)과 같아야 한다. 다르면 빌드가 실패한다
+- **연결 전에 들어온 커밋은 다시 빌드되지 않는다.** 연결 직후에는 main 에 새 커밋이 하나 들어가야 첫 배포가 돈다
+- 체크가 `queued` 에서 멈춰 있으면 Cloudflare 쪽에 저장소가 연결되지 않은 것이다. GitHub 앱은 푸시를
+  받아 체크를 만들지만 처리할 빌드가 없다 (2026-08 ~ 10 동안 이 상태로 자동 배포가 한 번도 돌지 않았다)
+- 급할 때는 로컬에서 `npm run deploy` (wrangler 로그인 필요)
 
 ### 3D 에셋 파이프라인
 
