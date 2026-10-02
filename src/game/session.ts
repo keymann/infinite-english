@@ -6,7 +6,8 @@ import type { Quiz } from '../quiz/types';
 import type { SessionSummary } from '../progress/stats';
 import { FAST_ANSWER_MS, HARD_DIFFICULTY } from '../progress/player';
 import { COMBO_TIERS, RULES, type StepStyle } from './balance';
-import { hitBoss, missBoss, spawnBoss, type BossHit, type BossState } from './boss';
+import { hitBoss, missBoss, openBoss, spawnBoss, type BossHit, type BossOpening, type BossState } from './boss';
+import { BARE_HANDS, type Armament } from './weaponPerk';
 import { bossFor, type BossPick } from './bossRoster';
 import {
   SPEED_LIMIT_SEC,
@@ -113,10 +114,12 @@ export class Session {
   /** 지금 싸우는 보스의 종·등급 — 연출이 같은 답을 쓰도록 여기서 정한다 */
   bossPick: BossPick | null = null;
   /**
-   * 장착한 무기의 추가 피해 (0~5). 판을 시작할 때 main 이 넣는다.
-   * Session 은 상점을 모른다 — 숫자만 받는다.
+   * 장착한 무기 — 등급 추가 피해(+1~+5)와 계열(특기). 판을 시작할 때 main 이 넣는다.
+   * Session 은 상점을 모른다 — 숫자와 계열만 받는다.
    */
-  weaponBonus = 0;
+  weapon: Armament = BARE_HANDS;
+  /** 방금 등장한 보스에 무기 특기가 바꾼 것(창 선제 피해·지팡이 봉인) — UI 가 알린 뒤 비운다 */
+  opening: BossOpening | null = null;
 
   private readonly bank: WordBank;
   private readonly engine: LearningEngine;
@@ -185,6 +188,8 @@ export class Session {
       giant: this.bossPick.giant,
       regen: this.bossPick.kind.trait === 'regen',
     });
+    // 창은 등장하자마자 찌르고, 지팡이는 흡혈귀의 회복을 막는다 (game/weaponPerk.ts)
+    this.opening = openBoss(this.boss, this.weapon.family);
     this.event = null;
 
     const decision = rollBossEvent({ floor, rng: this.rng, lastId: this.lastEventId });
@@ -291,7 +296,11 @@ export class Session {
       /* 보스전: 계단이 열리지 않는다. 정답이 보스 HP 를 깎고, 처치하면 계단이 다시 열린다.
          같은 문제를 푸는데 의미가 달라지는 구간이다 (PRD 18장). */
       if (this.boss) {
-        const hit = hitBoss(this.boss, quiz.difficulty, this.combo, this.weaponBonus);
+        const hit = hitBoss(
+          this.boss,
+          { difficulty: quiz.difficulty, combo: this.combo, answerMs },
+          this.weapon,
+        );
         if (hit.defeated) {
           this.boss = null;
           this.bossPick = null;

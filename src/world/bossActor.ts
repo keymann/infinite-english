@@ -37,6 +37,8 @@ const LUNGE = 0.85;
  * "왜 저기서 아픈가" 가 된다 — 그래서 시간(setTimeout)이 아니라 애니메이션 진행도로 잰다.
  */
 const IMPACT_AT = 0.4;
+/** 망치 특기로 밀려나는 거리 — 계단 한 칸(0.78)보다 짧게. 더 밀면 계단 밖으로 떨어져 보인다 */
+const KNOCK_HEAVY = 0.6;
 
 type BossMove = 'spawn' | 'idle' | 'hit' | 'hitHard' | 'attack' | 'die';
 
@@ -119,11 +121,21 @@ export class BossActor {
     this.playerAt.copy(lookAt);
   }
 
-  /** 피격 — 정답 한 번 */
-  hit(critical: boolean) {
+  /**
+   * 피격 — 정답 한 번.
+   *
+   * @param heavy 망치 특기 — 플레이어 반대쪽으로 크게 밀려났다가 제자리로 돌아온다.
+   *              돌아오는 것은 update 의 "제자리로 수렴" 이 맡는다
+   */
+  hit(critical: boolean, heavy = false) {
     if (this.dying) return;
     this.hitLeft = 0.45;
     this.attackLeft = 0;
+    if (heavy) {
+      this.scratch.subVectors(this.base, this.playerAt).setY(0);
+      const len = this.scratch.length() || 1;
+      this.actor.root.position.addScaledVector(this.scratch, KNOCK_HEAVY / len);
+    }
     this.play(critical ? 'hitHard' : 'hit', {
       loop: false,
       timeScale: critical ? 1.1 : 1.4,

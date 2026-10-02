@@ -76,8 +76,8 @@ describe('대보스 · 특성 · 무기', () => {
 
   it('흡혈귀는 오답에 체력을 조금 찬다 — 정답 한 번보다 적게', () => {
     const boss = spawnBoss(400, { regen: true });
-    hitBoss(boss, 0.1, 0);
-    hitBoss(boss, 0.1, 0);
+    hitBoss(boss, { difficulty: 0.1, combo: 0, answerMs: 9999 });
+    hitBoss(boss, { difficulty: 0.1, combo: 0, answerMs: 9999 });
     const before = boss.hp;
     const heal = missBoss(boss);
     expect(heal).toBeGreaterThan(0);
@@ -87,8 +87,8 @@ describe('대보스 · 특성 · 무기', () => {
 
   it('대보스 흡혈귀도 정답 한 번보다 적게 회복한다', () => {
     const boss = spawnBoss(400, { regen: true, giant: true });
-    hitBoss(boss, 0.1, 0);
-    hitBoss(boss, 0.1, 0);
+    hitBoss(boss, { difficulty: 0.1, combo: 0, answerMs: 9999 });
+    hitBoss(boss, { difficulty: 0.1, combo: 0, answerMs: 9999 });
     expect(missBoss(boss)).toBeLessThan(10);
   });
 
@@ -97,13 +97,13 @@ describe('대보스 · 특성 · 무기', () => {
     expect(missBoss(full)).toBe(0);
     expect(full.hp).toBe(full.maxHp);
     const plain = spawnBoss(400);
-    hitBoss(plain, 0.1, 0);
+    hitBoss(plain, { difficulty: 0.1, combo: 0, answerMs: 9999 });
     expect(missBoss(plain)).toBe(0);
   });
 
   it('무기 보너스만큼 피해가 늘어난다', () => {
-    const a = hitBoss(spawnBoss(20), 0.1, 0, 0).damage;
-    const b = hitBoss(spawnBoss(20), 0.1, 0, 5).damage;
+    const a = hitBoss(spawnBoss(20), { difficulty: 0.1, combo: 0, answerMs: 9999 }, { bonus: 0, family: null }).damage;
+    const b = hitBoss(spawnBoss(20), { difficulty: 0.1, combo: 0, answerMs: 9999 }, { bonus: 5, family: null }).damage;
     expect(b - a).toBe(5);
   });
 });

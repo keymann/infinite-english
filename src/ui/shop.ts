@@ -3,6 +3,7 @@ import {
   SHOP_CATEGORIES,
   affordable,
   itemsOf,
+  perkOf,
   weaponDamage,
   type ShopCategory,
   type ShopItem,
@@ -38,7 +39,12 @@ function thumb(item: ShopItem): string {
 
 /** 한 줄 설명 밑에 붙는 효과 표시 — 무기는 공격력, 아이템은 가진 개수 */
 function effectTag(item: ShopItem, inventory: Inventory): string {
-  if (item.category === 'weapon') return `<em class="shop-tag">⚔️ 공격 +${weaponDamage(item.price)}</em>`;
+  if (item.category === 'weapon') {
+    const perk = perkOf(item);
+    return `<em class="shop-tag">⚔️ 공격 +${weaponDamage(item.price)}</em>${
+      perk ? `<em class="shop-perk">✨ ${escapeHtml(perk.name)} · ${escapeHtml(perk.hint)}</em>` : ''
+    }`;
+  }
   if (item.category === 'item') {
     const n = countOf(inventory, item.id as ConsumableId);
     return `<em class="shop-tag">가진 개수 ${n}/${CARRY_MAX}</em>`;
@@ -128,7 +134,8 @@ export class ShopScreen {
         </div>
 
         <p class="shop-notice">
-          무기를 사면 <b>로비에서 골라 들 수 있어요.</b> 무기를 들면 보스에게 주는 피해가 커져요.
+          무기를 사면 <b>로비에서 골라 들 수 있어요.</b> 무기를 들면 보스에게 주는 피해가 커지고,
+          무기 종류마다 <b>특기</b>가 있어요.
           캐릭터를 사면 <b>바로 고를 수 있어요.</b>
           아이템은 <b>판 안에서 오른쪽 버튼으로 써요.</b> 한 판에 쓰는 횟수는 정해져 있어요.
         </p>

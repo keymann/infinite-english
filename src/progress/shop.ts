@@ -20,6 +20,7 @@
  * 화살만 따로 사는 것은 게임에서 의미가 없다.
  */
 
+import { PERKS, familyOf, type Armament, type Perk } from '../game/weaponPerk';
 import { CONSUMABLES, type ConsumableId } from './items';
 
 const ITEM_EMOJI: Record<ConsumableId, string> = { star: '⭐', key: '🗝️', potion: '🧪', shield: '🛡️' };
@@ -110,6 +111,19 @@ export function weaponDamage(price: number): number {
 export function equippedDamage(weaponId: string | null): number {
   const item = weaponId ? BY_ID.get(weaponId) : undefined;
   return item?.category === 'weapon' ? weaponDamage(item.price) : 0;
+}
+
+/** 그 무기의 특기 (game/weaponPerk.ts). 무기가 아니면 null */
+export function perkOf(item: ShopItem | undefined): Perk | null {
+  if (item?.category !== 'weapon') return null;
+  const family = familyOf(item.asset);
+  return family ? PERKS[family] : null;
+}
+
+/** 장착한 무기를 Session 이 쓰는 형태로 — 등급 피해 + 계열 */
+export function armamentOf(weaponId: string | null): Armament {
+  const item = weaponId ? BY_ID.get(weaponId) : undefined;
+  return { bonus: equippedDamage(weaponId), family: perkOf(item)?.family ?? null };
 }
 
 /**

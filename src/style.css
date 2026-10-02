@@ -1331,3 +1331,10 @@ body {
   font-weight: 700;
   color: #ffd24a;
 }
+
+/* 무기 특기 — 공격력 아래 한 줄. 무엇이 다른지가 보여야 무기를 고르는 이유가 생긴다 */
+.shop-perk {
+  font-size: 0.66rem;
+  font-style: normal;
+  color: #c9b8ff;
+}

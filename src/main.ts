@@ -16,7 +16,7 @@ import { Session } from './game/session';
 import { LearningEngine } from './learning/engine';
 import { WordBank } from './learning/words';
 import { bandOf, levelsOf } from './learning/gradeBand';
-import { buy, equippedDamage, shopItem } from './progress/shop';
+import { armamentOf, buy, shopItem } from './progress/shop';
 import {
   CONSUMABLES,
   RunItems,
@@ -62,6 +62,8 @@ import { Backdrop } from './world/backdrop';
 import { BossActor } from './world/bossActor';
 import { Gimmicks } from './world/gimmicks';
 import { Chest } from './world/chest';
+import { HitFx } from './world/hitFx';
+import { PERKS } from './game/weaponPerk';
 import { Npc } from './world/npc';
 import { Pet } from './world/pet';
 import { QuizObject } from './world/quizObject';
@@ -176,6 +178,10 @@ async function boot() {
     star: assets.source('items', 'star'),
   });
   scene.add(gimmicks.group);
+
+  /** 정답 타격 연출 — 무기 계열마다 모양이 다르다 */
+  const hitFx = new HitFx();
+  scene.add(hitFx.group);
 
   /** 보스 상자 — 처치한 자리에서 열린다 */
   const chest = new Chest(assets.instance('items', 'chest'), assets.clips('items'), 0.7);
@@ -384,6 +390,15 @@ async function boot() {
     clearTimeout(timer);
     timer = setTimeout(fn, sec * 1000) as unknown as number;
   };
+  /**
+   * 연출 문구 전용 지연 — `after` 와 **슬롯을 공유하지 않는다.**
+   *
+   * `after` 는 단일 슬롯이라, 문구를 예약한 직후 다음 문제·등반 재개를 예약하면 문구가 취소된다.
+   * 특기 이름·상자 보상처럼 상태 전이와 무관한 문구는 이쪽으로 띄운다.
+   */
+  const later = (sec: number, fn: () => void) => {
+    setTimeout(fn, sec * 1000);
+  };
 
   /* 홈 화면에서는 아직 판이 없다. 더미 Session 을 만들어 두면 난수 스트림이 헛돌고
      나중에 "왜 첫 문제가 매번 다르지" 같은 버그로 돌아온다 — undefined 로 두고 가드한다. */
@@ -575,8 +590,29 @@ async function boot() {
     const kind = buildBoss(pick);
     const title = `${boss.giant ? '대보스' : 'BOSS'} ${boss.index} · ${kind?.name ?? '보스'}`;
     bossBar.showBoss(title, 1);
-    const hint = traitHint(pick.kind.trait);
-    if (hint) after(0.5, () => overlays.praise(`${pick.kind.name}: ${hint}`, 'fire'));
+    /* 무기 특기 — 창은 등장하자마자 찌르고, 지팡이는 흡혈귀의 회복을 막는다.
+       특성 안내보다 먼저 정해진다: 봉인했으면 "틀리면 체력이 찬다" 를 띄우지 않는다.
+       `after()` 가 아니라 `later()` 를 쓴다 — after 는 단일 슬롯이라 아래의 첫 문제
+       예약(0.9초)을 취소해 버린다 */
+    const opening = session.opening;
+    session.opening = null;
+    const hint = opening?.sealed ? '' : traitHint(pick.kind.trait);
+    if (hint) later(0.5, () => overlays.praise(`${pick.kind.name}: ${hint}`, 'fire'));
+    if (opening?.sealed) {
+      later(0.6, () => overlays.praise(`🔮 ${PERKS.staff.name}! 흡혈귀가 회복하지 못한다`, 'lightning'));
+    }
+    if (opening && opening.opener > 0) {
+      // 보스가 내려앉은 뒤에 찌른다 — 등장 낙하(0.9초) 중에 맞으면 무엇에 맞았는지 안 보인다
+      later(0.7, () => {
+        if (!session?.boss || !bossActor) return;
+        climb.attack();
+        bossActor.hit(false);
+        playHitFx('spear', true);
+        bossBar.setBossHp(hpRatio(session.boss));
+        overlays.praise(`🔱 ${PERKS.spear.name}! -${opening.opener}`, 'lightning');
+        sound.tierUp(2);
+      });
+    }
     /* **계단 표면에 세운다.** 플레이어 좌표에 오프셋을 더하던 방식은 계단이 올라가면서
        안쪽으로 뻗는 것을 무시해 보스를 계단 아래에 박아 넣었다 (world/bossActor.ts) */
     bossActor?.spawn(stairs.surfaceAt(climb.floor + BOSS_STAND_AHEAD), actor.root.position);
@@ -679,8 +715,8 @@ async function boot() {
       levels: levelsOf(saved.levelBand),
     });
     session = new Session(bank, engine, createRng(seed ^ 0x9e3779b9));
-    // 장착한 무기의 추가 피해 — Session 은 상점을 모르므로 숫자만 넣는다
-    session.weaponBonus = equippedDamage(saved.shop.weaponId);
+    // 장착한 무기 — 등급 피해와 계열(특기). Session 은 상점을 모르므로 값만 넣는다
+    session.weapon = armamentOf(saved.shop.weaponId);
     runItems = new RunItems();
     quizOpen = false;
     keyUsed = false;
@@ -815,8 +851,11 @@ async function boot() {
         /* **플레이어가 무기를 휘두른다.** 정답의 결과가 HP 바 숫자만 줄어드는 것이 아니라
            화면에서 보여야 한다. 무기를 안 들었어도 동작은 나온다(맨손) */
         climb.attack();
-        bossActor?.hit(hit.critical);
-        camera.shake(PLAYER.landShake * (hit.critical ? 2.4 : 1.4));
+        bossActor?.hit(hit.critical, hit.perk === 'hammer');
+        playHitFx(session.weapon.family, hit.perk !== null);
+        camera.shake(PLAYER.landShake * (hit.perk === 'hammer' ? 3.4 : hit.critical ? 2.4 : 1.4));
+        // 특기가 발동했으면 이름을 띄운다 — 무기를 고른 이유가 그 순간 보인다
+        if (hit.perk) later(0.05, () => overlays.praise(`${PERKS[hit.perk!].name}! -${hit.damage}`, 'lightning'));
         if (hit.defeated) {
           bossBar.setBossHp(0);
           bossBar.hideBoss();
@@ -940,6 +979,20 @@ async function boot() {
   };
 
   /**
+   * 정답 타격 연출. 맨손이면 작은 별이 튄다 — 맨손도 "내가 때렸다" 는 보여야 한다.
+   * 탄(화살·찌르기·마법탄)은 플레이어 손 높이에서 보스 몸통으로 날아간다.
+   */
+  const playHitFx = (family: keyof typeof PERKS | null, big: boolean) => {
+    if (!bossActor) return;
+    const perk = family ? PERKS[family] : null;
+    const from = actor.root.position.clone();
+    from.y += actor.height * 0.6;
+    const to = bossActor.root.position.clone();
+    to.y += PLAYER.height * 0.7;
+    hitFx.play(perk?.fx ?? 'star', perk?.color ?? 0xffffff, from, to, big);
+  };
+
+  /**
    * 보스 상자 — 처치한 자리에서 열리고 얻은 물건이 떠오른다.
    * 무엇이 나오는지는 층이 정한다(progress/items.ts) — 다시 해도 같은 층은 같은 상자다.
    */
@@ -951,16 +1004,16 @@ async function boot() {
       const item = consumable(drop.id)!;
       if (got.granted) {
         saved.shop = { ...saved.shop, items: got.inventory };
-        after(0.9, () => overlays.praise(`🎁 ${item.name} 획득!`, 'lightning'));
+        later(0.9, () => overlays.praise(`🎁 ${item.name} 획득!`, 'lightning'));
       } else {
         // 이미 가득 — 그 값만큼 골드로 바꿔 준다. 빈손으로 끝나면 상자가 배신한다
         award(0, Math.round(item.price / 2));
-        after(0.9, () => overlays.praise(`🎁 ${item.name} (가득) → 🪙 +${Math.round(item.price / 2)}`, 'gold'));
+        later(0.9, () => overlays.praise(`🎁 ${item.name} (가득) → 🪙 +${Math.round(item.price / 2)}`, 'gold'));
       }
       prize = assets.instance('items', item.model);
     } else {
       award(0, drop.amount);
-      after(0.9, () => overlays.praise(`🎁 🪙 +${drop.amount}`, 'gold'));
+      later(0.9, () => overlays.praise(`🎁 🪙 +${drop.amount}`, 'gold'));
       prize = assets.instance('items', 'coin');
     }
     saveSoon(saved);
@@ -1298,6 +1351,7 @@ async function boot() {
     }
     gimmicks.update(dt);
     chest.update(dt);
+    hitFx.update(dt);
     renderItems();
     npc?.update(dt, stairs);
     quizObject.update(dt, actor.root.position);
@@ -1618,6 +1672,9 @@ async function boot() {
           clip: bossClip(),
           hp: session?.boss ? { hp: session.boss.hp, max: session.boss.maxHp } : null,
           gear,
+          /** 타격 연출이 재생 중인지 */
+          fx: hitFx.active,
+          weapon: session?.weapon ?? null,
           height: bossActor ? +new THREE_NS.Box3().setFromObject(bossActor.root).getSize(new THREE_NS.Vector3()).y.toFixed(2) : null,
         };
       },

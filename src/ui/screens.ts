@@ -10,7 +10,7 @@ import {
 import { GRADE_BANDS, bandOf } from '../learning/gradeBand';
 import { allDone, defOf, type MissionState } from '../progress/mission';
 import type { ShopState } from '../progress/save';
-import { nextGoal, ownedWeapons, shopItem } from '../progress/shop';
+import { nextGoal, ownedWeapons, perkOf, shopItem, weaponDamage } from '../progress/shop';
 import { expRatio, expToNext, type Abilities, type PlayerState } from '../progress/player';
 import type { RunState } from '../progress/save';
 import type { StreakState } from '../progress/streak';
@@ -198,7 +198,11 @@ export class StartScreen {
           ${
             weapons.length === 0
               ? `<p class="hint-text">상점에서 무기를 사면 여기에 담겨요. 무기를 들면 보스를 공격해요.</p>`
-              : ''
+              : equipped
+                ? `<p class="hint-text">⚔️ 공격 +${weaponDamage(equipped.price)}${
+                    perkOf(equipped) ? ` · ✨ ${escapeHtml(perkOf(equipped)!.name)}: ${escapeHtml(perkOf(equipped)!.hint)}` : ''
+                  }</p>`
+                : ''
           }
 
           <h2>캐릭터</h2>
