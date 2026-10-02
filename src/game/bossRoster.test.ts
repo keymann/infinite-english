@@ -40,6 +40,11 @@ describe('보스 로스터', () => {
     expect(ids.size).toBeGreaterThanOrEqual(3);
   });
 
+  it('첫 보스(10층)는 숲 무리의 맨 앞 — 덜 무서운 오크다', () => {
+    expect(bossFor(10).kind.id).toBe('orc');
+    expect(bossFor(110).kind.id).toBe('zombie');
+  });
+
   it('구간이 바뀌면 무리도 바뀐다 (숲 ≠ 설산)', () => {
     expect(bossFor(10).kind.id).not.toBe(bossFor(310).kind.id);
   });

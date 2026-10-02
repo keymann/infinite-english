@@ -102,7 +102,8 @@ export function bossFor(floor: number): BossPick {
   const milestone = Math.max(BOSS_EVERY, Math.floor(floor / BOSS_EVERY) * BOSS_EVERY);
   const band = bandOf(milestone);
   if (isGiantFloor(milestone)) return { kind: BOSS_KINDS[band.champion], giant: true };
-  const order = Math.floor((milestone - band.fromFloor) / BOSS_EVERY);
+  // 구간 첫 보스 층(fromFloor + 10)이 0번이다 — 숲의 첫 보스가 무리의 맨 앞(오크)이어야 한다
+  const order = Math.floor((milestone - band.fromFloor) / BOSS_EVERY) - 1;
   return { kind: BOSS_KINDS[band.crew[order % band.crew.length]], giant: false };
 }
 
