@@ -16,7 +16,19 @@ import { Session } from './game/session';
 import { LearningEngine } from './learning/engine';
 import { WordBank } from './learning/words';
 import { bandOf, levelsOf } from './learning/gradeBand';
-import { buy, shopItem } from './progress/shop';
+import { buy, equippedDamage, shopItem } from './progress/shop';
+import {
+  CONSUMABLES,
+  RunItems,
+  buyItem,
+  chestDrop,
+  consumable,
+  grantItem,
+  isConsumable,
+  keyEliminations,
+  type ConsumableId,
+  type ItemContext,
+} from './progress/items';
 import { CHARACTERS, characterOf, newlyUnlocked, petOf, requiredBundles } from './progress/collection';
 import { applyProgress, allDone, defOf, ensureToday, rewardFor } from './progress/mission';
 import {
@@ -42,12 +54,14 @@ import { BossBar } from './ui/bossBar';
 import { Hud } from './ui/hud';
 import { Overlays, praiseFor, type ResultReward } from './ui/overlays';
 import { QuizPanel } from './ui/quizPanel';
+import { ItemBar } from './ui/itemBar';
 import { ParentScreen, StartScreen } from './ui/screens';
 import { ShopScreen } from './ui/shop';
 import { Ambient } from './world/ambient';
 import { Backdrop } from './world/backdrop';
 import { BossActor } from './world/bossActor';
 import { Gimmicks } from './world/gimmicks';
+import { Chest } from './world/chest';
 import { Npc } from './world/npc';
 import { Pet } from './world/pet';
 import { QuizObject } from './world/quizObject';
@@ -112,7 +126,8 @@ async function boot() {
    *  · 상점 캐릭터를 골랐으면 그 번들과 `boss-anims`(클립이 그 캐릭터 glb 에 없다)
    *  · 무기를 장착했으면 `weapons` — 없으면 손이 빈 채로 시작한다
    */
-  const bootBundles = ['player', 'world-forest', 'gimmick', 'pickup', 'blocks'];
+  // `items` — 계단 위 별·보스 상자·아이템 슬롯이 1층부터 필요하다 (gzip 33KB)
+  const bootBundles = ['player', 'world-forest', 'gimmick', 'pickup', 'blocks', 'items'];
   const savedCharacter = characterOf(saved.collection, saved.player.level, saved.shop.owned);
   /* **고른 캐릭터의 번들은 리그와 무관하게 필요하다.** 예전에는 상점 캐릭터(rigMedium)만
      챙겨서, 레벨로 해금한 캐릭터를 고른 저장본이 부팅에서 깨졌다
@@ -158,8 +173,13 @@ async function boot() {
     crystal: assets.source('pickup', 'detail-crystal'),
     spring: assets.source('gimmick', 'spring'),
     flag: assets.source('gimmick', 'signage_finish'),
+    star: assets.source('items', 'star'),
   });
   scene.add(gimmicks.group);
+
+  /** 보스 상자 — 처치한 자리에서 열린다 */
+  const chest = new Chest(assets.instance('items', 'chest'), assets.clips('items'), 0.7);
+  scene.add(chest.group);
 
   /** 그림 문제(TYPE_C)에서 계단 위에 떠오르는 3D 사물 */
   const quizObject = new QuizObject();
@@ -348,6 +368,13 @@ async function boot() {
   const hud = new Hud(app, profile);
   const bossBar = new BossBar(app);
   const panel = new QuizPanel(app);
+  const itemBar = new ItemBar(app);
+  /** 이번 판의 아이템 사용 기록 — 판을 시작할 때 새로 만든다 */
+  let runItems = new RunItems();
+  /** 지금 떠 있는 문제에 답할 수 있는지 (열쇠를 쓸 수 있는 순간) */
+  let quizOpen = false;
+  /** 이 문제에 열쇠를 썼는지 — 맞혀도 경험치가 절반이다 */
+  let keyUsed = false;
   const overlays = new Overlays(app);
 
   /* ── 연출 지연 관리 ──
@@ -382,6 +409,12 @@ async function boot() {
           award(0, 8 + Math.floor(climb.floor / 10) * 2);
           overlays.praise('💎 +골드', 'gold');
           sound.tierUp(1);
+        } else if (gimmick === 'star') {
+          // 별 — 계단 게이지가 가득 찬다. 바닥날 때쯤 보이면 "저기까지만" 이 목표가 된다
+          gimmicks.take(climb.floor);
+          if (gaugeOn) gauge = STAIR_GAUGE.capacity;
+          overlays.praise('⭐ 시간 가득!', 'gold');
+          sound.tierUp(2);
         } else if (gimmick === 'spring') {
           // 튕겨 올라 한 칸을 공짜로 얻는다. 구간 수와 무관하게 층만 오른다
           overlays.praise('⬆︎ 스프링!', 'lightning');
@@ -412,6 +445,19 @@ async function boot() {
          원작의 긴장이 방향 선택에서 온다는 요청으로 뒤집었다.
          조작이 어려운 아이에게는 `?autodir=1` 이 그대로 남아 있다. */
       onWrongDir: (onFake) => failRun(onFake ? 'fake' : 'direction'),
+      /* 방패 — 실수를 한 번 막는다. 판당 1번이라 방향 판단의 긴장은 남는다 */
+      absorbWrongDir: (onFake) => {
+        if (!canClimb()) return false;
+        const next = runItems.absorbMistake(saved.shop.items);
+        if (!next) return false;
+        saved.shop = { ...saved.shop, items: next };
+        saveSoon(saved);
+        itemBar.pulse('shield');
+        overlays.praise(onFake ? '🛡 방패가 가짜 계단을 막았다!' : '🛡 방패가 막았다!', 'lightning');
+        sound.stumble();
+        camera.shake(PLAYER.landShake * 2);
+        return true;
+      },
     });
   }
 
@@ -633,6 +679,12 @@ async function boot() {
       levels: levelsOf(saved.levelBand),
     });
     session = new Session(bank, engine, createRng(seed ^ 0x9e3779b9));
+    // 장착한 무기의 추가 피해 — Session 은 상점을 모르므로 숫자만 넣는다
+    session.weaponBonus = equippedDamage(saved.shop.weaponId);
+    runItems = new RunItems();
+    quizOpen = false;
+    keyUsed = false;
+    chest.hide();
     runExp = 0;
     runGold = 0;
     runLevelUp = null;
@@ -696,6 +748,8 @@ async function boot() {
     stopStairTimer();
     const quiz = options.revive ? session.reviveQuiz() : session.next(climb.floor);
     panel.show(quiz, options);
+    quizOpen = true;
+    keyUsed = false;
 
     /* 그림 문제(TYPE_C) — 계단 위에 실물을 띄운다. food bundle 이 아직 안 왔으면
        사물 없이 진행한다(문제 자체는 영어 4지선다라 성립한다) */
@@ -716,6 +770,7 @@ async function boot() {
     // 처치하면 session.boss 가 비워진다 — 보상 계산에 쓸 등급을 먼저 잡아 둔다
     const fighting = session.boss ? { index: session.boss.index, giant: session.boss.giant } : null;
     const result = session.answer(index);
+    quizOpen = false;
     panel.feedback(index, result.correctIndex, result.correct);
     quizObject.hide();
     hud.setHp(result.hp, RULES.hp);
@@ -743,7 +798,12 @@ async function boot() {
         combo: session.combo,
         isRetry: result.isRetry,
       });
-      award(baseExp * result.multiplier, goldForAnswer(result.isRetry) * result.multiplier);
+      /* 열쇠로 보기를 지운 문제는 경험치 절반 — 열쇠로 경험치를 벌 수 없게 한다 */
+      const keyFactor = keyUsed ? 0.5 : 1;
+      award(
+        Math.round(baseExp * result.multiplier * keyFactor),
+        goldForAnswer(result.isRetry) * result.multiplier,
+      );
       if (result.multiplier > 1) {
         after(0.05, () => overlays.praise(`보상 ×${result.multiplier}!`, 'gold'));
       }
@@ -763,6 +823,7 @@ async function boot() {
           bossActor?.die();
           const reward = bossReward(fighting ?? { index: 1, giant: false });
           award(reward.exp, reward.gold);
+          openChest(fighting?.giant ?? false);
           overlays.banner('BOSS DEFEATED!', 'lightning');
           sound.tierUp(3);
           pet?.cheer();
@@ -816,6 +877,99 @@ async function boot() {
       }
     });
   });
+
+  /* ── 아이템 ── */
+  const ITEM_ICON: Record<ConsumableId, string> = { star: '⭐', key: '🗝️', potion: '🧪', shield: '🛡️' };
+
+  const itemContext = (): ItemContext => ({
+    climbing: canClimb() && climb.state !== 'stumble' && climb.state !== 'dead',
+    quizOpen: quizOpen && !!session && (session.phase === 'quiz' || session.phase === 'revive'),
+    inBoss: !!session?.boss,
+    hp: session?.hp ?? 0,
+    maxHp: RULES.hp,
+    keyUsed,
+  });
+
+  itemBar.onItem((id) => {
+    if (!session || session.phase === 'over') return;
+    const next = runItems.use(id, saved.shop.items, itemContext());
+    if (!next) return;
+    saved.shop = { ...saved.shop, items: next };
+    saveSoon(saved);
+    itemBar.pulse(id);
+    sound.tierUp(1);
+    switch (id) {
+      case 'star':
+        gauge = STAIR_GAUGE.capacity;
+        bossBar.showStairTimer(1);
+        overlays.praise('⭐ 시간 가득!', 'gold');
+        break;
+      case 'potion':
+        session.hp = Math.min(RULES.hp, session.hp + 1);
+        hud.setHp(session.hp, RULES.hp);
+        overlays.praise('🧪 하트 +1', 'gold');
+        break;
+      case 'key': {
+        const quiz = session.quiz;
+        if (!quiz) break;
+        keyUsed = true;
+        panel.eliminate(keyEliminations(quiz.choices.length, quiz.correctIndex, Math.random));
+        overlays.praise('🗝️ 틀린 보기 2개를 지웠다', 'gold');
+        break;
+      }
+      case 'shield':
+        break;
+    }
+  });
+
+  /** 슬롯 상태 — 매 프레임 그린다(내용이 같으면 DOM 을 만지지 않는다) */
+  const renderItems = () => {
+    if (!session || session.phase === 'over') {
+      itemBar.hide();
+      return;
+    }
+    const ctx = itemContext();
+    itemBar.render(
+      CONSUMABLES.map((c) => ({
+        id: c.id,
+        icon: ITEM_ICON[c.id],
+        left: runItems.left(c.id, saved.shop.items),
+        usable: runItems.canUse(c.id, saved.shop.items, ctx),
+      })),
+    );
+  };
+
+  /**
+   * 보스 상자 — 처치한 자리에서 열리고 얻은 물건이 떠오른다.
+   * 무엇이 나오는지는 층이 정한다(progress/items.ts) — 다시 해도 같은 층은 같은 상자다.
+   */
+  const openChest = (giant: boolean) => {
+    const drop = chestDrop(climb.floor, giant);
+    let prize: THREE.Object3D;
+    if (drop.kind === 'item') {
+      const got = grantItem(saved.shop.items, drop.id);
+      const item = consumable(drop.id)!;
+      if (got.granted) {
+        saved.shop = { ...saved.shop, items: got.inventory };
+        after(0.9, () => overlays.praise(`🎁 ${item.name} 획득!`, 'lightning'));
+      } else {
+        // 이미 가득 — 그 값만큼 골드로 바꿔 준다. 빈손으로 끝나면 상자가 배신한다
+        award(0, Math.round(item.price / 2));
+        after(0.9, () => overlays.praise(`🎁 ${item.name} (가득) → 🪙 +${Math.round(item.price / 2)}`, 'gold'));
+      }
+      prize = assets.instance('items', item.model);
+    } else {
+      award(0, drop.amount);
+      after(0.9, () => overlays.praise(`🎁 🪙 +${drop.amount}`, 'gold'));
+      prize = assets.instance('items', 'coin');
+    }
+    saveSoon(saved);
+    chest.open(
+      stairs.surfaceAt(climb.floor + BOSS_STAND_AHEAD - 1),
+      actor.root.position,
+      prize,
+    );
+  };
 
   /**
    * 새 이벤트가 붙었으면 배너를 띄운다.
@@ -939,8 +1093,19 @@ async function boot() {
    * **산 직후 바로 쓸 수 있어야 한다.** 로드는 뒤에서 돌리고 화면은 즉시 갱신한다.
    */
   const openShop = () => {
-    shopScreen.show(saved.player.gold, saved.shop.owned, {
+    shopScreen.show(saved.player.gold, saved.shop.owned, saved.shop.items, {
       onBuy: (id) => {
+        /* 소비 아이템은 여러 개 산다 — 소유 목록이 아니라 개수를 늘린다 */
+        if (isConsumable(id)) {
+          const bought = buyItem(id, saved.player.gold, saved.shop.items);
+          if (!bought.ok) return;
+          saved.player = { ...saved.player, gold: bought.gold };
+          saved.shop = { ...saved.shop, items: bought.inventory };
+          saveNow(saved);
+          sound.tierUp(1);
+          openShop();
+          return;
+        }
         const result = buy(id, saved.player.gold, saved.shop.owned);
         if (!result.ok) return;
         const item = shopItem(id)!;
@@ -1132,6 +1297,8 @@ async function boot() {
       sound.stumble();
     }
     gimmicks.update(dt);
+    chest.update(dt);
+    renderItems();
     npc?.update(dt, stairs);
     quizObject.update(dt, actor.root.position);
     ambient?.setEnabled(hasAmbientFlyers(theme));
@@ -1424,6 +1591,17 @@ async function boot() {
       /** 지금 재생 중인 클립 — 애니메이션이 죽는 사고가 두 번 있었다(스파이크 A 기록) */
       get clips() {
         return { player: actor.playing, boss: bossClip() };
+      },
+      /** 아이템 — 가진 개수, 이 판에서 남은 횟수, 지금 쓸 수 있는지, 상자가 열리는 중인지 */
+      get items() {
+        const ctx = itemContext();
+        return {
+          inventory: { ...saved.shop.items },
+          left: Object.fromEntries(CONSUMABLES.map((c) => [c.id, runItems.left(c.id, saved.shop.items)])),
+          usable: CONSUMABLES.filter((c) => runItems.canUse(c.id, saved.shop.items, ctx)).map((c) => c.id),
+          chest: chest.active,
+          keyUsed,
+        };
       },
       /**
        * 지금 보스 — 로스터가 고른 종과 실제로 올라간 종이 같은지, 무기를 들었는지.

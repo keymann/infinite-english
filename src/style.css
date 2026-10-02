@@ -1205,3 +1205,97 @@ body {
   font-size: 0.95rem;
   font-weight: 800;
 }
+
+/* ── 아이템 ── */
+
+/* 열쇠로 지운 보기 — 자리는 남기고 누를 수 없게 한다 (위치가 바뀌면 남은 보기를 다시 찾아야 한다) */
+.choice[data-state='gone'] {
+  opacity: 0.18;
+  text-decoration: line-through;
+  pointer-events: none;
+}
+
+/*
+ * 판 안의 아이템 슬롯 — 오른쪽 가장자리, 화면 세로 중간.
+ * 아래쪽은 문제 패널, 위쪽은 보스 바가 쓴다. 손가락이 계단 탭을 하다 실수로 닿지 않게
+ * 가장자리에 붙이고, 버튼 자체는 48px 로 크게 둔다(누르려고 할 때는 확실히 눌려야 한다).
+ */
+.item-bar {
+  position: absolute;
+  right: calc(env(safe-area-inset-right) + 10px);
+  top: 42%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 5;
+}
+
+.item-bar[hidden] {
+  display: none;
+}
+
+.item-slot {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border: 2px solid rgba(255, 255, 255, 0.28);
+  border-radius: 14px;
+  background: rgba(8, 14, 26, 0.72);
+  color: var(--fg);
+  font-family: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.item-slot i {
+  font-style: normal;
+  font-size: 1.45rem;
+  line-height: 1;
+}
+
+.item-slot b {
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: #ffd24a;
+  color: #2a2000;
+  font-size: 0.72rem;
+  line-height: 20px;
+  text-align: center;
+}
+
+.item-slot:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* 방패 — 버튼이 아니다. 실수하는 순간 저절로 쓰인다 */
+.item-passive {
+  border-style: dashed;
+  cursor: default;
+}
+
+.item-slot.pulse {
+  animation: item-pulse 0.45s ease-out;
+}
+
+@keyframes item-pulse {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.25); border-color: #ffd24a; }
+  100% { transform: scale(1); }
+}
+
+/* 상점 — 무기 공격력·아이템 개수 */
+.shop-tag {
+  font-size: 0.68rem;
+  font-style: normal;
+  font-weight: 700;
+  color: #ffd24a;
+}

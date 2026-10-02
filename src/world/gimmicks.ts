@@ -14,6 +14,7 @@ import type { Stairs } from './stairs';
  * | 크리스탈 | 그 칸에 착지하면 골드를 준다 |
  * | 체크포인트 깃발 | 10층마다 서 있어 "얼마나 왔는지"를 눈으로 보여 준다 |
  * | 스프링 | 착지하면 한 칸을 공짜로 더 오른다 |
+ * | 별 | 착지하면 계단 게이지가 가득 찬다 (드물다) |
  *
  * 방향 안내는 3D 표지판을 세워 봤지만 이 시점에서는 읽히지 않았다 —
  * 지금은 **다음 칸을 밝게 그리는 것**으로 대신한다 (stairs.setHint).
@@ -21,7 +22,7 @@ import type { Stairs } from './stairs';
  * 배치는 **계단 번호의 해시**로 정한다. 회수·재배치해도 같은 칸에 같은 것이 온다.
  */
 
-export type GimmickKind = 'crystal' | 'spring' | null;
+export type GimmickKind = 'crystal' | 'spring' | 'star' | null;
 
 /** 크리스탈이 놓일 확률 */
 const CRYSTAL_CHANCE = 0.16;
@@ -36,11 +37,18 @@ const CRYSTAL_RUN_CHANCE = 0.45;
 const CRYSTAL_RUN_MAX = 3;
 /** 스프링이 놓일 확률 (크리스탈보다 드물게 — 특별해야 한다) */
 const SPRING_CHANCE = 0.05;
+/**
+ * 별이 놓일 확률 — 스프링보다 드물다.
+ *
+ * 게이지가 바닥날 때쯤 별이 보이면 "저기까지만 가면 산다" 는 짧은 목표가 생긴다.
+ * 흔하면 게이지 압박이 사라진다.
+ */
+const STAR_CHANCE = 0.03;
 /** 처음 몇 칸은 아무것도 두지 않는다 — 조작을 익히는 구간 */
 const QUIET_FLOORS = 2;
 
 /** 원본 모델 크기가 kit 마다 달라 배치 시 맞춰 줄인다 */
-const SCALE = { crystal: 1.1, spring: 0.42, flag: 0.16 } as const;
+const SCALE = { crystal: 1.1, spring: 0.42, flag: 0.16, star: 0.55 } as const;
 
 function hash01(n: number, salt: number): number {
   let h = Math.imul((n + salt * 7919) ^ 0x6d2b79f5, 0x85ebca6b);
@@ -52,6 +60,7 @@ export type GimmickSources = {
   crystal: THREE.Object3D;
   spring: THREE.Object3D;
   flag: THREE.Object3D;
+  star: THREE.Object3D;
 };
 
 export class Gimmicks {
@@ -60,7 +69,8 @@ export class Gimmicks {
   private readonly crystal: InstancedModel;
   private readonly spring: InstancedModel;
   private readonly flag: InstancedModel;
-  /** 이미 먹은 크리스탈 — 다시 그리지 않는다 */
+  private readonly star: InstancedModel;
+  /** 이미 먹은 크리스탈·별 — 다시 그리지 않는다 */
   private readonly taken = new Set<number>();
   private readonly matrix = new THREE.Matrix4();
   private readonly pos = new THREE.Vector3();
@@ -74,7 +84,12 @@ export class Gimmicks {
     this.crystal = new InstancedModel(sources.crystal, capacity);
     this.spring = new InstancedModel(sources.spring, capacity);
     this.flag = new InstancedModel(sources.flag, capacity);
-    for (const m of [this.crystal, this.spring, this.flag]) this.group.add(m.group);
+    this.star = new InstancedModel(sources.star, capacity);
+    for (const m of this.models) this.group.add(m.group);
+  }
+
+  private get models(): InstancedModel[] {
+    return [this.crystal, this.spring, this.flag, this.star];
   }
 
   /** 이 칸에 무엇이 있는지 — 게임이 착지 시 확인한다 */
@@ -83,6 +98,8 @@ export class Gimmicks {
     if (this.taken.has(index)) return null;
     // 스프링을 먼저 본다. 한 칸에 둘을 놓지 않는다
     if (hash01(index, 3) < SPRING_CHANCE) return 'spring';
+    // 별은 크리스탈보다 먼저 본다 — 드문 것이 묻히지 않게
+    if (hash01(index, 11) < STAR_CHANCE) return 'star';
     if (this.isCrystal(index)) return 'crystal';
     return null;
   }
@@ -108,7 +125,7 @@ export class Gimmicks {
     return run > 0 && run < CRYSTAL_RUN_MAX && hash01(index, 5) < CRYSTAL_RUN_CHANCE;
   }
 
-  /** 크리스탈을 먹었다 */
+  /** 크리스탈·별을 먹었다 */
   take(index: number) {
     this.taken.add(index);
     // 화면 밖으로 나간 기록은 버린다 — 5,000층을 오르면 Set 이 무한히 커진다
@@ -133,6 +150,7 @@ export class Gimmicks {
     let crystals = 0;
     let springs = 0;
     let flags = 0;
+    let stars = 0;
 
     for (let i = from; i <= to; i++) {
       stairs.surfaceAt(i, this.pos);
@@ -142,6 +160,9 @@ export class Gimmicks {
         this.place(this.crystal, crystals++, this.pos, SCALE.crystal, this.spin, 0.05);
       } else if (kind === 'spring' && springs < this.spring.capacity) {
         this.place(this.spring, springs++, this.pos, SCALE.spring, 0, 0);
+      } else if (kind === 'star' && stars < this.star.capacity) {
+        // 크리스탈과 반대로 돌고 조금 더 높이 뜬다 — 다른 물건으로 읽혀야 한다
+        this.place(this.star, stars++, this.pos, SCALE.star, -this.spin * 1.4, 0.32);
       }
 
       // 체크포인트 깃발
@@ -155,7 +176,8 @@ export class Gimmicks {
     this.crystal.setCount(crystals);
     this.spring.setCount(springs);
     this.flag.setCount(flags);
-    for (const m of [this.crystal, this.spring, this.flag]) m.commit();
+    this.star.setCount(stars);
+    for (const m of this.models) m.commit();
   }
 
   private place(

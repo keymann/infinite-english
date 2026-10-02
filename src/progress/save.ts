@@ -2,6 +2,7 @@ import type { Ability } from '../learning/adaptive';
 import type { BandId } from '../learning/gradeBand';
 import type { WordProgress } from '../learning/mastery';
 import { emptyCollection, type CollectionState } from './collection';
+import type { Inventory } from './items';
 import { emptyMissions, type MissionState } from './mission';
 import { emptyPlayer, type PlayerState } from './player';
 import { emptyStreak, type StreakState } from './streak';
@@ -40,6 +41,8 @@ export type ShopState = {
   owned: string[];
   /** 장착한 무기 id. **기본은 없음(null)** */
   weaponId: string | null;
+  /** 소비 아이템 개수 (progress/items.ts). 없던 저장본은 빈 인벤토리로 채운다 */
+  items: Inventory;
 };
 
 export type SaveData = {
@@ -87,7 +90,7 @@ export function emptySave(): SaveData {
     streak: emptyStreak(),
     collection: emptyCollection(),
     levelBand: 'auto',
-    shop: { owned: [], weaponId: null },
+    shop: { owned: [], weaponId: null, items: {} },
     run: null,
     meta: { lastSeed: 0, lastPlayedAt: 0 },
   };
@@ -102,7 +105,10 @@ export function emptySave(): SaveData {
  */
 function migrate(raw: Partial<SaveData> & { v?: number }): SaveData {
   const base = emptySave();
-  if (raw.v === VERSION) return { ...base, ...raw } as SaveData;
+  /* `shop` 은 **한 단계 더 깊게** 병합한다. 얕은 병합이면 `items` 가 생기기 전 저장본의
+     `shop` 이 기본값을 통째로 덮어 `items` 가 undefined 가 된다 */
+  const shop = { ...base.shop, ...(raw.shop ?? {}) };
+  if (raw.v === VERSION) return { ...base, ...raw, shop } as SaveData;
 
   const merged: SaveData = {
     ...base,

@@ -73,6 +73,20 @@ export class QuizPanel {
       .join('');
   }
 
+  /**
+   * 열쇠 — 오답 보기를 지운다. 자리는 그대로 두고 누를 수 없게만 한다.
+   * 버튼이 사라져 위치가 바뀌면 아이가 남은 보기를 다시 찾아야 한다.
+   */
+  eliminate(indices: readonly number[]) {
+    const buttons = [...this.choicesEl.querySelectorAll<HTMLButtonElement>('button')];
+    for (const i of indices) {
+      const b = buttons[i];
+      if (!b) continue;
+      b.disabled = true;
+      b.dataset.state = 'gone';
+    }
+  }
+
   onAnswer(handler: (index: number) => void) {
     this.onPick = handler;
   }

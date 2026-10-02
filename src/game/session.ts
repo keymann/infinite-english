@@ -294,6 +294,7 @@ export class Session {
         const hit = hitBoss(this.boss, quiz.difficulty, this.combo, this.weaponBonus);
         if (hit.defeated) {
           this.boss = null;
+          this.bossPick = null;
           this.phase = 'climbing';
         } else {
           this.phase = 'quiz';

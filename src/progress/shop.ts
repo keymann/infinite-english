@@ -1,5 +1,5 @@
 /**
- * 상점 — 무기와 캐릭터를 골드로 산다.
+ * 상점 — 무기·캐릭터·소비 아이템을 골드로 산다. 아이템의 사용 규칙은 progress/items.ts 에 있다.
  *
  * ## 화폐는 골드다 (점수가 아니다)
  *
@@ -20,7 +20,11 @@
  * 화살만 따로 사는 것은 게임에서 의미가 없다.
  */
 
-export type ShopCategory = 'weapon' | 'character';
+import { CONSUMABLES, type ConsumableId } from './items';
+
+const ITEM_EMOJI: Record<ConsumableId, string> = { star: '⭐', key: '🗝️', potion: '🧪', shield: '🛡️' };
+
+export type ShopCategory = 'weapon' | 'character' | 'item';
 
 export type ShopItem = {
   id: string;
@@ -44,6 +48,7 @@ export type ShopItem = {
 export const SHOP_CATEGORIES: ReadonlyArray<{ id: ShopCategory; label: string; hint: string }> = [
   { id: 'weapon', label: '무기', hint: '보스를 공격할 때 든다' },
   { id: 'character', label: '캐릭터', hint: '함께 계단을 오를 친구' },
+  { id: 'item', label: '아이템', hint: '한 판에서 쓰는 도구 — 종류마다 3개까지' },
 ] as const;
 
 /**
@@ -87,7 +92,41 @@ const CHARACTERS: readonly ShopItem[] = [
   { id: 'Mage', name: '마법사', price: 10000, hint: '가장 먼 곳까지 오른다', emoji: '🧙', asset: 'adv-mage', category: 'character' },
 ];
 
-export const SHOP_ITEMS: readonly ShopItem[] = [...WEAPONS, ...CHARACTERS];
+/**
+ * 무기의 보스 추가 피해 — **가격 등급에서 정한다** (+1 ~ +5).
+ *
+ * 기본 피해가 10 이라 +5 여도 보스전이 1~2문제 짧아질 뿐이다. 무기가 영어를 대신하지 않는다.
+ * 22종에 값을 하나씩 적지 않는 이유: 가격을 바꾸면 피해도 따라 바뀌어야 한다.
+ */
+export function weaponDamage(price: number): number {
+  if (price >= 4000) return 5;
+  if (price >= 3000) return 4;
+  if (price >= 2000) return 3;
+  if (price >= 1200) return 2;
+  return 1;
+}
+
+/** 장착한 무기의 추가 피해 (없으면 0) */
+export function equippedDamage(weaponId: string | null): number {
+  const item = weaponId ? BY_ID.get(weaponId) : undefined;
+  return item?.category === 'weapon' ? weaponDamage(item.price) : 0;
+}
+
+/**
+ * 상점에 거는 소비 아이템 — 목록 표시용 항목이다.
+ * 사고·쓰는 규칙은 progress/items.ts 가 가진다 (여러 개를 살 수 있어 `buy` 를 쓰지 않는다).
+ */
+const ITEMS: readonly ShopItem[] = CONSUMABLES.map((c) => ({
+  id: c.id,
+  name: c.name,
+  category: 'item' as const,
+  price: c.price,
+  hint: c.hint,
+  emoji: ITEM_EMOJI[c.id],
+  asset: c.model,
+}));
+
+export const SHOP_ITEMS: readonly ShopItem[] = [...WEAPONS, ...CHARACTERS, ...ITEMS];
 
 const BY_ID = new Map(SHOP_ITEMS.map((i) => [i.id, i]));
 
@@ -105,9 +144,11 @@ export function affordable(item: ShopItem, gold: number): boolean {
   return gold >= item.price;
 }
 
-/** 가장 가까운 목표 — 로비에 "다음 목표"로 보여 준다 */
+/** 가장 가까운 목표 — 로비에 "다음 목표"로 보여 준다. 소비 아이템은 목표가 아니다 */
 export function nextGoal(gold: number, owned: readonly string[]): ShopItem | null {
-  const locked = SHOP_ITEMS.filter((item) => item.price > gold && !owned.includes(item.id)).sort(
+  const locked = SHOP_ITEMS.filter(
+    (item) => item.category !== 'item' && item.price > gold && !owned.includes(item.id),
+  ).sort(
     (a, b) => a.price - b.price,
   );
   return locked[0] ?? null;
@@ -125,7 +166,7 @@ export type PurchaseResult =
  */
 export function buy(id: string, gold: number, owned: readonly string[]): PurchaseResult {
   const item = BY_ID.get(id);
-  if (!item) return { ok: false, reason: 'unknown' };
+  if (!item || item.category === 'item') return { ok: false, reason: 'unknown' };
   if (owned.includes(id)) return { ok: false, reason: 'owned' };
   if (gold < item.price) return { ok: false, reason: 'poor' };
   return { ok: true, gold: gold - item.price };
