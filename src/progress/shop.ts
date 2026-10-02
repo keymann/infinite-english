@@ -34,7 +34,7 @@ export type ShopItem = {
   price: number;
   /** 한 줄 설명 */
   hint: string;
-  /** 3D 모델이 화면에 붙기 전까지 목록에서 쓰는 이모지 */
+  /** 썸네일(public/thumbs)을 못 받았을 때 쓰는 이모지. 로비의 무기 칩에도 쓴다 */
   emoji: string;
   /**
    * 무기: `weapons` 번들의 노드 이름.

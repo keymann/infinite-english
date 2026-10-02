@@ -26,6 +26,16 @@ export type ShopHandlers = {
   onClose(): void;
 };
 
+/**
+ * 3D 모델 썸네일 — `public/thumbs/<id>.webp` (tools/thumbs.html 로 굽는다).
+ *
+ * 이모지 위에 겹쳐 그린다. 파일을 못 받으면 이미지를 지워 **이모지가 그대로 남는다** —
+ * 썸네일 때문에 상점이 빈칸이 되면 안 된다.
+ */
+function thumb(item: ShopItem): string {
+  return `<img class="shop-thumb" src="thumbs/${item.id}.webp" alt="" loading="lazy" decoding="async" onerror="this.remove()" />`;
+}
+
 /** 한 줄 설명 밑에 붙는 효과 표시 — 무기는 공격력, 아이템은 가진 개수 */
 function effectTag(item: ShopItem, inventory: Inventory): string {
   if (item.category === 'weapon') return `<em class="shop-tag">⚔️ 공격 +${weaponDamage(item.price)}</em>`;
@@ -40,7 +50,7 @@ function itemRow(item: ShopItem, gold: number, owned: boolean, inventory: Invent
   const can = affordable(item, gold);
   const left = item.price - gold;
   return `<li class="shop-item" data-can="${can}" data-owned="${owned}" data-cat="${item.category}">
-      <span class="shop-emoji" aria-hidden="true">${item.emoji}</span>
+      <span class="shop-emoji" aria-hidden="true"><i class="shop-fallback">${item.emoji}</i>${thumb(item)}</span>
       <span class="shop-text">
         <b>${escapeHtml(item.name)}</b>
         <small>${escapeHtml(item.hint)}</small>

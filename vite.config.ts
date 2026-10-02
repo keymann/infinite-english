@@ -1,10 +1,45 @@
-import { defineConfig } from 'vite';
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { defineConfig, type Plugin } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
+
+/**
+ * 상점 썸네일 저장 — **dev 서버 전용** (`apply: 'serve'`, 빌드·배포에는 없다).
+ *
+ * tools/thumbs.html 이 브라우저에서 3D 모델을 그려 webp 로 보내면 `public/thumbs/<id>.webp` 에 쓴다.
+ * WebGL 이 필요해 Node 에서 굽지 못하고, 그렇다고 결과를 손으로 내려받게 하면 빠뜨린다.
+ * id 는 영문·숫자·`_`·`-` 만 받는다 — 경로를 벗어나는 이름을 막는다.
+ */
+function thumbsWriter(): Plugin {
+  return {
+    name: 'thumbs-writer',
+    apply: 'serve',
+    configureServer(server) {
+      server.middlewares.use('/__thumbs', (req, res) => {
+        const id = new URL(req.url ?? '', 'http://x').searchParams.get('id') ?? '';
+        if (req.method !== 'POST' || !/^[A-Za-z0-9_-]{1,64}$/.test(id)) {
+          res.statusCode = 400;
+          res.end('bad request');
+          return;
+        }
+        const chunks: Buffer[] = [];
+        req.on('data', (c: Buffer) => chunks.push(c));
+        req.on('end', () => {
+          const dir = join(server.config.root, 'public', 'thumbs');
+          mkdirSync(dir, { recursive: true });
+          writeFileSync(join(dir, `${id}.webp`), Buffer.concat(chunks));
+          res.end('ok');
+        });
+      });
+    },
+  };
+}
 
 // Cloudflare Workers Static Assets 배포 대상. 빌드 산출물은 dist/ 로 고정한다.
 //   - 로컬 배포: `npm run deploy` (build → wrangler deploy)
 export default defineConfig({
   plugins: [
+    thumbsWriter(),
     // 오프라인 플레이 + 홈 화면 설치.
     // 3D 모델(glb)은 첫 로드 후 계속 캐시되어야 한다 — 매 판 3MB 를 다시 받으면 안 된다.
     VitePWA({
@@ -44,6 +79,16 @@ export default defineConfig({
             options: {
               cacheName: 'models',
               expiration: { maxEntries: 40, maxAgeSeconds: 60 * 60 * 24 * 180 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
+            // 상점 썸네일 — 상점을 처음 열 때 받고 그 뒤로는 캐시
+            urlPattern: /\/thumbs\/.*\.webp$/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'thumbs',
+              expiration: { maxEntries: 80, maxAgeSeconds: 60 * 60 * 24 * 180 },
               cacheableResponse: { statuses: [0, 200] },
             },
           },
