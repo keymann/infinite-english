@@ -467,6 +467,7 @@ KO→EN 문제의 정답이 둘이 된다 — 빌드가 이를 막고, 표기를
 | 폴더 | 출처 |
 |---|---|
 | `castle-kit` `nature-kit` `mini-characters` `cube-pets_1.0` `food-kit` `tower-defense-kit` `impact-sounds` | [kenney.nl](https://kenney.nl/assets) |
+| `graveyard-kit` (5.0) `mini-dungeon` (2.0) `platformer-kit` (4.1) | [Graveyard Kit](https://kenney.nl/assets/graveyard-kit) · [Mini Dungeon](https://kenney.nl/assets/mini-dungeon) · [Platformer Kit](https://kenney.nl/assets/platformer-kit) — 압축을 풀고 폴더 이름만 바꾼다 |
 | `Platformer_Pack_1.0_FREE` `Skeletons_1.1_FREE` `BlockBits_1.0_kit` `Adventurers_2.0_Kit` `FantasyWeaponsBits_1.0_kit` | [kaylousberg.com](https://kaylousberg.com/game-assets) |
 
 `tools/asset-manifest.json`에 적힌 모델만 bundle 단위로 병합해 `public/models/`로 낸다.
@@ -480,8 +481,11 @@ KO→EN 문제의 정답이 둘이 된다 — 빌드가 이를 막고, 표기를
 | `boss-warrior` `boss-minion` | lazy | 664KB / 307KB | 보스 2종 |
 | `boss-anims` | lazy | 585KB / 213KB | 공유 애니메이션 클립 26종 |
 | `player-female-a` `pet-fox` `pet-cat` | lazy | 318KB / 77KB | 해금 캐릭터·펫 |
+| `items` | eager | 96KB / 33KB | 소비 아이템·보상 8종 (물약·방패·열쇠·별·하트·상자·코인·보석) |
+| `monster-*` 6종 | lazy | 68~134KB / 24~37KB | 몬스터 보스 (오크·좀비·유령·흡혈귀·해골·묘지기) — 클립 32종 내장 |
+| `boss-gear` | lazy | 203KB / 115KB | 보스가 드는 무기 7종 |
 
-**첫 로드 256KB (gzip 58KB)** — 예산 3MB.
+**첫 로드 1,064KB (gzip 386KB)** — 예산 3MB.
 
 > ⚠️ **스킨드 캐릭터는 bundle 하나에 하나만.** 같은 리그를 쓰는 캐릭터를 한 glb로 합치면
 > 본 이름이 중복되고 three가 `_1`을 붙여 유일화하므로, 공유 애니메이션 클립이 경고만 남기고
@@ -498,6 +502,7 @@ KO→EN 문제의 정답이 둘이 된다 — 빌드가 이를 막고, 표기를
 3D·사운드 에셋은 전부 **CC0**다.
 
 - Kenney (kenney.nl) — Castle Kit, Nature Kit, Mini Characters, Cube Pets, Food Kit, Tower Defense Kit, Impact Sounds
-- KayKit (kaylousberg.com) — Platformer Pack, Character Pack: Skeletons
+- Kenney (kenney.nl) — Graveyard Kit, Mini Dungeon, Platformer Kit
+- KayKit (kaylousberg.com) — Platformer Pack, Character Pack: Skeletons, Block Bits, Adventurers, Fantasy Weapons Bits
 
 원작 게임(무한의 계단)의 명칭·코드·에셋은 사용하지 않는다.

@@ -423,6 +423,106 @@
         "Rig_Medium_MovementBasic"
       ],
       "animationsOnly": true
+    },
+    {
+      "name": "monster-orc",
+      "when": "lazy",
+      "note": "몬스터 보스 (Kenney, CC0). 기본 캐릭터와 **같은 클립 32종**이 내장돼 있어 `boss-anims` 가 필요 없고, 해골 팩에 없던 진짜 공격 클립(`attack-melee-right`)이 있다. 캐릭터는 번들 하나에 하나만(★).",
+      "dir": "mini-dungeon/Models/GLB format",
+      "models": [
+        "character-orc"
+      ]
+    },
+    {
+      "name": "monster-zombie",
+      "when": "lazy",
+      "note": "몬스터 보스 (Kenney, CC0). 기본 캐릭터와 **같은 클립 32종**이 내장돼 있어 `boss-anims` 가 필요 없고, 해골 팩에 없던 진짜 공격 클립(`attack-melee-right`)이 있다. 캐릭터는 번들 하나에 하나만(★).",
+      "dir": "graveyard-kit/Models/GLB format",
+      "models": [
+        "character-zombie"
+      ]
+    },
+    {
+      "name": "monster-ghost",
+      "when": "lazy",
+      "note": "몬스터 보스 (Kenney, CC0). 기본 캐릭터와 **같은 클립 32종**이 내장돼 있어 `boss-anims` 가 필요 없고, 해골 팩에 없던 진짜 공격 클립(`attack-melee-right`)이 있다. 캐릭터는 번들 하나에 하나만(★).",
+      "dir": "graveyard-kit/Models/GLB format",
+      "models": [
+        "character-ghost"
+      ]
+    },
+    {
+      "name": "monster-vampire",
+      "when": "lazy",
+      "note": "몬스터 보스 (Kenney, CC0). 기본 캐릭터와 **같은 클립 32종**이 내장돼 있어 `boss-anims` 가 필요 없고, 해골 팩에 없던 진짜 공격 클립(`attack-melee-right`)이 있다. 캐릭터는 번들 하나에 하나만(★).",
+      "dir": "graveyard-kit/Models/GLB format",
+      "models": [
+        "character-vampire"
+      ]
+    },
+    {
+      "name": "monster-skeleton",
+      "when": "lazy",
+      "note": "몬스터 보스 (Kenney, CC0). 기본 캐릭터와 **같은 클립 32종**이 내장돼 있어 `boss-anims` 가 필요 없고, 해골 팩에 없던 진짜 공격 클립(`attack-melee-right`)이 있다. 캐릭터는 번들 하나에 하나만(★).",
+      "dir": "graveyard-kit/Models/GLB format",
+      "models": [
+        "character-skeleton"
+      ]
+    },
+    {
+      "name": "monster-keeper",
+      "when": "lazy",
+      "note": "몬스터 보스 (Kenney, CC0). 기본 캐릭터와 **같은 클립 32종**이 내장돼 있어 `boss-anims` 가 필요 없고, 해골 팩에 없던 진짜 공격 클립(`attack-melee-right`)이 있다. 캐릭터는 번들 하나에 하나만(★).",
+      "dir": "graveyard-kit/Models/GLB format",
+      "models": [
+        "character-keeper"
+      ]
+    },
+    {
+      "name": "boss-gear",
+      "when": "lazy",
+      "note": "보스가 드는 무기 (KayKit Skeletons 부속 + Kenney Mini Dungeon). 해골 보스는 손 슬롯만 있고 빈손이라, 같은 몸에 다른 무기를 들려 변형을 만든다. 정적 메시라 한 번들에 모은다.",
+      "dir": "Skeletons_1.1_FREE/assets/gltf",
+      "models": [
+        "Skeleton_Blade",
+        "Skeleton_Axe",
+        "Skeleton_Staff",
+        "Skeleton_Crossbow",
+        "Skeleton_Shield_Small_A",
+        {
+          "dir": "mini-dungeon/Models/GLB format",
+          "name": "weapon-sword"
+        },
+        {
+          "dir": "mini-dungeon/Models/GLB format",
+          "name": "weapon-spear"
+        }
+      ]
+    },
+    {
+      "name": "items",
+      "when": "eager",
+      "note": "소비 아이템·보상 (Kenney Mini Dungeon + Platformer Kit, CC0). 계단 위 드롭(하트·별)이 1층부터 나오므로 eager. 모델당 12~288 삼각형이라 작다. 상자는 `open` 클립이 있다.",
+      "dir": "mini-dungeon/Models/GLB format",
+      "models": [
+        "potion",
+        "shield-round",
+        "key",
+        "chest",
+        "coin",
+        {
+          "dir": "platformer-kit/Models/GLB format",
+          "name": "heart"
+        },
+        {
+          "dir": "platformer-kit/Models/GLB format",
+          "name": "star"
+        },
+        {
+          "dir": "platformer-kit/Models/GLB format",
+          "name": "jewel"
+        }
+      ]
     }
   ]
 }

@@ -95,13 +95,17 @@ async function buildBundle(bundle) {
   const skinned = [];
   let srcBytes = 0;
 
-  for (const name of bundle.models) {
+  for (const entry of bundle.models) {
+    /* 모델은 이름(문자열)이거나 `{ dir, name }` 이다. 아이템처럼 **여러 kit 에서 골라 한 번들로
+       모을 때** 모델마다 폴더를 따로 적는다 — 요청 수를 늘리지 않으려고 번들을 쪼개지 않는다. */
+    const name = typeof entry === 'string' ? entry : entry.name;
+    const dir = typeof entry === 'string' ? srcDir : join(ROOT, entry.dir);
     /* kit 마다 포맷이 다르다. Kenney·KayKit 캐릭터는 .glb 인데
        KayKit Platformer 는 .gltf + .bin 으로 나온다 — 확장자를 자동으로 찾는다. */
     const candidates = [`${name}.glb`, `${name}.gltf`];
-    const path = candidates.map((file) => join(srcDir, file)).find((p) => existsSync(p));
+    const path = candidates.map((file) => join(dir, file)).find((p) => existsSync(p));
     if (!path) {
-      missing.push(name);
+      missing.push(dir === srcDir ? name : `${name} (${entry.dir})`);
       continue;
     }
     srcBytes += statSync(path).size;
@@ -124,7 +128,7 @@ async function buildBundle(bundle) {
 
   if (missing.length) {
     throw new Error(
-      `[${bundle.name}] 원본에 없는 모델: ${missing.join(', ')}\n  경로 확인: ${srcDir}`,
+      `[${bundle.name}] 원본에 없는 모델: ${missing.join(', ')}\n  기본 경로: ${srcDir}`,
     );
   }
 

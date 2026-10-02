@@ -660,6 +660,155 @@
       },
       "bytes": 599000,
       "gzip": 217944
+    },
+    {
+      "name": "monster-orc",
+      "when": "lazy",
+      "file": "models/monster-orc.glb",
+      "nodes": [
+        "character-orc"
+      ],
+      "counts": {
+        "meshes": 2,
+        "materials": 1,
+        "textures": 1,
+        "animations": 32,
+        "skins": 1
+      },
+      "bytes": 112036,
+      "gzip": 28214
+    },
+    {
+      "name": "monster-zombie",
+      "when": "lazy",
+      "file": "models/monster-zombie.glb",
+      "nodes": [
+        "character-zombie"
+      ],
+      "counts": {
+        "meshes": 5,
+        "materials": 1,
+        "textures": 1,
+        "animations": 32,
+        "skins": 0
+      },
+      "bytes": 134136,
+      "gzip": 37730
+    },
+    {
+      "name": "monster-ghost",
+      "when": "lazy",
+      "file": "models/monster-ghost.glb",
+      "nodes": [
+        "character-ghost"
+      ],
+      "counts": {
+        "meshes": 3,
+        "materials": 1,
+        "textures": 1,
+        "animations": 32,
+        "skins": 0
+      },
+      "bytes": 69952,
+      "gzip": 24662
+    },
+    {
+      "name": "monster-vampire",
+      "when": "lazy",
+      "file": "models/monster-vampire.glb",
+      "nodes": [
+        "character-vampire"
+      ],
+      "counts": {
+        "meshes": 5,
+        "materials": 1,
+        "textures": 1,
+        "animations": 32,
+        "skins": 0
+      },
+      "bytes": 136052,
+      "gzip": 37669
+    },
+    {
+      "name": "monster-skeleton",
+      "when": "lazy",
+      "file": "models/monster-skeleton.glb",
+      "nodes": [
+        "character-skeleton"
+      ],
+      "counts": {
+        "meshes": 5,
+        "materials": 1,
+        "textures": 1,
+        "animations": 32,
+        "skins": 0
+      },
+      "bytes": 106780,
+      "gzip": 30582
+    },
+    {
+      "name": "monster-keeper",
+      "when": "lazy",
+      "file": "models/monster-keeper.glb",
+      "nodes": [
+        "character-keeper"
+      ],
+      "counts": {
+        "meshes": 5,
+        "materials": 1,
+        "textures": 1,
+        "animations": 32,
+        "skins": 0
+      },
+      "bytes": 137572,
+      "gzip": 37961
+    },
+    {
+      "name": "boss-gear",
+      "when": "lazy",
+      "file": "models/boss-gear.glb",
+      "nodes": [
+        "Skeleton_Blade",
+        "Skeleton_Axe",
+        "Skeleton_Staff",
+        "Skeleton_Crossbow",
+        "Skeleton_Shield_Small_A",
+        "weapon-sword",
+        "weapon-spear"
+      ],
+      "counts": {
+        "meshes": 7,
+        "materials": 2,
+        "textures": 2,
+        "animations": 0,
+        "skins": 0
+      },
+      "bytes": 207828,
+      "gzip": 117605
+    },
+    {
+      "name": "items",
+      "when": "eager",
+      "file": "models/items.glb",
+      "nodes": [
+        "potion",
+        "shield-round",
+        "key",
+        "chest",
+        "coin",
+        "heart",
+        "star",
+        "jewel"
+      ],
+      "counts": {
+        "meshes": 9,
+        "materials": 2,
+        "textures": 2,
+        "animations": 3,
+        "skins": 0
+      },
+      "bytes": 98808,
+      "gzip": 33705
     }
   ]
 }
