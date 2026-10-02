@@ -8,7 +8,7 @@ import { FAST_ANSWER_MS, HARD_DIFFICULTY } from '../progress/player';
 import { COMBO_TIERS, RULES, type StepStyle } from './balance';
 import { hitBoss, missBoss, openBoss, spawnBoss, type BossHit, type BossOpening, type BossState } from './boss';
 import { BARE_HANDS, type Armament } from './weaponPerk';
-import { bossFor, type BossPick } from './bossRoster';
+import { bossFor, type BossKind, type BossPick } from './bossRoster';
 import {
   SPEED_LIMIT_SEC,
   activate,
@@ -201,6 +201,22 @@ export class Session {
       this.lastEventId = decision.event.id;
     }
     return this.boss;
+  }
+
+  /**
+   * 번들이 늦어 **다른 종이 대신 나왔다** — 규칙을 화면의 종에 맞춘다.
+   *
+   * 고른 종의 특성(흡혈귀 회복)을 그대로 두면 화면의 오크가 오답마다 회복하고, 아이는
+   * "오크는 회복한다" 를 잘못 배운다. 특성과 지팡이 봉인 판정을 대신 나온 종 기준으로 다시 한다.
+   * 대보스 여부(크기·HP·보상)는 층이 정한 것이라 그대로 둔다.
+   */
+  substituteBoss(kind: BossKind): void {
+    if (!this.boss || !this.bossPick || this.bossPick.kind.id === kind.id) return;
+    this.bossPick = { ...this.bossPick, kind };
+    const sealable = kind.trait === 'regen';
+    const staff = this.weapon.family === 'staff';
+    this.boss.regen = sealable && !staff;
+    if (this.opening) this.opening = { ...this.opening, sealed: sealable && staff };
   }
 
   /** Escape 이벤트 등에서 콤보만 잃는다 — HP 는 영어 오답 전용이다 */

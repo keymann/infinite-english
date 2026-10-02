@@ -123,6 +123,17 @@ export class Climb {
     // 'stumble'·'dead' 상태의 입력은 버린다 — 이미 판이 끝났다
   }
 
+  /**
+   * 버퍼에 쌓인 다음 입력을 버린다.
+   *
+   * 착지 콜백(`onLand`)이 보스를 예약해 계단을 잠그면 부른다. 버리지 않으면 착지 직후
+   * 버퍼 입력이 그대로 처리돼, 틀린 방향이면 방패가 막지 못한 채 판이 끝나고
+   * 맞는 방향이면 보스 층을 지나쳐 한 칸 더 오른다.
+   */
+  clearBuffer() {
+    this.buffered = null;
+  }
+
   private resolve(dir: Dir) {
     if (dir === this.nextDir) this.startJump();
     else if (this.events.absorbWrongDir?.(this.stairs.hasFake(this.floor + 1))) this.flinch();

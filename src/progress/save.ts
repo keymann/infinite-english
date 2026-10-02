@@ -2,7 +2,7 @@ import type { Ability } from '../learning/adaptive';
 import type { BandId } from '../learning/gradeBand';
 import type { WordProgress } from '../learning/mastery';
 import { emptyCollection, type CollectionState } from './collection';
-import type { Inventory } from './items';
+import type { ConsumableId, Inventory } from './items';
 import { emptyMissions, type MissionState } from './mission';
 import { emptyPlayer, type PlayerState } from './player';
 import { emptyStreak, type StreakState } from './streak';
@@ -33,6 +33,11 @@ export type RunState = {
   asked: number;
   correct: number;
   wrong: number;
+  /**
+   * 이 판에서 쓴 아이템 횟수 — 이어하기에서 판당 제한을 지키려고 둔다.
+   * 선택 필드다: 없던 저장본은 "아직 안 씀" 으로 읽는다
+   */
+  itemsUsed?: Partial<Record<ConsumableId, number>>;
 };
 
 /** 상점 소유·장착 상태 */

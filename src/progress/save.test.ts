@@ -220,3 +220,18 @@ describe('소비 아이템 (shop.items)', () => {
     expect(load().shop.items).toEqual({ star: 2, shield: 1 });
   });
 });
+
+describe('이어하기 — 아이템 사용 기록 (run.itemsUsed)', () => {
+  it('저장한 사용 횟수가 다시 읽히고, 없던 저장본은 undefined 로 열린다', () => {
+    const data = load();
+    data.run = { seed: 1, floor: 12, hp: 2, combo: 0, score: 0, asked: 3, correct: 2, wrong: 1, itemsUsed: { shield: 1 } };
+    saveNow(data);
+    expect(load().run?.itemsUsed).toEqual({ shield: 1 });
+
+    const raw = JSON.parse(store.get(KEY)!);
+    delete raw.run.itemsUsed;
+    store.set(KEY, JSON.stringify(raw));
+    expect(load().run?.itemsUsed).toBeUndefined();
+    expect(load().run?.floor).toBe(12);
+  });
+});

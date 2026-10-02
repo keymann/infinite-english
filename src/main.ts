@@ -341,12 +341,12 @@ async function boot() {
    * 해골(rigMedium)은 클립이 `boss-anims` 에 있고, Kenney 몬스터는 자기 glb 에 있다.
    */
   const buildBoss = (pick: BossPick): BossKind | null => {
-    const kind: BossKind | undefined = assets.ready(pick.kind.bundle)
+    // 쓸 수 있다 = 번들이 왔고, 해골(rigMedium)이면 클립 번들(boss-anims)도 왔다
+    const usable = (k: BossKind) => assets.ready(k.bundle) && (k.rig === 'kenney' || assets.ready('boss-anims'));
+    const kind: BossKind | undefined = usable(pick.kind)
       ? pick.kind
-      : Object.values(BOSS_KINDS).find(
-          (k: BossKind) => assets.ready(k.bundle) && (k.rig === 'kenney' || assets.ready('boss-anims')),
-        );
-    if (!kind || (kind.rig === 'rigMedium' && !assets.ready('boss-anims'))) return null;
+      : (Object.values(BOSS_KINDS) as BossKind[]).find(usable);
+    if (!kind) return null;
     if (bossActor) scene.remove(bossActor.root);
     const instance = new Actor(
       assets.instance(kind.bundle, kind.node),
@@ -453,6 +453,8 @@ async function boot() {
           lastBossFloor = Math.floor(climb.floor / BOSS_EVERY) * BOSS_EVERY;
           // 연출을 기다리지 않고 **여기서 바로 잠근다** (bossPending 주석 참고)
           bossPending = true;
+          // 착지 직후 처리될 버퍼 입력을 버린다 — 잠근 계단 위에서 방향 판정이 일어나면 안 된다
+          climb.clearBuffer();
           stopStairTimer();
           stairs.setHint(-1);
           after(0.3, startBossFight);
@@ -470,7 +472,7 @@ async function boot() {
         const next = runItems.absorbMistake(saved.shop.items);
         if (!next) return false;
         saved.shop = { ...saved.shop, items: next };
-        saveSoon(saved);
+        snapshotRun();
         itemBar.pulse('shield');
         overlays.praise(onFake ? '🛡 방패가 가짜 계단을 막았다!' : '🛡 방패가 막았다!', 'lightning');
         sound.stumble();
@@ -592,6 +594,9 @@ async function boot() {
     /* 종·등급은 층이 정한다(game/bossRoster.ts) — Session 과 같은 답을 쓴다 */
     const pick = session.bossPick ?? bossFor(climb.floor);
     const kind = buildBoss(pick);
+    // 다른 종이 대신 나왔으면 특성·봉인 판정을 그 종에 맞춘다 (Session.substituteBoss)
+    if (kind) session.substituteBoss(kind);
+    const shown = session.bossPick ?? pick;
     const title = `${boss.giant ? '대보스' : 'BOSS'} ${boss.index} · ${kind?.name ?? '보스'}`;
     bossBar.showBoss(title, 1);
     /* 무기 특기 — 창은 등장하자마자 찌르고, 지팡이는 흡혈귀의 회복을 막는다.
@@ -600,8 +605,8 @@ async function boot() {
        예약(0.9초)을 취소해 버린다 */
     const opening = session.opening;
     session.opening = null;
-    const hint = opening?.sealed ? '' : traitHint(pick.kind.trait);
-    if (hint) later(0.5, () => overlays.praise(`${pick.kind.name}: ${hint}`, 'fire'));
+    const hint = opening?.sealed ? '' : traitHint(shown.kind.trait);
+    if (hint) later(0.5, () => overlays.praise(`${shown.kind.name}: ${hint}`, 'fire'));
     if (opening?.sealed) {
       later(0.6, () => overlays.praise(`🔮 ${PERKS.staff.name}! 흡혈귀가 회복하지 못한다`, 'lightning'));
     }
@@ -682,6 +687,7 @@ async function boot() {
       asked: session.asked,
       correct: session.correctCount,
       wrong: session.wrongCount,
+      itemsUsed: runItems.snapshot(),
     };
     saveSoon(saved);
   };
@@ -721,7 +727,8 @@ async function boot() {
     session = new Session(bank, engine, createRng(seed ^ 0x9e3779b9));
     // 장착한 무기 — 등급 피해와 계열(특기). Session 은 상점을 모르므로 값만 넣는다
     session.weapon = armamentOf(saved.shop.weaponId);
-    runItems = new RunItems();
+    // 이어하기면 그 판에서 이미 쓴 횟수를 되살린다 — 판당 제한이 껐다 켜기로 풀리지 않게
+    runItems = new RunItems(resume?.itemsUsed);
     quizOpen = false;
     keyUsed = false;
     chest.hide();
@@ -747,6 +754,14 @@ async function boot() {
       const startFloor = Number(params.get('floor'));
       if (Number.isFinite(startFloor) && startFloor > 0) climb.teleport(Math.floor(startFloor));
     }
+    /* 시작 층 기준으로 다음 보스 둘을 먼저 받는다. 부팅 때는 10·20층 보스만 받으므로,
+       이어하기·?floor= 로 높은 층에서 시작하면 첫 보스가 다른 종으로 대신 나왔다 */
+    const firstBoss = nextBossFloor(climb.floor);
+    void assets
+      .load([...new Set([bossFor(firstBoss).kind.bundle, bossFor(firstBoss + BOSS_EVERY).kind.bundle])])
+      .catch(() => {
+        /* 못 받으면 buildBoss 가 받아 둔 종으로 대신한다 */
+      });
     stairs.clearStyles();
     stairs.refresh(climb.floor);
     props.refresh(climb.floor, stairs);
@@ -925,7 +940,9 @@ async function boot() {
   const ITEM_ICON: Record<ConsumableId, string> = { star: '⭐', key: '🗝️', potion: '🧪', shield: '🛡️' };
 
   const itemContext = (): ItemContext => ({
-    climbing: canClimb() && climb.state !== 'stumble' && climb.state !== 'dead',
+    /* 게이지가 실제로 돌 때만 "오르는 중" 이다. 보스 처치 직후 1.2초는 phase 가 이미
+       climbing 이지만 게이지는 꺼져 있어, 별을 쓰면 효과 없이 사라졌다 */
+    climbing: canClimb() && gaugeOn && climb.state !== 'stumble' && climb.state !== 'dead',
     quizOpen: quizOpen && !!session && (session.phase === 'quiz' || session.phase === 'revive'),
     inBoss: !!session?.boss,
     hp: session?.hp ?? 0,
@@ -938,7 +955,6 @@ async function boot() {
     const next = runItems.use(id, saved.shop.items, itemContext());
     if (!next) return;
     saved.shop = { ...saved.shop, items: next };
-    saveSoon(saved);
     itemBar.pulse(id);
     sound.tierUp(1);
     switch (id) {
@@ -963,6 +979,9 @@ async function boot() {
       case 'shield':
         break;
     }
+    /* 효과를 적용한 **뒤에** 판 상태를 저장한다. 인벤토리만 저장하면 물약을 쓰고 새로고침했을 때
+       물약은 사라지고 회복한 HP 는 돌아오지 않았다 */
+    snapshotRun();
   });
 
   /** 슬롯 상태 — 매 프레임 그린다(내용이 같으면 DOM 을 만지지 않는다) */

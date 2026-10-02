@@ -104,6 +104,22 @@ export type ItemContext = {
 export class RunItems {
   private readonly used = new Map<ConsumableId, number>();
 
+  /**
+   * @param used 이어하기 — 중단된 판에서 이미 쓴 횟수. 없으면 새 판이다.
+   *             새로 만들면 판당 횟수가 초기화돼, 앱을 껐다 켜는 것으로 방패를 한 번 더 쓸 수 있었다
+   */
+  constructor(used?: Partial<Record<ConsumableId, number>>) {
+    for (const item of CONSUMABLES) {
+      const n = Math.floor(Number(used?.[item.id] ?? 0));
+      if (n > 0) this.used.set(item.id, Math.min(item.perRun, n));
+    }
+  }
+
+  /** 저장용 — 이 판에서 쓴 횟수 (`RunState.itemsUsed`) */
+  snapshot(): Partial<Record<ConsumableId, number>> {
+    return Object.fromEntries(this.used);
+  }
+
   usedCount(id: ConsumableId): number {
     return this.used.get(id) ?? 0;
   }
