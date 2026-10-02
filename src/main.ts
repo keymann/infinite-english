@@ -9,13 +9,26 @@ import { startLoop } from './core/loop';
 import { createRng, randomSeed } from './core/rng';
 import { CHECKPOINT_EVERY, CLIMB, PLAYER, RULES, STAIR_GAUGE, gaugeGainFor } from './game/balance';
 import { BOSS_EVERY, bossReward, canSpawnBoss, hpRatio, nextBossFloor } from './game/boss';
+import { BOSS_KINDS, bossBundles, bossFor, traitHint, type BossKind, type BossPick } from './game/bossRoster';
 import { Climb } from './game/climb';
 import { SPEED_LIMIT_SEC, instantGold } from './game/events';
 import { Session } from './game/session';
 import { LearningEngine } from './learning/engine';
 import { WordBank } from './learning/words';
 import { bandOf, levelsOf } from './learning/gradeBand';
-import { buy, shopItem } from './progress/shop';
+import { armamentOf, buy, shopItem } from './progress/shop';
+import {
+  CONSUMABLES,
+  RunItems,
+  buyItem,
+  chestDrop,
+  consumable,
+  grantItem,
+  isConsumable,
+  keyEliminations,
+  type ConsumableId,
+  type ItemContext,
+} from './progress/items';
 import { CHARACTERS, characterOf, newlyUnlocked, petOf, requiredBundles } from './progress/collection';
 import { applyProgress, allDone, defOf, ensureToday, rewardFor } from './progress/mission';
 import {
@@ -41,12 +54,16 @@ import { BossBar } from './ui/bossBar';
 import { Hud } from './ui/hud';
 import { Overlays, praiseFor, type ResultReward } from './ui/overlays';
 import { QuizPanel } from './ui/quizPanel';
+import { ItemBar } from './ui/itemBar';
 import { ParentScreen, StartScreen } from './ui/screens';
 import { ShopScreen } from './ui/shop';
 import { Ambient } from './world/ambient';
 import { Backdrop } from './world/backdrop';
 import { BossActor } from './world/bossActor';
 import { Gimmicks } from './world/gimmicks';
+import { Chest } from './world/chest';
+import { HitFx } from './world/hitFx';
+import { PERKS } from './game/weaponPerk';
 import { Npc } from './world/npc';
 import { Pet } from './world/pet';
 import { QuizObject } from './world/quizObject';
@@ -111,7 +128,8 @@ async function boot() {
    *  · 상점 캐릭터를 골랐으면 그 번들과 `boss-anims`(클립이 그 캐릭터 glb 에 없다)
    *  · 무기를 장착했으면 `weapons` — 없으면 손이 빈 채로 시작한다
    */
-  const bootBundles = ['player', 'world-forest', 'gimmick', 'pickup', 'blocks'];
+  // `items` — 계단 위 별·보스 상자·아이템 슬롯이 1층부터 필요하다 (gzip 33KB)
+  const bootBundles = ['player', 'world-forest', 'gimmick', 'pickup', 'blocks', 'items'];
   const savedCharacter = characterOf(saved.collection, saved.player.level, saved.shop.owned);
   /* **고른 캐릭터의 번들은 리그와 무관하게 필요하다.** 예전에는 상점 캐릭터(rigMedium)만
      챙겨서, 레벨로 해금한 캐릭터를 고른 저장본이 부팅에서 깨졌다
@@ -157,8 +175,17 @@ async function boot() {
     crystal: assets.source('pickup', 'detail-crystal'),
     spring: assets.source('gimmick', 'spring'),
     flag: assets.source('gimmick', 'signage_finish'),
+    star: assets.source('items', 'star'),
   });
   scene.add(gimmicks.group);
+
+  /** 정답 타격 연출 — 무기 계열마다 모양이 다르다 */
+  const hitFx = new HitFx();
+  scene.add(hitFx.group);
+
+  /** 보스 상자 — 처치한 자리에서 열린다 */
+  const chest = new Chest(assets.instance('items', 'chest'), assets.clips('items'), 0.7);
+  scene.add(chest.group);
 
   /** 그림 문제(TYPE_C)에서 계단 위에 떠오르는 3D 사물 */
   const quizObject = new QuizObject();
@@ -247,14 +274,11 @@ async function boot() {
   };
 
   let bossActor: BossActor | null = null;
+  /** 보스 손에 든 무기 — Kenney 리그는 첫 프레임 뒤에 세워 든 자세로 맞춘다 */
+  let bossGearAlign: THREE.Object3D[] = [];
 
-  /** 보스는 층에 따라 다른 종을 낸다 — 같은 뼈 기사만 세 번 나오면 세 번째는 배경이 된다 */
-  const BOSS_KINDS = [
-    { bundle: 'boss-warrior', node: 'Skeleton_Warrior', name: '뼈 기사' },
-    { bundle: 'boss-mage', node: 'Skeleton_Mage', name: '뼈 마법사' },
-    { bundle: 'boss-rogue', node: 'Skeleton_Rogue', name: '뼈 도적' },
-  ] as const;
-  let bossKindIndex = 0;
+  /** 첫 보스(10층)와 그 다음 보스 — 먼저 받는다. 나머지 로스터는 맨 뒤에 받는다 */
+  const earlyBossBundles = [...new Set([bossFor(10).kind.bundle, bossFor(20).kind.bundle])];
 
   void assets
     .load(['world-castle', petOf(saved.collection, saved.player.level).bundle])
@@ -263,7 +287,7 @@ async function boot() {
       buildPet();
       /* 보스는 더 뒤에 받는다 — 20층에 닿기 전에만 오면 된다.
          캐릭터 glb 에 애니메이션이 없으므로 클립 전용 bundle 과 짝으로 로드한다 (스파이크 A) */
-      return assets.load(['boss-anims', 'char-female-a', ...BOSS_KINDS.map((k) => k.bundle)]);
+      return assets.load(['boss-anims', 'boss-gear', 'char-female-a', ...earlyBossBundles]);
     })
     .then(() => {
       /* 응원 NPC — 다음 체크포인트 옆 섬에서 기다린다. 캐릭터 하나를 재사용한다
@@ -281,9 +305,13 @@ async function boot() {
       return undefined;
     })
     .then(() => {
-      buildBoss(0);
+      buildBoss(bossFor(10));
       // 눈·하늘 월드와 그림 문제용 에셋은 가장 마지막에 받는다 (35층·그림 문제 전까지 여유가 있다)
       return assets.load(['world-snow', 'world-sky', 'food']);
+    })
+    .then(() => {
+      /* 나머지 보스 로스터 — 30층 이후에 나온다. 아직 안 왔으면 받아 둔 보스로 대신한다 */
+      void assets.load(bossBundles()).catch((err: unknown) => console.warn('보스 로스터 로드 실패', err));
     })
     .then(() => {
       registerSet('snow');
@@ -306,17 +334,39 @@ async function boot() {
   /** 체크포인트에서 응원하는 NPC */
   let npc: Npc | null = null;
 
-  /** 보스 3종 중 하나를 씬에 올린다 */
-  const buildBoss = (index: number) => {
-    const kind = BOSS_KINDS[index % BOSS_KINDS.length];
+  /**
+   * 그 보스를 씬에 올린다.
+   *
+   * 번들이 아직 안 왔으면 **받아 둔 보스로 대신한다** — 보스 때문에 게임이 멈추면 안 된다.
+   * 해골(rigMedium)은 클립이 `boss-anims` 에 있고, Kenney 몬스터는 자기 glb 에 있다.
+   */
+  const buildBoss = (pick: BossPick): BossKind | null => {
+    // 쓸 수 있다 = 번들이 왔고, 해골(rigMedium)이면 클립 번들(boss-anims)도 왔다
+    const usable = (k: BossKind) => assets.ready(k.bundle) && (k.rig === 'kenney' || assets.ready('boss-anims'));
+    const kind: BossKind | undefined = usable(pick.kind)
+      ? pick.kind
+      : (Object.values(BOSS_KINDS) as BossKind[]).find(usable);
+    if (!kind) return null;
     if (bossActor) scene.remove(bossActor.root);
     const instance = new Actor(
       assets.instance(kind.bundle, kind.node),
-      assets.clips('boss-anims'),
-      PLAYER.height * 1.35,
+      assets.clips(kind.rig === 'rigMedium' ? 'boss-anims' : kind.bundle),
+      // 대보스는 1.3배 — 크기만으로 "이번엔 다르다" 가 읽힌다
+      PLAYER.height * 1.35 * (pick.giant ? 1.3 : 1),
     );
+    bossGearAlign = [];
+    if (kind.gear && assets.ready('boss-gear')) {
+      for (const hand of ['right', 'left'] as const) {
+        const node = kind.gear[hand];
+        if (!node) continue;
+        const held = attachWeapon(instance.root, assets.instance('boss-gear', node), kind.rig, null, hand);
+        /* 해골 무기는 손 슬롯 기준으로 만들어져 그대로 쥔다. Kenney 몬스터는 손이 없어
+           팔 끝에 붙이므로 플레이어 무기처럼 세워 든 자세로 맞춘다 */
+        if (held && kind.rig === 'kenney') bossGearAlign.push(held);
+      }
+    }
     scene.add(instance.root);
-    bossActor = new BossActor(instance);
+    bossActor = new BossActor(instance, kind.rig);
     return kind;
   };
 
@@ -324,14 +374,34 @@ async function boot() {
   const hud = new Hud(app, profile);
   const bossBar = new BossBar(app);
   const panel = new QuizPanel(app);
+  const itemBar = new ItemBar(app);
+  /** 이번 판의 아이템 사용 기록 — 판을 시작할 때 새로 만든다 */
+  let runItems = new RunItems();
+  /** 지금 떠 있는 문제에 답할 수 있는지 (열쇠를 쓸 수 있는 순간) */
+  let quizOpen = false;
+  /** 이 문제에 열쇠를 썼는지 — 맞혀도 경험치가 절반이다 */
+  let keyUsed = false;
   const overlays = new Overlays(app);
 
   /* ── 연출 지연 관리 ──
-     Session 은 시간을 모른다. 피드백을 몇 초 보여 줄지는 UI 의 결정이다. */
+     Session 은 시간을 모른다. 피드백을 몇 초 보여 줄지는 UI 의 결정이다.
+
+     `after` 는 **상태 전이 전용**이다 (다음 문제·등반 재개·보스 등장·종료).
+     단일 슬롯이라 새로 예약하면 앞의 예약이 취소되고, 그래서 전이가 겹치지 않는다.
+     칭찬·배너 같은 문구를 여기에 넣으면 바로 뒤의 전이 예약에 덮여 사라진다 — 문구는 `later`. */
   let timer = 0;
   const after = (sec: number, fn: () => void) => {
     clearTimeout(timer);
     timer = setTimeout(fn, sec * 1000) as unknown as number;
+  };
+  /**
+   * 연출 문구 전용 지연 — `after` 와 **슬롯을 공유하지 않는다.**
+   *
+   * `after` 는 단일 슬롯이라, 문구를 예약한 직후 다음 문제·등반 재개를 예약하면 문구가 취소된다.
+   * 특기 이름·상자 보상처럼 상태 전이와 무관한 문구는 이쪽으로 띄운다.
+   */
+  const later = (sec: number, fn: () => void) => {
+    setTimeout(fn, sec * 1000);
   };
 
   /* 홈 화면에서는 아직 판이 없다. 더미 Session 을 만들어 두면 난수 스트림이 헛돌고
@@ -358,6 +428,12 @@ async function boot() {
           award(0, 8 + Math.floor(climb.floor / 10) * 2);
           overlays.praise('💎 +골드', 'gold');
           sound.tierUp(1);
+        } else if (gimmick === 'star') {
+          // 별 — 계단 게이지가 가득 찬다. 바닥날 때쯤 보이면 "저기까지만" 이 목표가 된다
+          gimmicks.take(climb.floor);
+          if (gaugeOn) gauge = STAIR_GAUGE.capacity;
+          overlays.praise('⭐ 시간 가득!', 'gold');
+          sound.tierUp(2);
         } else if (gimmick === 'spring') {
           // 튕겨 올라 한 칸을 공짜로 얻는다. 구간 수와 무관하게 층만 오른다
           overlays.praise('⬆︎ 스프링!', 'lightning');
@@ -377,6 +453,8 @@ async function boot() {
           lastBossFloor = Math.floor(climb.floor / BOSS_EVERY) * BOSS_EVERY;
           // 연출을 기다리지 않고 **여기서 바로 잠근다** (bossPending 주석 참고)
           bossPending = true;
+          // 착지 직후 처리될 버퍼 입력을 버린다 — 잠근 계단 위에서 방향 판정이 일어나면 안 된다
+          climb.clearBuffer();
           stopStairTimer();
           stairs.setHint(-1);
           after(0.3, startBossFight);
@@ -388,6 +466,19 @@ async function boot() {
          원작의 긴장이 방향 선택에서 온다는 요청으로 뒤집었다.
          조작이 어려운 아이에게는 `?autodir=1` 이 그대로 남아 있다. */
       onWrongDir: (onFake) => failRun(onFake ? 'fake' : 'direction'),
+      /* 방패 — 실수를 한 번 막는다. 판당 1번이라 방향 판단의 긴장은 남는다 */
+      absorbWrongDir: (onFake) => {
+        if (!canClimb()) return false;
+        const next = runItems.absorbMistake(saved.shop.items);
+        if (!next) return false;
+        saved.shop = { ...saved.shop, items: next };
+        snapshotRun();
+        itemBar.pulse('shield');
+        overlays.praise(onFake ? '🛡 방패가 가짜 계단을 막았다!' : '🛡 방패가 막았다!', 'lightning');
+        sound.stumble();
+        camera.shake(PLAYER.landShake * 2);
+        return true;
+      },
     });
   }
 
@@ -500,15 +591,43 @@ async function boot() {
        계단을 오를 수 있다는 뜻이 되어 거짓 안내가 된다 (브라우저 검증에서 드러났다) */
     panel.showPrompt('보스를 넘어야 한다!', 'stumble');
     const boss = session.startBoss(climb.floor);
-    // 보스마다 다른 종을 낸다 — 같은 뼈 기사만 세 번 나오면 세 번째는 배경이 된다
-    const kind = bossActor ? buildBoss(bossKindIndex++) : null;
-    bossBar.showBoss(`BOSS ${boss.index} · ${kind?.name ?? '보스'}`, 1);
+    /* 종·등급은 층이 정한다(game/bossRoster.ts) — Session 과 같은 답을 쓴다 */
+    const pick = session.bossPick ?? bossFor(climb.floor);
+    const kind = buildBoss(pick);
+    // 다른 종이 대신 나왔으면 특성·봉인 판정을 그 종에 맞춘다 (Session.substituteBoss)
+    if (kind) session.substituteBoss(kind);
+    const shown = session.bossPick ?? pick;
+    const title = `${boss.giant ? '대보스' : 'BOSS'} ${boss.index} · ${kind?.name ?? '보스'}`;
+    bossBar.showBoss(title, 1);
+    /* 무기 특기 — 창은 등장하자마자 찌르고, 지팡이는 흡혈귀의 회복을 막는다.
+       특성 안내보다 먼저 정해진다: 봉인했으면 "틀리면 체력이 찬다" 를 띄우지 않는다.
+       `after()` 가 아니라 `later()` 를 쓴다 — after 는 단일 슬롯이라 아래의 첫 문제
+       예약(0.9초)을 취소해 버린다 */
+    const opening = session.opening;
+    session.opening = null;
+    const hint = opening?.sealed ? '' : traitHint(shown.kind.trait);
+    if (hint) later(0.5, () => overlays.praise(`${shown.kind.name}: ${hint}`, 'fire'));
+    if (opening?.sealed) {
+      later(0.6, () => overlays.praise(`🔮 ${PERKS.staff.name}! 흡혈귀가 회복하지 못한다`, 'lightning'));
+    }
+    if (opening && opening.opener > 0) {
+      // 보스가 내려앉은 뒤에 찌른다 — 등장 낙하(0.9초) 중에 맞으면 무엇에 맞았는지 안 보인다
+      later(0.7, () => {
+        if (!session?.boss || !bossActor) return;
+        climb.attack();
+        bossActor.hit(false);
+        playHitFx('spear', true);
+        bossBar.setBossHp(hpRatio(session.boss));
+        overlays.praise(`🔱 ${PERKS.spear.name}! -${opening.opener}`, 'lightning');
+        sound.tierUp(2);
+      });
+    }
     /* **계단 표면에 세운다.** 플레이어 좌표에 오프셋을 더하던 방식은 계단이 올라가면서
        안쪽으로 뻗는 것을 무시해 보스를 계단 아래에 박아 넣었다 (world/bossActor.ts) */
     bossActor?.spawn(stairs.surfaceAt(climb.floor + BOSS_STAND_AHEAD), actor.root.position);
-    overlays.banner('BOSS!', 'fire');
+    overlays.banner(boss.giant ? 'GIANT BOSS!' : 'BOSS!', 'fire');
     sound.tierUp(3);
-    camera.shake(PLAYER.landShake * 3);
+    camera.shake(PLAYER.landShake * (boss.giant ? 4.5 : 3));
     stopTimer();
     // 보스전 문제는 **자주 틀리는 단어**로 낸다 (PRD 19장) — engine 이 boss 모드로 고른다
     after(0.9, () => showQuiz());
@@ -568,6 +687,7 @@ async function boot() {
       asked: session.asked,
       correct: session.correctCount,
       wrong: session.wrongCount,
+      itemsUsed: runItems.snapshot(),
     };
     saveSoon(saved);
   };
@@ -591,7 +711,7 @@ async function boot() {
       if (opened.length > 0) {
         runUnlocked = [...runUnlocked, ...opened.map((o) => o.name)];
         // 해금 알림은 결과 화면에서 다시 보여 준다. 여기서는 짧게만
-        after(1.0, () => overlays.praise(`🎉 ${opened[0].name} 해금!`, 'lightning'));
+        later(1.0, () => overlays.praise(`🎉 ${opened[0].name} 해금!`, 'lightning'));
       }
     }
   };
@@ -605,6 +725,13 @@ async function boot() {
       levels: levelsOf(saved.levelBand),
     });
     session = new Session(bank, engine, createRng(seed ^ 0x9e3779b9));
+    // 장착한 무기 — 등급 피해와 계열(특기). Session 은 상점을 모르므로 값만 넣는다
+    session.weapon = armamentOf(saved.shop.weaponId);
+    // 이어하기면 그 판에서 이미 쓴 횟수를 되살린다 — 판당 제한이 껐다 켜기로 풀리지 않게
+    runItems = new RunItems(resume?.itemsUsed);
+    quizOpen = false;
+    keyUsed = false;
+    chest.hide();
     runExp = 0;
     runGold = 0;
     runLevelUp = null;
@@ -627,6 +754,14 @@ async function boot() {
       const startFloor = Number(params.get('floor'));
       if (Number.isFinite(startFloor) && startFloor > 0) climb.teleport(Math.floor(startFloor));
     }
+    /* 시작 층 기준으로 다음 보스 둘을 먼저 받는다. 부팅 때는 10·20층 보스만 받으므로,
+       이어하기·?floor= 로 높은 층에서 시작하면 첫 보스가 다른 종으로 대신 나왔다 */
+    const firstBoss = nextBossFloor(climb.floor);
+    void assets
+      .load([...new Set([bossFor(firstBoss).kind.bundle, bossFor(firstBoss + BOSS_EVERY).kind.bundle])])
+      .catch(() => {
+        /* 못 받으면 buildBoss 가 받아 둔 종으로 대신한다 */
+      });
     stairs.clearStyles();
     stairs.refresh(climb.floor);
     props.refresh(climb.floor, stairs);
@@ -634,7 +769,6 @@ async function boot() {
     gimmicks.refresh(climb.floor, stairs);
     npc?.reset(stairs);
     quizObject.hide();
-    bossKindIndex = 0;
     theme = themeForFloor(climb.floor);
     mood.applyTheme(theme, true);
     backdrop.applyTheme(theme);
@@ -656,8 +790,8 @@ async function boot() {
       const parts = [`연속 학습 ${streak.state.days}일`];
       if (streak.shieldUsed) parts.push('🛡 방패로 지켰어요');
       if (streak.shieldEarned) parts.push('🛡 방패 획득');
-      after(0.6, () => overlays.praise(parts.join(' · '), 'gold'));
-      if (streak.milestone) after(1.4, () => overlays.banner(`${streak.milestone}일 연속!`, 'lightning'));
+      later(0.6, () => overlays.praise(parts.join(' · '), 'gold'));
+      if (streak.milestone) later(1.4, () => overlays.banner(`${streak.milestone}일 연속!`, 'lightning'));
     }
     saveSoon(saved);
   };
@@ -669,6 +803,8 @@ async function boot() {
     stopStairTimer();
     const quiz = options.revive ? session.reviveQuiz() : session.next(climb.floor);
     panel.show(quiz, options);
+    quizOpen = true;
+    keyUsed = false;
 
     /* 그림 문제(TYPE_C) — 계단 위에 실물을 띄운다. food bundle 이 아직 안 왔으면
        사물 없이 진행한다(문제 자체는 영어 4지선다라 성립한다) */
@@ -686,7 +822,10 @@ async function boot() {
 
     // answer() 뒤에는 다음 문제로 바뀔 수 있으므로 지금 잡아 둔다
     const wasRetry = session.quiz?.isRetry ?? false;
+    // 처치하면 session.boss 가 비워진다 — 보상 계산에 쓸 등급을 먼저 잡아 둔다
+    const fighting = session.boss ? { index: session.boss.index, giant: session.boss.giant } : null;
     const result = session.answer(index);
+    quizOpen = false;
     panel.feedback(index, result.correctIndex, result.correct);
     quizObject.hide();
     hud.setHp(result.hp, RULES.hp);
@@ -714,9 +853,14 @@ async function boot() {
         combo: session.combo,
         isRetry: result.isRetry,
       });
-      award(baseExp * result.multiplier, goldForAnswer(result.isRetry) * result.multiplier);
+      /* 열쇠로 보기를 지운 문제는 경험치 절반 — 열쇠로 경험치를 벌 수 없게 한다 */
+      const keyFactor = keyUsed ? 0.5 : 1;
+      award(
+        Math.round(baseExp * result.multiplier * keyFactor),
+        goldForAnswer(result.isRetry) * result.multiplier,
+      );
       if (result.multiplier > 1) {
-        after(0.05, () => overlays.praise(`보상 ×${result.multiplier}!`, 'gold'));
+        later(0.05, () => overlays.praise(`보상 ×${result.multiplier}!`, 'gold'));
       }
       stopTimer();
 
@@ -726,14 +870,18 @@ async function boot() {
         /* **플레이어가 무기를 휘두른다.** 정답의 결과가 HP 바 숫자만 줄어드는 것이 아니라
            화면에서 보여야 한다. 무기를 안 들었어도 동작은 나온다(맨손) */
         climb.attack();
-        bossActor?.hit(hit.critical);
-        camera.shake(PLAYER.landShake * (hit.critical ? 2.4 : 1.4));
+        bossActor?.hit(hit.critical, hit.perk === 'hammer');
+        playHitFx(session.weapon.family, hit.perk !== null);
+        camera.shake(PLAYER.landShake * (hit.perk === 'hammer' ? 3.4 : hit.critical ? 2.4 : 1.4));
+        // 특기가 발동했으면 이름을 띄운다 — 무기를 고른 이유가 그 순간 보인다
+        if (hit.perk) later(0.05, () => overlays.praise(`${PERKS[hit.perk!].name}! -${hit.damage}`, 'lightning'));
         if (hit.defeated) {
           bossBar.setBossHp(0);
           bossBar.hideBoss();
           bossActor?.die();
-          const reward = bossReward({ index: Math.max(1, Math.floor(climb.floor / BOSS_EVERY)), hp: 0, maxHp: 1, asked: 0 });
+          const reward = bossReward(fighting ?? { index: 1, giant: false });
           award(reward.exp, reward.gold);
+          openChest(fighting?.giant ?? false);
           overlays.banner('BOSS DEFEATED!', 'lightning');
           sound.tierUp(3);
           pet?.cheer();
@@ -767,6 +915,11 @@ async function boot() {
        화면에서 보여야 한다. FREE 팩에 공격 클립이 없어 Throw + 돌진으로 만들었다.
        플레이어 피격은 여기서 바로 하지 않는다 — 돌진이 닿는 프레임에 맞춘다(update 루프) */
     if (session.boss) bossActor?.attack();
+    // 흡혈귀 — 틀리면 보스가 회복한다. HP 바가 다시 차는 것을 보여 줘야 이유가 읽힌다
+    if (result.bossHeal > 0 && session.boss) {
+      bossBar.setBossHp(hpRatio(session.boss));
+      overlays.praise(`🩸 보스 체력 +${result.bossHeal}`, 'fire');
+    }
     // 보스전에서는 흔들림도 타격 순간으로 미룬다. 두 번 흔들면 소음이 된다
     if (!session.boss) camera.shake(PLAYER.landShake);
     snapshotRun();
@@ -783,6 +936,117 @@ async function boot() {
     });
   });
 
+  /* ── 아이템 ── */
+  const ITEM_ICON: Record<ConsumableId, string> = { star: '⭐', key: '🗝️', potion: '🧪', shield: '🛡️' };
+
+  const itemContext = (): ItemContext => ({
+    /* 게이지가 실제로 돌 때만 "오르는 중" 이다. 보스 처치 직후 1.2초는 phase 가 이미
+       climbing 이지만 게이지는 꺼져 있어, 별을 쓰면 효과 없이 사라졌다 */
+    climbing: canClimb() && gaugeOn && climb.state !== 'stumble' && climb.state !== 'dead',
+    quizOpen: quizOpen && !!session && (session.phase === 'quiz' || session.phase === 'revive'),
+    inBoss: !!session?.boss,
+    hp: session?.hp ?? 0,
+    maxHp: RULES.hp,
+    keyUsed,
+  });
+
+  itemBar.onItem((id) => {
+    if (!session || session.phase === 'over') return;
+    const next = runItems.use(id, saved.shop.items, itemContext());
+    if (!next) return;
+    saved.shop = { ...saved.shop, items: next };
+    itemBar.pulse(id);
+    sound.tierUp(1);
+    switch (id) {
+      case 'star':
+        gauge = STAIR_GAUGE.capacity;
+        bossBar.showStairTimer(1);
+        overlays.praise('⭐ 시간 가득!', 'gold');
+        break;
+      case 'potion':
+        session.hp = Math.min(RULES.hp, session.hp + 1);
+        hud.setHp(session.hp, RULES.hp);
+        overlays.praise('🧪 하트 +1', 'gold');
+        break;
+      case 'key': {
+        const quiz = session.quiz;
+        if (!quiz) break;
+        keyUsed = true;
+        panel.eliminate(keyEliminations(quiz.choices.length, quiz.correctIndex, Math.random));
+        overlays.praise('🗝️ 틀린 보기 2개를 지웠다', 'gold');
+        break;
+      }
+      case 'shield':
+        break;
+    }
+    /* 효과를 적용한 **뒤에** 판 상태를 저장한다. 인벤토리만 저장하면 물약을 쓰고 새로고침했을 때
+       물약은 사라지고 회복한 HP 는 돌아오지 않았다 */
+    snapshotRun();
+  });
+
+  /** 슬롯 상태 — 매 프레임 그린다(내용이 같으면 DOM 을 만지지 않는다) */
+  const renderItems = () => {
+    if (!session || session.phase === 'over') {
+      itemBar.hide();
+      return;
+    }
+    const ctx = itemContext();
+    itemBar.render(
+      CONSUMABLES.map((c) => ({
+        id: c.id,
+        icon: ITEM_ICON[c.id],
+        left: runItems.left(c.id, saved.shop.items),
+        usable: runItems.canUse(c.id, saved.shop.items, ctx),
+      })),
+    );
+  };
+
+  /**
+   * 정답 타격 연출. 맨손이면 작은 별이 튄다 — 맨손도 "내가 때렸다" 는 보여야 한다.
+   * 탄(화살·찌르기·마법탄)은 플레이어 손 높이에서 보스 몸통으로 날아간다.
+   */
+  const playHitFx = (family: keyof typeof PERKS | null, big: boolean) => {
+    if (!bossActor) return;
+    const perk = family ? PERKS[family] : null;
+    const from = actor.root.position.clone();
+    from.y += actor.height * 0.6;
+    const to = bossActor.root.position.clone();
+    to.y += PLAYER.height * 0.7;
+    hitFx.play(perk?.fx ?? 'star', perk?.color ?? 0xffffff, from, to, big);
+  };
+
+  /**
+   * 보스 상자 — 처치한 자리에서 열리고 얻은 물건이 떠오른다.
+   * 무엇이 나오는지는 층이 정한다(progress/items.ts) — 다시 해도 같은 층은 같은 상자다.
+   */
+  const openChest = (giant: boolean) => {
+    const drop = chestDrop(climb.floor, giant);
+    let prize: THREE.Object3D;
+    if (drop.kind === 'item') {
+      const got = grantItem(saved.shop.items, drop.id);
+      const item = consumable(drop.id)!;
+      if (got.granted) {
+        saved.shop = { ...saved.shop, items: got.inventory };
+        later(0.9, () => overlays.praise(`🎁 ${item.name} 획득!`, 'lightning'));
+      } else {
+        // 이미 가득 — 그 값만큼 골드로 바꿔 준다. 빈손으로 끝나면 상자가 배신한다
+        award(0, Math.round(item.price / 2));
+        later(0.9, () => overlays.praise(`🎁 ${item.name} (가득) → 🪙 +${Math.round(item.price / 2)}`, 'gold'));
+      }
+      prize = assets.instance('items', item.model);
+    } else {
+      award(0, drop.amount);
+      later(0.9, () => overlays.praise(`🎁 🪙 +${drop.amount}`, 'gold'));
+      prize = assets.instance('items', 'coin');
+    }
+    saveSoon(saved);
+    chest.open(
+      stairs.surfaceAt(climb.floor + BOSS_STAND_AHEAD - 1),
+      actor.root.position,
+      prize,
+    );
+  };
+
   /**
    * 새 이벤트가 붙었으면 배너를 띄운다.
    * Session 은 이벤트를 정하기만 하고 연출은 여기서 한다 — 규칙과 화면을 섞지 않는다.
@@ -793,7 +1057,7 @@ async function boot() {
     session.pendingEvent = null;
 
     overlays.banner(def.label, def.id === 'treasure' ? 'gold' : 'lightning');
-    after(0.05, () => overlays.praise(def.hint, 'gold'));
+    later(0.05, () => overlays.praise(def.hint, 'gold'));
     sound.tierUp(def.id === 'escape' ? 3 : 1);
 
     // 보물상자는 즉시 골드
@@ -806,7 +1070,11 @@ async function boot() {
   /** 다음 칸 방향 안내. 남은 칸 수는 없다 — 계단은 보스 층까지 계속 열려 있다 */
   const promptText = () => {
     const next = nextBossFloor(climb.floor);
-    const to = next > climb.floor ? ` · 다음 보스 ${next}층` : '';
+    /* 다음 보스의 **이름까지** 보여 준다. "20층에 좀비" 처럼 구체적인 목표가 있으면
+       오르는 이유가 생긴다. 대보스는 따로 표시해 기대를 만든다 */
+    const upcoming = bossFor(next);
+    const label = `${upcoming.giant ? '대보스 ' : ''}${upcoming.kind.name}`;
+    const to = next > climb.floor ? ` · ${next - climb.floor}층 뒤 ${label}` : '';
     return input.options.autoDir
       ? `아무 곳이나 탭${to}`
       : climb.nextDir < 0
@@ -901,8 +1169,19 @@ async function boot() {
    * **산 직후 바로 쓸 수 있어야 한다.** 로드는 뒤에서 돌리고 화면은 즉시 갱신한다.
    */
   const openShop = () => {
-    shopScreen.show(saved.player.gold, saved.shop.owned, {
+    shopScreen.show(saved.player.gold, saved.shop.owned, saved.shop.items, {
       onBuy: (id) => {
+        /* 소비 아이템은 여러 개 산다 — 소유 목록이 아니라 개수를 늘린다 */
+        if (isConsumable(id)) {
+          const bought = buyItem(id, saved.player.gold, saved.shop.items);
+          if (!bought.ok) return;
+          saved.player = { ...saved.player, gold: bought.gold };
+          saved.shop = { ...saved.shop, items: bought.inventory };
+          saveNow(saved);
+          sound.tierUp(1);
+          openShop();
+          return;
+        }
         const result = buy(id, saved.player.gold, saved.shop.owned);
         if (!result.ok) return;
         const item = shopItem(id)!;
@@ -1078,6 +1357,11 @@ async function boot() {
     backdrop.update(dt, actor.root.position, bandProgress(climb.floor));
     pet?.update(dt, actor.root.position);
     bossActor?.update(dt);
+    // 보스 무기도 같은 이유로 첫 프레임 뒤에 한 번 맞춘다
+    if (bossGearAlign.length > 0 && bossActor?.visible) {
+      for (const held of bossGearAlign) alignHeld(held);
+      bossGearAlign = [];
+    }
 
     /* 보스의 돌진이 가장 깊이 들어간 프레임 — **여기서 플레이어가 맞는다.**
        setTimeout 으로 맞추지 않는 이유: 연출 지연은 단일 슬롯(after)을 공유하므로
@@ -1089,6 +1373,9 @@ async function boot() {
       sound.stumble();
     }
     gimmicks.update(dt);
+    chest.update(dt);
+    hitFx.update(dt);
+    renderItems();
     npc?.update(dt, stairs);
     quizObject.update(dt, actor.root.position);
     ambient?.setEnabled(hasAmbientFlyers(theme));
@@ -1381,6 +1668,38 @@ async function boot() {
       /** 지금 재생 중인 클립 — 애니메이션이 죽는 사고가 두 번 있었다(스파이크 A 기록) */
       get clips() {
         return { player: actor.playing, boss: bossClip() };
+      },
+      /** 아이템 — 가진 개수, 이 판에서 남은 횟수, 지금 쓸 수 있는지, 상자가 열리는 중인지 */
+      get items() {
+        const ctx = itemContext();
+        return {
+          inventory: { ...saved.shop.items },
+          left: Object.fromEntries(CONSUMABLES.map((c) => [c.id, runItems.left(c.id, saved.shop.items)])),
+          usable: CONSUMABLES.filter((c) => runItems.canUse(c.id, saved.shop.items, ctx)).map((c) => c.id),
+          chest: chest.active,
+          keyUsed,
+        };
+      },
+      /**
+       * 지금 보스 — 로스터가 고른 종과 실제로 올라간 종이 같은지, 무기를 들었는지.
+       * 번들이 늦으면 다른 종으로 대신하므로 `pick` 과 `shown` 이 다를 수 있다.
+       */
+      get boss() {
+        let gear = 0;
+        bossActor?.root.traverse((o) => {
+          if (o.name === 'weapon-holder') gear++;
+        });
+        return {
+          pick: session?.bossPick ? { id: session.bossPick.kind.id, giant: session.bossPick.giant } : null,
+          visible: bossActor?.visible ?? false,
+          clip: bossClip(),
+          hp: session?.boss ? { hp: session.boss.hp, max: session.boss.maxHp } : null,
+          gear,
+          /** 타격 연출이 재생 중인지 */
+          fx: hitFx.active,
+          weapon: session?.weapon ?? null,
+          height: bossActor ? +new THREE_NS.Box3().setFromObject(bossActor.root).getSize(new THREE_NS.Vector3()).y.toFixed(2) : null,
+        };
       },
       /**
        * 디버그: 프롭이 **실제로 화면에 보이는지** 센다.

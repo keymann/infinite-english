@@ -1,12 +1,14 @@
 import * as THREE from 'three';
+import type { BossRig } from '../game/bossRoster';
 import type { Actor } from '../three/actor';
 
 /**
  * 3D 보스.
  *
- * **스파이크 A 의 결과가 여기서 쓰인다.** 보스 캐릭터 glb 에는 애니메이션이 없고,
- * 클립 26종은 별도 파일(`boss-anims`)에 있다. 본 이름이 같아 AnimationMixer 가
- * 이름으로 바인딩하므로 출처가 달라도 붙는다.
+ * 리그가 둘이다. 클립의 출처와 이름이 달라 `BOSS_VOCAB` 이 동작을 이름으로 옮긴다.
+ *  - KayKit 해골(rigMedium): glb 에 애니메이션이 없다. 클립 26종은 `boss-anims` 에서 온다
+ *    (스파이크 A — 본 이름이 같아 AnimationMixer 가 이름으로 바인딩한다)
+ *  - Kenney 몬스터: 클립 32종이 자기 glb 에 들어 있다
  *
  * 보스는 계단 **위쪽 칸에 서서** 아래를 본다. 플레이어가 올라오는 길을 막고 있는 자세여야
  * "저걸 넘어야 한다"가 전달된다.
@@ -35,6 +37,35 @@ const LUNGE = 0.85;
  * "왜 저기서 아픈가" 가 된다 — 그래서 시간(setTimeout)이 아니라 애니메이션 진행도로 잰다.
  */
 const IMPACT_AT = 0.4;
+/** 망치 특기로 밀려나는 거리 — 계단 한 칸(0.78)보다 짧게. 더 밀면 계단 밖으로 떨어져 보인다 */
+const KNOCK_HEAVY = 0.6;
+
+type BossMove = 'spawn' | 'idle' | 'hit' | 'hitHard' | 'attack' | 'die';
+
+/**
+ * 리그별 클립 사전 — 앞에 있는 것을 먼저 쓴다.
+ *
+ * KayKit 해골은 공격 클립이 없어 `Throw` 로 대신한다. Kenney 몬스터에는 진짜 공격
+ * (`attack-melee-right`)과 쓰러짐(`die`)이 있다. 등장 클립은 없어 점프로 대신한다.
+ */
+const BOSS_VOCAB: Record<BossRig, Record<BossMove, readonly string[]>> = {
+  rigMedium: {
+    spawn: ['Spawn_Air', 'Idle_A'],
+    idle: ['Idle_A', 'Idle_B'],
+    hit: ['Hit_A'],
+    hitHard: ['Hit_B', 'Hit_A'],
+    attack: ['Throw', 'Interact', 'Use_Item', 'Idle_B'],
+    die: ['Death_A', 'Idle_A'],
+  },
+  kenney: {
+    spawn: ['jump', 'idle'],
+    idle: ['idle'],
+    hit: ['fall', 'crouch'],
+    hitHard: ['fall', 'crouch'],
+    attack: ['attack-melee-right', 'attack-kick-right', 'interact-right'],
+    die: ['die', 'fall'],
+  },
+};
 
 export class BossActor {
   private readonly actor: Actor;
@@ -52,8 +83,11 @@ export class BossActor {
   /** 아직 소비되지 않은 타격 신호 */
   private impact = false;
 
-  constructor(actor: Actor) {
+  private readonly vocab: Record<BossMove, readonly string[]>;
+
+  constructor(actor: Actor, rig: BossRig = 'rigMedium') {
     this.actor = actor;
+    this.vocab = BOSS_VOCAB[rig];
     this.actor.root.visible = false;
   }
 
@@ -78,7 +112,7 @@ export class BossActor {
     this.hitLeft = 0;
     this.attackLeft = 0;
     this.spawnLeft = SPAWN_SEC;
-    this.play(['Spawn_Air', 'Idle_A'], { loop: false, timeScale: 1.1 });
+    this.play('spawn', { loop: false, timeScale: 1.1 });
   }
 
   /** 보스전 도중 플레이어 위치가 바뀌면(부활 연출 등) 알려 준다 */
@@ -87,12 +121,22 @@ export class BossActor {
     this.playerAt.copy(lookAt);
   }
 
-  /** 피격 — 정답 한 번 */
-  hit(critical: boolean) {
+  /**
+   * 피격 — 정답 한 번.
+   *
+   * @param heavy 망치 특기 — 플레이어 반대쪽으로 크게 밀려났다가 제자리로 돌아온다.
+   *              돌아오는 것은 update 의 "제자리로 수렴" 이 맡는다
+   */
+  hit(critical: boolean, heavy = false) {
     if (this.dying) return;
     this.hitLeft = 0.45;
     this.attackLeft = 0;
-    this.play([critical ? 'Hit_B' : 'Hit_A', 'Idle_A'], {
+    if (heavy) {
+      this.scratch.subVectors(this.base, this.playerAt).setY(0);
+      const len = this.scratch.length() || 1;
+      this.actor.root.position.addScaledVector(this.scratch, KNOCK_HEAVY / len);
+    }
+    this.play(critical ? 'hitHard' : 'hit', {
       loop: false,
       timeScale: critical ? 1.1 : 1.4,
     });
@@ -113,7 +157,7 @@ export class BossActor {
     this.impactFired = false;
     this.impact = false;
     this.faceTarget();
-    this.play(['Throw', 'Interact', 'Use_Item', 'Idle_B'], { loop: false, timeScale: 1.3 });
+    this.play('attack', { loop: false, timeScale: 1.3 });
   }
 
   /** 처치 */
@@ -121,7 +165,7 @@ export class BossActor {
     this.dying = true;
     this.attackLeft = 0;
     this.impact = false;
-    this.play(['Death_A', 'Idle_A'], { loop: false, timeScale: 1.1 });
+    this.play('die', { loop: false, timeScale: 1.1 });
   }
 
   hide() {
@@ -202,7 +246,7 @@ export class BossActor {
    * 멈추므로, 되돌리지 않으면 보스가 얼어붙은 것처럼 보인다).
    */
   idle() {
-    this.play(['Idle_A', 'Idle_B'], { loop: true, timeScale: 0.9 });
+    this.play('idle', { loop: true, timeScale: 0.9 });
   }
 
   /** 플레이어(아래쪽)를 바라본다 */
@@ -212,9 +256,9 @@ export class BossActor {
     this.actor.root.rotation.y = Math.atan2(this.scratch.x, this.scratch.z);
   }
 
-  /** 있는 클립 중 첫 번째를 재생한다 — 클립 이름이 팩마다 다를 수 있어 후보를 넘긴다 */
-  private play(names: string[], options: { loop?: boolean; timeScale?: number }) {
-    for (const name of names) {
+  /** 그 동작의 후보 중 이 리그에 있는 첫 클립을 재생한다 */
+  private play(move: BossMove, options: { loop?: boolean; timeScale?: number }) {
+    for (const name of this.vocab[move]) {
       if (this.actor.has(name)) {
         this.actor.play(name, { ...options, fade: 0.1, restart: options.loop !== true });
         return;

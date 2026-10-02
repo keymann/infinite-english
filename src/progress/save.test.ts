@@ -192,3 +192,46 @@ describe('문제 레벨 선택 (levelBand)', () => {
     expect(loaded.progress.w1.right).toBe(3);
   });
 });
+
+describe('소비 아이템 (shop.items)', () => {
+  /**
+   * `shop` 은 객체라 얕은 병합이면 옛 저장본의 `shop`(items 없음)이 기본값을 통째로 덮는다.
+   * 그러면 `items` 가 undefined 가 되어 아이템 슬롯을 그리는 순간 터진다.
+   */
+  it('items 가 없던 저장본도 빈 인벤토리로 열리고 산 무기는 그대로다', () => {
+    const data = load();
+    data.shop = { owned: ['sword_A'], weaponId: 'sword_A', items: {} };
+    saveNow(data);
+
+    const raw = JSON.parse(store.get(KEY)!);
+    delete raw.shop.items;
+    store.set(KEY, JSON.stringify(raw));
+
+    const loaded = load();
+    expect(loaded.shop.items).toEqual({});
+    expect(loaded.shop.owned).toEqual(['sword_A']);
+    expect(loaded.shop.weaponId).toBe('sword_A');
+  });
+
+  it('산 아이템 개수가 저장되고 다시 읽힌다', () => {
+    const data = load();
+    data.shop = { ...data.shop, items: { star: 2, shield: 1 } };
+    saveNow(data);
+    expect(load().shop.items).toEqual({ star: 2, shield: 1 });
+  });
+});
+
+describe('이어하기 — 아이템 사용 기록 (run.itemsUsed)', () => {
+  it('저장한 사용 횟수가 다시 읽히고, 없던 저장본은 undefined 로 열린다', () => {
+    const data = load();
+    data.run = { seed: 1, floor: 12, hp: 2, combo: 0, score: 0, asked: 3, correct: 2, wrong: 1, itemsUsed: { shield: 1 } };
+    saveNow(data);
+    expect(load().run?.itemsUsed).toEqual({ shield: 1 });
+
+    const raw = JSON.parse(store.get(KEY)!);
+    delete raw.run.itemsUsed;
+    store.set(KEY, JSON.stringify(raw));
+    expect(load().run?.itemsUsed).toBeUndefined();
+    expect(load().run?.floor).toBe(12);
+  });
+});

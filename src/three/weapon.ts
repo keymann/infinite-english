@@ -19,8 +19,13 @@ import * as THREE from 'three';
  * 애니메이션이 조용히 죽은 적이 있다. 그래서 후보 이름을 **정규화해서** 찾는다.
  */
 
-/** 붙일 본 후보 — 앞에 있는 것을 먼저 쓴다 */
-const SLOT_CANDIDATES = ['handslot.r', 'hand.r', 'handslot.l', 'hand.l', 'arm-right', 'arm-left'];
+/** 붙일 본 후보 — 앞에 있는 것을 먼저 쓴다. 왼손은 방패처럼 보조 손에 들 때 쓴다 */
+const SLOT_CANDIDATES = {
+  right: ['handslot.r', 'hand.r', 'handslot.l', 'hand.l', 'arm-right', 'arm-left'],
+  left: ['handslot.l', 'hand.l', 'arm-left'],
+} as const;
+
+export type Hand = keyof typeof SLOT_CANDIDATES;
 
 /** three 가 노드 이름에서 지우는 문자를 같은 방식으로 지운다 */
 const normalize = (name: string) => name.replace(/[.:]/g, '');
@@ -87,12 +92,12 @@ const BLADE_AXIS = new THREE.Vector3(0, 1, 0);
  *
  * 못 찾으면 null — 무기 없이 진행한다. **무기 때문에 게임이 멈추면 안 된다.**
  */
-export function findWeaponSlot(root: THREE.Object3D): THREE.Object3D | null {
+export function findWeaponSlot(root: THREE.Object3D, hand: Hand = 'right'): THREE.Object3D | null {
   const byName = new Map<string, THREE.Object3D>();
   root.traverse((o) => {
     if (o.name) byName.set(normalize(o.name.toLowerCase()), o);
   });
-  for (const candidate of SLOT_CANDIDATES) {
+  for (const candidate of SLOT_CANDIDATES[hand]) {
     const found = byName.get(normalize(candidate.toLowerCase()));
     if (found) return found;
   }
@@ -102,6 +107,7 @@ export function findWeaponSlot(root: THREE.Object3D): THREE.Object3D | null {
 /**
  * 무기를 손에 쥐게 한다.
  *
+ * @param hand 어느 손에 들지 (기본: 오른손)
  * @returns 붙인 노드 (실패하면 null). 부르는 쪽이 교체할 때 지울 수 있게 돌려준다
  */
 export function attachWeapon(
@@ -109,8 +115,9 @@ export function attachWeapon(
   weapon: THREE.Object3D,
   rig: WeaponRig,
   extra: THREE.Object3D | null = null,
+  hand: Hand = 'right',
 ): THREE.Object3D | null {
-  const slot = findWeaponSlot(root);
+  const slot = findWeaponSlot(root, hand);
   if (!slot) return null;
 
   const fit = FIT[rig];

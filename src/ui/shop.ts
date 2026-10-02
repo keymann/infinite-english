@@ -1,13 +1,16 @@
+import { CARRY_MAX, countOf, type ConsumableId, type Inventory } from '../progress/items';
 import {
   SHOP_CATEGORIES,
   affordable,
   itemsOf,
+  perkOf,
+  weaponDamage,
   type ShopCategory,
   type ShopItem,
 } from '../progress/shop';
 
 /**
- * 상점 화면 — 골드로 무기·캐릭터를 산다.
+ * 상점 화면 — 골드로 무기·캐릭터·아이템을 산다. 아이템은 3개까지 여러 번 살 수 있다.
  *
  * 목록은 **가격 오름차순**이다(`itemsOf` 가 정렬한다). 아이가 위에서부터 훑으면
  * "지금 살 수 있는 것"을 먼저 만나고, 아래로 갈수록 다음 목표가 된다.
@@ -24,18 +27,44 @@ export type ShopHandlers = {
   onClose(): void;
 };
 
-function itemRow(item: ShopItem, gold: number, owned: boolean): string {
+/**
+ * 3D 모델 썸네일 — `public/thumbs/<id>.webp` (tools/thumbs.html 로 굽는다).
+ *
+ * 이모지 위에 겹쳐 그린다. 파일을 못 받으면 이미지를 지워 **이모지가 그대로 남는다** —
+ * 썸네일 때문에 상점이 빈칸이 되면 안 된다.
+ */
+function thumb(item: ShopItem): string {
+  return `<img class="shop-thumb" src="thumbs/${item.id}.webp" alt="" loading="lazy" decoding="async" onerror="this.remove()" />`;
+}
+
+/** 한 줄 설명 밑에 붙는 효과 표시 — 무기는 공격력, 아이템은 가진 개수 */
+function effectTag(item: ShopItem, inventory: Inventory): string {
+  if (item.category === 'weapon') {
+    const perk = perkOf(item);
+    return `<em class="shop-tag">⚔️ 공격 +${weaponDamage(item.price)}</em>${
+      perk ? `<em class="shop-perk">✨ ${escapeHtml(perk.name)} · ${escapeHtml(perk.hint)}</em>` : ''
+    }`;
+  }
+  if (item.category === 'item') {
+    const n = countOf(inventory, item.id as ConsumableId);
+    return `<em class="shop-tag">가진 개수 ${n}/${CARRY_MAX}</em>`;
+  }
+  return '';
+}
+
+function itemRow(item: ShopItem, gold: number, owned: boolean, inventory: Inventory): string {
   const can = affordable(item, gold);
   const left = item.price - gold;
-  return `<li class="shop-item" data-can="${can}" data-owned="${owned}">
-      <span class="shop-emoji" aria-hidden="true">${item.emoji}</span>
+  return `<li class="shop-item" data-can="${can}" data-owned="${owned}" data-cat="${item.category}">
+      <span class="shop-emoji" aria-hidden="true"><i class="shop-fallback">${item.emoji}</i>${thumb(item)}</span>
       <span class="shop-text">
         <b>${escapeHtml(item.name)}</b>
         <small>${escapeHtml(item.hint)}</small>
+        ${effectTag(item, inventory)}
       </span>
       ${
         owned
-          ? `<span class="shop-buy"><em class="shop-have">가지고 있어요</em></span>`
+          ? `<span class="shop-buy"><em class="shop-have">${item.category === 'item' ? '가득 찼어요' : '가지고 있어요'}</em></span>`
           : `<span class="shop-buy">
                <span class="shop-price">🪙 ${item.price}</span>
                ${
@@ -48,14 +77,28 @@ function itemRow(item: ShopItem, gold: number, owned: boolean): string {
     </li>`;
 }
 
-function categoryBlock(category: ShopCategory, gold: number, owned: readonly string[]): string {
+/**
+ * 소비 아이템은 여러 개 산다 — **3개를 다 채웠을 때만** "가지고 있어요" 로 닫는다.
+ * 무기·캐릭터는 한 번 사면 끝이다.
+ */
+function isHeld(item: ShopItem, owned: readonly string[], inventory: Inventory): boolean {
+  if (item.category === 'item') return countOf(inventory, item.id as ConsumableId) >= CARRY_MAX;
+  return owned.includes(item.id);
+}
+
+function categoryBlock(
+  category: ShopCategory,
+  gold: number,
+  owned: readonly string[],
+  inventory: Inventory,
+): string {
   const meta = SHOP_CATEGORIES.find((c) => c.id === category)!;
   const items = itemsOf(category);
   return `<section class="block">
       <h2>${escapeHtml(meta.label)} <span class="soon">${items.length}종</span></h2>
       <p class="hint-text">${escapeHtml(meta.hint)}</p>
       <ul class="shop-list">
-        ${items.map((i) => itemRow(i, gold, owned.includes(i.id))).join('')}
+        ${items.map((i) => itemRow(i, gold, isHeld(i, owned, inventory), inventory)).join('')}
       </ul>
     </section>`;
 }
@@ -76,7 +119,7 @@ export class ShopScreen {
     });
   }
 
-  show(gold: number, owned: readonly string[], handlers: ShopHandlers) {
+  show(gold: number, owned: readonly string[], inventory: Inventory, handlers: ShopHandlers) {
     this.handlers = handlers;
     this.el.innerHTML = `
       <div class="screen-card">
@@ -91,11 +134,13 @@ export class ShopScreen {
         </div>
 
         <p class="shop-notice">
-          무기를 사면 <b>로비에서 골라 들 수 있어요.</b> 무기를 들면 보스를 맞힐 때 공격해요.
+          무기를 사면 <b>로비에서 골라 들 수 있어요.</b> 무기를 들면 보스에게 주는 피해가 커지고,
+          무기 종류마다 <b>특기</b>가 있어요.
           캐릭터를 사면 <b>바로 고를 수 있어요.</b>
+          아이템은 <b>판 안에서 오른쪽 버튼으로 써요.</b> 한 판에 쓰는 횟수는 정해져 있어요.
         </p>
 
-        ${SHOP_CATEGORIES.map((c) => categoryBlock(c.id, gold, owned)).join('')}
+        ${SHOP_CATEGORIES.map((c) => categoryBlock(c.id, gold, owned, inventory)).join('')}
 
         <button type="button" class="primary" data-action="close">돌아가기</button>
       </div>`;

@@ -6,7 +6,9 @@ import type { Quiz } from '../quiz/types';
 import type { SessionSummary } from '../progress/stats';
 import { FAST_ANSWER_MS, HARD_DIFFICULTY } from '../progress/player';
 import { COMBO_TIERS, RULES, type StepStyle } from './balance';
-import { hitBoss, missBoss, spawnBoss, type BossHit, type BossState } from './boss';
+import { hitBoss, missBoss, openBoss, spawnBoss, type BossHit, type BossOpening, type BossState } from './boss';
+import { BARE_HANDS, type Armament } from './weaponPerk';
+import { bossFor, type BossKind, type BossPick } from './bossRoster';
 import {
   SPEED_LIMIT_SEC,
   activate,
@@ -75,6 +77,8 @@ export type AnswerResult = {
   multiplier: number;
   /** 보스전이었다면 타격 결과 */
   bossHit: BossHit | null;
+  /** 오답에 보스가 회복한 HP (흡혈귀만, 그 밖에는 0) */
+  bossHeal: number;
 };
 
 export type SessionStats = {
@@ -107,6 +111,15 @@ export class Session {
   pendingEvent: EventDef | null = null;
   /** 판이 끝난 이유. 기본값은 영어 오답(REVIVE 실패) */
   failReason: FailReason = 'quiz';
+  /** 지금 싸우는 보스의 종·등급 — 연출이 같은 답을 쓰도록 여기서 정한다 */
+  bossPick: BossPick | null = null;
+  /**
+   * 장착한 무기 — 등급 추가 피해(+1~+5)와 계열(특기). 판을 시작할 때 main 이 넣는다.
+   * Session 은 상점을 모른다 — 숫자와 계열만 받는다.
+   */
+  weapon: Armament = BARE_HANDS;
+  /** 방금 등장한 보스에 무기 특기가 바꾼 것(창 선제 피해·지팡이 봉인) — UI 가 알린 뒤 비운다 */
+  opening: BossOpening | null = null;
 
   private readonly bank: WordBank;
   private readonly engine: LearningEngine;
@@ -170,7 +183,13 @@ export class Session {
    * 성립하지 않는다 (events.rollBossEvent 의 주석 참고).
    */
   startBoss(floor: number): BossState {
-    this.boss = spawnBoss(floor);
+    this.bossPick = bossFor(floor);
+    this.boss = spawnBoss(floor, {
+      giant: this.bossPick.giant,
+      regen: this.bossPick.kind.trait === 'regen',
+    });
+    // 창은 등장하자마자 찌르고, 지팡이는 흡혈귀의 회복을 막는다 (game/weaponPerk.ts)
+    this.opening = openBoss(this.boss, this.weapon.family);
     this.event = null;
 
     const decision = rollBossEvent({ floor, rng: this.rng, lastId: this.lastEventId });
@@ -182,6 +201,22 @@ export class Session {
       this.lastEventId = decision.event.id;
     }
     return this.boss;
+  }
+
+  /**
+   * 번들이 늦어 **다른 종이 대신 나왔다** — 규칙을 화면의 종에 맞춘다.
+   *
+   * 고른 종의 특성(흡혈귀 회복)을 그대로 두면 화면의 오크가 오답마다 회복하고, 아이는
+   * "오크는 회복한다" 를 잘못 배운다. 특성과 지팡이 봉인 판정을 대신 나온 종 기준으로 다시 한다.
+   * 대보스 여부(크기·HP·보상)는 층이 정한 것이라 그대로 둔다.
+   */
+  substituteBoss(kind: BossKind): void {
+    if (!this.boss || !this.bossPick || this.bossPick.kind.id === kind.id) return;
+    this.bossPick = { ...this.bossPick, kind };
+    const sealable = kind.trait === 'regen';
+    const staff = this.weapon.family === 'staff';
+    this.boss.regen = sealable && !staff;
+    if (this.opening) this.opening = { ...this.opening, sealed: sealable && staff };
   }
 
   /** Escape 이벤트 등에서 콤보만 잃는다 — HP 는 영어 오답 전용이다 */
@@ -277,9 +312,14 @@ export class Session {
       /* 보스전: 계단이 열리지 않는다. 정답이 보스 HP 를 깎고, 처치하면 계단이 다시 열린다.
          같은 문제를 푸는데 의미가 달라지는 구간이다 (PRD 18장). */
       if (this.boss) {
-        const hit = hitBoss(this.boss, quiz.difficulty, this.combo);
+        const hit = hitBoss(
+          this.boss,
+          { difficulty: quiz.difficulty, combo: this.combo, answerMs },
+          this.weapon,
+        );
         if (hit.defeated) {
           this.boss = null;
+          this.bossPick = null;
           this.phase = 'climbing';
         } else {
           this.phase = 'quiz';
@@ -295,6 +335,7 @@ export class Session {
           hp: this.hp,
           phase: this.phase,
           bossHit: hit,
+          bossHeal: 0,
         };
       }
 
@@ -312,6 +353,7 @@ export class Session {
         hp: this.hp,
         phase: this.phase,
         bossHit: null,
+        bossHeal: 0,
       };
     }
 
@@ -332,7 +374,7 @@ export class Session {
       // HP 가 남았으면 phase 는 'quiz' 그대로 — UI 가 피드백을 보여 준 뒤 next() 를 부른다
     }
 
-    if (this.boss) missBoss(this.boss);
+    const bossHeal = this.boss ? missBoss(this.boss) : 0;
 
     return {
       ...base,
@@ -344,6 +386,7 @@ export class Session {
       hp: this.hp,
       phase: this.phase,
       bossHit: null,
+      bossHeal,
     };
   }
 

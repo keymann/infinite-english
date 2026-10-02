@@ -27,12 +27,20 @@ export type ClimbEvents = {
    *               원인이 다르므로 종료 화면 문구가 갈린다
    */
   onWrongDir?(onFake: boolean): void;
+  /**
+   * 방향을 틀리기 **직전에** 묻는다 — 막을 수단(방패)이 있으면 true 를 돌려준다.
+   *
+   * true 면 판이 끝나지 않는다. 제자리에서 움찔하고 같은 칸에서 다시 고른다.
+   * 막은 쪽(main)이 연출과 아이템 차감을 맡는다.
+   */
+  absorbWrongDir?(onFake: boolean): boolean;
 };
 
 /**
  * 계단 오르기 상태머신.
  *
- * 방향 입력 → 맞으면 한 칸 점프, **틀리면 판이 끝난다.**
+ * 방향 입력 → 맞으면 한 칸 점프, **틀리면 판이 끝난다.** 방패가 있으면 한 번 막는다
+ * (`absorbWrongDir`).
  *
  * 이전에는 틀려도 휘청이기만 했다 (PRD 3.2절: "조작 실수로 판이 끝나면 영어를 틀려서
  * 실패했다는 인과가 무너진다"). 그 판단을 **뒤집었다** — 원작의 긴장이 방향 선택에서
@@ -115,9 +123,35 @@ export class Climb {
     // 'stumble'·'dead' 상태의 입력은 버린다 — 이미 판이 끝났다
   }
 
+  /**
+   * 버퍼에 쌓인 다음 입력을 버린다.
+   *
+   * 착지 콜백(`onLand`)이 보스를 예약해 계단을 잠그면 부른다. 버리지 않으면 착지 직후
+   * 버퍼 입력이 그대로 처리돼, 틀린 방향이면 방패가 막지 못한 채 판이 끝나고
+   * 맞는 방향이면 보스 층을 지나쳐 한 칸 더 오른다.
+   */
+  clearBuffer() {
+    this.buffered = null;
+  }
+
   private resolve(dir: Dir) {
     if (dir === this.nextDir) this.startJump();
+    else if (this.events.absorbWrongDir?.(this.stairs.hasFake(this.floor + 1))) this.flinch();
     else this.fallOff();
+  }
+
+  /**
+   * 방패가 실수를 막았다 — 움찔하고 **같은 칸에 그대로 선다.**
+   *
+   * 상태는 'stand' 로 둔다. 입력 버퍼를 비워 막힌 방향이 곧바로 다시 들어가지 않게 한다.
+   */
+  private flinch() {
+    this.buffered = null;
+    this.totalMisses++;
+    // 피격 리액션을 빌린다. 밀려나지 않게 방향을 0 으로 둔다 — 끝나면 idle 로 돌아온다
+    this.hurtLeft = CLIMB.hurtSec;
+    this.knock.set(0, 0, 0);
+    this.actor.playRole('hurt', { loop: false, fade: 0.05, restart: true, timeScale: 1.6 });
   }
 
   private startJump() {

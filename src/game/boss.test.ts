@@ -51,7 +51,7 @@ describe('보스전', () => {
     let asked = 0;
     // 평범한 난이도·콤보 없이 계속 맞히는 최악의 경우
     while (boss.hp > 0 && asked < 100) {
-      hitBoss(boss, 0.2, 0);
+      hitBoss(boss, { difficulty: 0.2, combo: 0, answerMs: 9999 });
       asked++;
     }
     expect(asked).toBe(6);
@@ -79,15 +79,15 @@ describe('보스전', () => {
   it('어려운 단어가 더 큰 피해를 준다 (PRD 18장)', () => {
     const easy = spawnBoss(20);
     const hard = spawnBoss(20);
-    hitBoss(easy, 0.1, 0);
-    hitBoss(hard, 0.8, 0);
+    hitBoss(easy, { difficulty: 0.1, combo: 0, answerMs: 9999 });
+    hitBoss(hard, { difficulty: 0.8, combo: 0, answerMs: 9999 });
     expect(hard.hp).toBeLessThan(easy.hp);
   });
 
   it('콤보가 피해를 늘리지만 상한이 있다', () => {
     const damageAt = (combo: number) => {
       const boss = spawnBoss(20);
-      return hitBoss(boss, 0.2, combo).damage;
+      return hitBoss(boss, { difficulty: 0.2, combo: combo, answerMs: 9999 }).damage;
     };
     expect(damageAt(10)).toBeGreaterThan(damageAt(0));
     // 콤보 20 에서 상한(+10)에 닿는다 — 콤보 100 이 무한히 세지지 않는다
@@ -99,7 +99,7 @@ describe('보스전', () => {
     const boss = spawnBoss(20);
     let defeats = 0;
     for (let i = 0; i < 30; i++) {
-      const hit = hitBoss(boss, 0.9, 20);
+      const hit = hitBoss(boss, { difficulty: 0.9, combo: 20, answerMs: 9999 });
       if (hit.defeated) defeats++;
     }
     expect(boss.hp).toBe(0);
@@ -168,7 +168,7 @@ describe('보스전', () => {
   it('HP 비율은 0~1 이다', () => {
     const boss = spawnBoss(20);
     expect(hpRatio(boss)).toBe(1);
-    hitBoss(boss, 0.2, 0);
+    hitBoss(boss, { difficulty: 0.2, combo: 0, answerMs: 9999 });
     expect(hpRatio(boss)).toBeLessThan(1);
     expect(hpRatio(boss)).toBeGreaterThan(0);
   });

@@ -27,8 +27,8 @@ import {
  */
 
 describe('카탈로그', () => {
-  it('카테고리는 무기·캐릭터 둘이다', () => {
-    expect(SHOP_CATEGORIES.map((c) => c.id)).toEqual(['weapon', 'character']);
+  it('카테고리는 무기·캐릭터·아이템 셋이다', () => {
+    expect(SHOP_CATEGORIES.map((c) => c.id)).toEqual(['weapon', 'character', 'item']);
   });
 
   it('무기 22종 · 캐릭터 6종', () => {
@@ -60,8 +60,10 @@ describe('카탈로그', () => {
     for (const [id, price] of Object.entries(expected)) {
       expect(shopItem(id)?.price, id).toBe(price);
     }
-    // 표에 없는 항목이 몰래 들어 있지 않다
-    expect(SHOP_ITEMS.map((i) => i.id).sort()).toEqual(Object.keys(expected).sort());
+    // 표에 없는 무기·캐릭터가 몰래 들어 있지 않다 (소비 아이템은 progress/items.ts 가 가진다)
+    expect(
+      SHOP_ITEMS.filter((i) => i.category !== 'item').map((i) => i.id).sort(),
+    ).toEqual(Object.keys(expected).sort());
   });
 
   /** 화살은 활에 종속된다 — 따로 사는 것은 게임에서 의미가 없다 */
@@ -71,8 +73,8 @@ describe('카탈로그', () => {
     expect(shopItem('bow_B')?.extra).toBe('arrow_B');
   });
 
-  it('방패는 없다 — 공격 모션에 쓸 수 없다', () => {
-    expect(SHOP_ITEMS.filter((i) => i.id.startsWith('shield'))).toEqual([]);
+  it('무기 중에 방패는 없다 — 공격 모션에 쓸 수 없다 (방패는 소비 아이템이다)', () => {
+    expect(itemsOf('weapon').filter((i) => i.asset.startsWith('shield'))).toEqual([]);
   });
 
   it('무기는 모델 노드를, 캐릭터는 번들 이름을 가리킨다', () => {

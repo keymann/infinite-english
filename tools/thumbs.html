@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <!-- 에셋 로더가 `models/*.glb` 를 상대 경로로 받는다 — 루트 기준으로 맞춘다 -->
+    <base href="/" />
+    <title>상점 썸네일 굽기</title>
+    <style>
+      body { margin: 16px; background: #10151f; color: #eaf0ff; font-family: system-ui, sans-serif; }
+      #grid { display: flex; flex-wrap: wrap; gap: 8px; }
+      figure { margin: 0; width: 96px; text-align: center; font-size: 11px; }
+      figure img { width: 96px; height: 96px; background: #1c2536; border-radius: 12px; }
+    </style>
+  </head>
+  <body>
+    <h1>상점 썸네일 굽기</h1>
+    <p id="status">준비 중…</p>
+    <div id="grid"></div>
+    <script type="module" src="/tools/thumbs.ts"></script>
+  </body>
+</html>
