@@ -384,7 +384,11 @@ async function boot() {
   const overlays = new Overlays(app);
 
   /* ── 연출 지연 관리 ──
-     Session 은 시간을 모른다. 피드백을 몇 초 보여 줄지는 UI 의 결정이다. */
+     Session 은 시간을 모른다. 피드백을 몇 초 보여 줄지는 UI 의 결정이다.
+
+     `after` 는 **상태 전이 전용**이다 (다음 문제·등반 재개·보스 등장·종료).
+     단일 슬롯이라 새로 예약하면 앞의 예약이 취소되고, 그래서 전이가 겹치지 않는다.
+     칭찬·배너 같은 문구를 여기에 넣으면 바로 뒤의 전이 예약에 덮여 사라진다 — 문구는 `later`. */
   let timer = 0;
   const after = (sec: number, fn: () => void) => {
     clearTimeout(timer);
@@ -701,7 +705,7 @@ async function boot() {
       if (opened.length > 0) {
         runUnlocked = [...runUnlocked, ...opened.map((o) => o.name)];
         // 해금 알림은 결과 화면에서 다시 보여 준다. 여기서는 짧게만
-        after(1.0, () => overlays.praise(`🎉 ${opened[0].name} 해금!`, 'lightning'));
+        later(1.0, () => overlays.praise(`🎉 ${opened[0].name} 해금!`, 'lightning'));
       }
     }
   };
@@ -771,8 +775,8 @@ async function boot() {
       const parts = [`연속 학습 ${streak.state.days}일`];
       if (streak.shieldUsed) parts.push('🛡 방패로 지켰어요');
       if (streak.shieldEarned) parts.push('🛡 방패 획득');
-      after(0.6, () => overlays.praise(parts.join(' · '), 'gold'));
-      if (streak.milestone) after(1.4, () => overlays.banner(`${streak.milestone}일 연속!`, 'lightning'));
+      later(0.6, () => overlays.praise(parts.join(' · '), 'gold'));
+      if (streak.milestone) later(1.4, () => overlays.banner(`${streak.milestone}일 연속!`, 'lightning'));
     }
     saveSoon(saved);
   };
@@ -841,7 +845,7 @@ async function boot() {
         goldForAnswer(result.isRetry) * result.multiplier,
       );
       if (result.multiplier > 1) {
-        after(0.05, () => overlays.praise(`보상 ×${result.multiplier}!`, 'gold'));
+        later(0.05, () => overlays.praise(`보상 ×${result.multiplier}!`, 'gold'));
       }
       stopTimer();
 
@@ -1034,7 +1038,7 @@ async function boot() {
     session.pendingEvent = null;
 
     overlays.banner(def.label, def.id === 'treasure' ? 'gold' : 'lightning');
-    after(0.05, () => overlays.praise(def.hint, 'gold'));
+    later(0.05, () => overlays.praise(def.hint, 'gold'));
     sound.tierUp(def.id === 'escape' ? 3 : 1);
 
     // 보물상자는 즉시 골드
