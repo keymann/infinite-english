@@ -9,6 +9,7 @@ import { startLoop } from './core/loop';
 import { createRng, randomSeed } from './core/rng';
 import { CHECKPOINT_EVERY, CLIMB, PLAYER, RULES, STAIR_GAUGE, gaugeGainFor } from './game/balance';
 import { BOSS_EVERY, bossReward, canSpawnBoss, hpRatio, nextBossFloor } from './game/boss';
+import { BOSS_KINDS, bossBundles, bossFor, traitHint, type BossKind, type BossPick } from './game/bossRoster';
 import { Climb } from './game/climb';
 import { SPEED_LIMIT_SEC, instantGold } from './game/events';
 import { Session } from './game/session';
@@ -247,14 +248,11 @@ async function boot() {
   };
 
   let bossActor: BossActor | null = null;
+  /** 보스 손에 든 무기 — Kenney 리그는 첫 프레임 뒤에 세워 든 자세로 맞춘다 */
+  let bossGearAlign: THREE.Object3D[] = [];
 
-  /** 보스는 층에 따라 다른 종을 낸다 — 같은 뼈 기사만 세 번 나오면 세 번째는 배경이 된다 */
-  const BOSS_KINDS = [
-    { bundle: 'boss-warrior', node: 'Skeleton_Warrior', name: '뼈 기사' },
-    { bundle: 'boss-mage', node: 'Skeleton_Mage', name: '뼈 마법사' },
-    { bundle: 'boss-rogue', node: 'Skeleton_Rogue', name: '뼈 도적' },
-  ] as const;
-  let bossKindIndex = 0;
+  /** 첫 보스(10층)와 그 다음 보스 — 먼저 받는다. 나머지 로스터는 맨 뒤에 받는다 */
+  const earlyBossBundles = [...new Set([bossFor(10).kind.bundle, bossFor(20).kind.bundle])];
 
   void assets
     .load(['world-castle', petOf(saved.collection, saved.player.level).bundle])
@@ -263,7 +261,7 @@ async function boot() {
       buildPet();
       /* 보스는 더 뒤에 받는다 — 20층에 닿기 전에만 오면 된다.
          캐릭터 glb 에 애니메이션이 없으므로 클립 전용 bundle 과 짝으로 로드한다 (스파이크 A) */
-      return assets.load(['boss-anims', 'char-female-a', ...BOSS_KINDS.map((k) => k.bundle)]);
+      return assets.load(['boss-anims', 'boss-gear', 'char-female-a', ...earlyBossBundles]);
     })
     .then(() => {
       /* 응원 NPC — 다음 체크포인트 옆 섬에서 기다린다. 캐릭터 하나를 재사용한다
@@ -281,9 +279,13 @@ async function boot() {
       return undefined;
     })
     .then(() => {
-      buildBoss(0);
+      buildBoss(bossFor(10));
       // 눈·하늘 월드와 그림 문제용 에셋은 가장 마지막에 받는다 (35층·그림 문제 전까지 여유가 있다)
       return assets.load(['world-snow', 'world-sky', 'food']);
+    })
+    .then(() => {
+      /* 나머지 보스 로스터 — 30층 이후에 나온다. 아직 안 왔으면 받아 둔 보스로 대신한다 */
+      void assets.load(bossBundles()).catch((err: unknown) => console.warn('보스 로스터 로드 실패', err));
     })
     .then(() => {
       registerSet('snow');
@@ -306,17 +308,39 @@ async function boot() {
   /** 체크포인트에서 응원하는 NPC */
   let npc: Npc | null = null;
 
-  /** 보스 3종 중 하나를 씬에 올린다 */
-  const buildBoss = (index: number) => {
-    const kind = BOSS_KINDS[index % BOSS_KINDS.length];
+  /**
+   * 그 보스를 씬에 올린다.
+   *
+   * 번들이 아직 안 왔으면 **받아 둔 보스로 대신한다** — 보스 때문에 게임이 멈추면 안 된다.
+   * 해골(rigMedium)은 클립이 `boss-anims` 에 있고, Kenney 몬스터는 자기 glb 에 있다.
+   */
+  const buildBoss = (pick: BossPick): BossKind | null => {
+    const kind: BossKind | undefined = assets.ready(pick.kind.bundle)
+      ? pick.kind
+      : Object.values(BOSS_KINDS).find(
+          (k: BossKind) => assets.ready(k.bundle) && (k.rig === 'kenney' || assets.ready('boss-anims')),
+        );
+    if (!kind || (kind.rig === 'rigMedium' && !assets.ready('boss-anims'))) return null;
     if (bossActor) scene.remove(bossActor.root);
     const instance = new Actor(
       assets.instance(kind.bundle, kind.node),
-      assets.clips('boss-anims'),
-      PLAYER.height * 1.35,
+      assets.clips(kind.rig === 'rigMedium' ? 'boss-anims' : kind.bundle),
+      // 대보스는 1.3배 — 크기만으로 "이번엔 다르다" 가 읽힌다
+      PLAYER.height * 1.35 * (pick.giant ? 1.3 : 1),
     );
+    bossGearAlign = [];
+    if (kind.gear && assets.ready('boss-gear')) {
+      for (const hand of ['right', 'left'] as const) {
+        const node = kind.gear[hand];
+        if (!node) continue;
+        const held = attachWeapon(instance.root, assets.instance('boss-gear', node), kind.rig, null, hand);
+        /* 해골 무기는 손 슬롯 기준으로 만들어져 그대로 쥔다. Kenney 몬스터는 손이 없어
+           팔 끝에 붙이므로 플레이어 무기처럼 세워 든 자세로 맞춘다 */
+        if (held && kind.rig === 'kenney') bossGearAlign.push(held);
+      }
+    }
     scene.add(instance.root);
-    bossActor = new BossActor(instance);
+    bossActor = new BossActor(instance, kind.rig);
     return kind;
   };
 
@@ -500,15 +524,19 @@ async function boot() {
        계단을 오를 수 있다는 뜻이 되어 거짓 안내가 된다 (브라우저 검증에서 드러났다) */
     panel.showPrompt('보스를 넘어야 한다!', 'stumble');
     const boss = session.startBoss(climb.floor);
-    // 보스마다 다른 종을 낸다 — 같은 뼈 기사만 세 번 나오면 세 번째는 배경이 된다
-    const kind = bossActor ? buildBoss(bossKindIndex++) : null;
-    bossBar.showBoss(`BOSS ${boss.index} · ${kind?.name ?? '보스'}`, 1);
+    /* 종·등급은 층이 정한다(game/bossRoster.ts) — Session 과 같은 답을 쓴다 */
+    const pick = session.bossPick ?? bossFor(climb.floor);
+    const kind = buildBoss(pick);
+    const title = `${boss.giant ? '대보스' : 'BOSS'} ${boss.index} · ${kind?.name ?? '보스'}`;
+    bossBar.showBoss(title, 1);
+    const hint = traitHint(pick.kind.trait);
+    if (hint) after(0.5, () => overlays.praise(`${pick.kind.name}: ${hint}`, 'fire'));
     /* **계단 표면에 세운다.** 플레이어 좌표에 오프셋을 더하던 방식은 계단이 올라가면서
        안쪽으로 뻗는 것을 무시해 보스를 계단 아래에 박아 넣었다 (world/bossActor.ts) */
     bossActor?.spawn(stairs.surfaceAt(climb.floor + BOSS_STAND_AHEAD), actor.root.position);
-    overlays.banner('BOSS!', 'fire');
+    overlays.banner(boss.giant ? 'GIANT BOSS!' : 'BOSS!', 'fire');
     sound.tierUp(3);
-    camera.shake(PLAYER.landShake * 3);
+    camera.shake(PLAYER.landShake * (boss.giant ? 4.5 : 3));
     stopTimer();
     // 보스전 문제는 **자주 틀리는 단어**로 낸다 (PRD 19장) — engine 이 boss 모드로 고른다
     after(0.9, () => showQuiz());
@@ -634,7 +662,6 @@ async function boot() {
     gimmicks.refresh(climb.floor, stairs);
     npc?.reset(stairs);
     quizObject.hide();
-    bossKindIndex = 0;
     theme = themeForFloor(climb.floor);
     mood.applyTheme(theme, true);
     backdrop.applyTheme(theme);
@@ -686,6 +713,8 @@ async function boot() {
 
     // answer() 뒤에는 다음 문제로 바뀔 수 있으므로 지금 잡아 둔다
     const wasRetry = session.quiz?.isRetry ?? false;
+    // 처치하면 session.boss 가 비워진다 — 보상 계산에 쓸 등급을 먼저 잡아 둔다
+    const fighting = session.boss ? { index: session.boss.index, giant: session.boss.giant } : null;
     const result = session.answer(index);
     panel.feedback(index, result.correctIndex, result.correct);
     quizObject.hide();
@@ -732,7 +761,7 @@ async function boot() {
           bossBar.setBossHp(0);
           bossBar.hideBoss();
           bossActor?.die();
-          const reward = bossReward({ index: Math.max(1, Math.floor(climb.floor / BOSS_EVERY)), hp: 0, maxHp: 1, asked: 0 });
+          const reward = bossReward(fighting ?? { index: 1, giant: false });
           award(reward.exp, reward.gold);
           overlays.banner('BOSS DEFEATED!', 'lightning');
           sound.tierUp(3);
@@ -767,6 +796,11 @@ async function boot() {
        화면에서 보여야 한다. FREE 팩에 공격 클립이 없어 Throw + 돌진으로 만들었다.
        플레이어 피격은 여기서 바로 하지 않는다 — 돌진이 닿는 프레임에 맞춘다(update 루프) */
     if (session.boss) bossActor?.attack();
+    // 흡혈귀 — 틀리면 보스가 회복한다. HP 바가 다시 차는 것을 보여 줘야 이유가 읽힌다
+    if (result.bossHeal > 0 && session.boss) {
+      bossBar.setBossHp(hpRatio(session.boss));
+      overlays.praise(`🩸 보스 체력 +${result.bossHeal}`, 'fire');
+    }
     // 보스전에서는 흔들림도 타격 순간으로 미룬다. 두 번 흔들면 소음이 된다
     if (!session.boss) camera.shake(PLAYER.landShake);
     snapshotRun();
@@ -806,7 +840,11 @@ async function boot() {
   /** 다음 칸 방향 안내. 남은 칸 수는 없다 — 계단은 보스 층까지 계속 열려 있다 */
   const promptText = () => {
     const next = nextBossFloor(climb.floor);
-    const to = next > climb.floor ? ` · 다음 보스 ${next}층` : '';
+    /* 다음 보스의 **이름까지** 보여 준다. "20층에 좀비" 처럼 구체적인 목표가 있으면
+       오르는 이유가 생긴다. 대보스는 따로 표시해 기대를 만든다 */
+    const upcoming = bossFor(next);
+    const label = `${upcoming.giant ? '대보스 ' : ''}${upcoming.kind.name}`;
+    const to = next > climb.floor ? ` · ${next - climb.floor}층 뒤 ${label}` : '';
     return input.options.autoDir
       ? `아무 곳이나 탭${to}`
       : climb.nextDir < 0
@@ -1078,6 +1116,11 @@ async function boot() {
     backdrop.update(dt, actor.root.position, bandProgress(climb.floor));
     pet?.update(dt, actor.root.position);
     bossActor?.update(dt);
+    // 보스 무기도 같은 이유로 첫 프레임 뒤에 한 번 맞춘다
+    if (bossGearAlign.length > 0 && bossActor?.visible) {
+      for (const held of bossGearAlign) alignHeld(held);
+      bossGearAlign = [];
+    }
 
     /* 보스의 돌진이 가장 깊이 들어간 프레임 — **여기서 플레이어가 맞는다.**
        setTimeout 으로 맞추지 않는 이유: 연출 지연은 단일 슬롯(after)을 공유하므로
@@ -1381,6 +1424,24 @@ async function boot() {
       /** 지금 재생 중인 클립 — 애니메이션이 죽는 사고가 두 번 있었다(스파이크 A 기록) */
       get clips() {
         return { player: actor.playing, boss: bossClip() };
+      },
+      /**
+       * 지금 보스 — 로스터가 고른 종과 실제로 올라간 종이 같은지, 무기를 들었는지.
+       * 번들이 늦으면 다른 종으로 대신하므로 `pick` 과 `shown` 이 다를 수 있다.
+       */
+      get boss() {
+        let gear = 0;
+        bossActor?.root.traverse((o) => {
+          if (o.name === 'weapon-holder') gear++;
+        });
+        return {
+          pick: session?.bossPick ? { id: session.bossPick.kind.id, giant: session.bossPick.giant } : null,
+          visible: bossActor?.visible ?? false,
+          clip: bossClip(),
+          hp: session?.boss ? { hp: session.boss.hp, max: session.boss.maxHp } : null,
+          gear,
+          height: bossActor ? +new THREE_NS.Box3().setFromObject(bossActor.root).getSize(new THREE_NS.Vector3()).y.toFixed(2) : null,
+        };
       },
       /**
        * 디버그: 프롭이 **실제로 화면에 보이는지** 센다.

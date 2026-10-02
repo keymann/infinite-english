@@ -76,6 +76,16 @@ const DAMAGE_BASE = 10;
 const DAMAGE_HARD = 20;
 /** 콤보 보너스 상한 */
 const DAMAGE_COMBO_MAX = 10;
+/** 대보스 HP 배수 — 일반 보스의 1.5배 */
+const GIANT_HP = 1.5;
+/**
+ * 흡혈귀(`regen`)가 오답 한 번에 회복하는 양 (최대 HP 대비).
+ *
+ * 정답 한 번(10)보다 작아야 한다. 같거나 크면 틀린 만큼 다시 맞혀도 제자리라 아이가 지친다.
+ * 그래서 `REGEN_MAX` 로 상한을 둔다 — 비율만 쓰면 대보스(HP 180)에서 11 이 된다.
+ */
+const REGEN_RATIO = 0.06;
+const REGEN_MAX = DAMAGE_BASE - 2;
 
 export type BossState = {
   /** 몇 번째 보스인지 (1부터) */
@@ -84,16 +94,32 @@ export type BossState = {
   maxHp: number;
   /** 보스전에서 낸 문제 수 */
   asked: number;
+  /** 대보스인지 (50층마다 — game/bossRoster.ts) */
+  giant: boolean;
+  /** 오답이면 HP 를 회복하는지 (흡혈귀) */
+  regen: boolean;
+};
+
+export type SpawnOptions = {
+  giant?: boolean;
+  regen?: boolean;
 };
 
 export function isBossFloor(floor: number): boolean {
   return floor > 0 && floor % BOSS_EVERY === 0;
 }
 
-export function spawnBoss(floor: number): BossState {
+/**
+ * 보스를 세운다. 종·등급은 `bossRoster.bossFor` 가 정하고, 여기서는 수치만 만든다.
+ *
+ * 대보스는 상한을 넘어 1.5배까지 두꺼워진다. 50층마다 한 번이라 판 전체를 늘리지 않는다.
+ */
+export function spawnBoss(floor: number, options: SpawnOptions = {}): BossState {
   const index = Math.max(1, Math.floor(floor / BOSS_EVERY));
-  const maxHp = Math.min(BOSS_HP_MAX, BOSS_HP + (index - 1) * BOSS_HP_STEP);
-  return { index, hp: maxHp, maxHp, asked: 0 };
+  const base = Math.min(BOSS_HP_MAX, BOSS_HP + (index - 1) * BOSS_HP_STEP);
+  const giant = options.giant ?? false;
+  const maxHp = giant ? Math.round(base * GIANT_HP) : base;
+  return { index, hp: maxHp, maxHp, asked: 0, giant, regen: options.regen ?? false };
 }
 
 /** 이 보스를 잡는 데 필요한 최소 정답 수 — 밸런스 확인·테스트용 */
@@ -110,27 +136,47 @@ export type BossHit = {
   critical: boolean;
 };
 
-/** 정답 → 보스 HP 감소 */
-export function hitBoss(boss: BossState, difficulty: number, combo: number): BossHit {
+/**
+ * 정답 → 보스 HP 감소.
+ *
+ * @param weaponBonus 장착한 무기의 추가 피해 (progress/shop.ts 의 `damage`, 0~5)
+ */
+export function hitBoss(
+  boss: BossState,
+  difficulty: number,
+  combo: number,
+  weaponBonus = 0,
+): BossHit {
   const critical = difficulty >= 0.5;
   const damage =
-    (critical ? DAMAGE_HARD : DAMAGE_BASE) + Math.min(DAMAGE_COMBO_MAX, Math.floor(combo / 2));
+    (critical ? DAMAGE_HARD : DAMAGE_BASE) +
+    Math.min(DAMAGE_COMBO_MAX, Math.floor(combo / 2)) +
+    Math.max(0, weaponBonus);
   const hp = Math.max(0, boss.hp - damage);
   boss.hp = hp;
   boss.asked++;
   return { damage, hp, defeated: hp === 0, critical };
 }
 
-/** 오답 → 보스전에서도 문제 수는 센다 (통계·연출용) */
-export function missBoss(boss: BossState) {
+/**
+ * 오답 → 보스전에서도 문제 수는 센다 (통계·연출용).
+ *
+ * @returns 보스가 회복한 HP (흡혈귀가 아니면 0)
+ */
+export function missBoss(boss: BossState): number {
   boss.asked++;
+  if (!boss.regen || boss.hp >= boss.maxHp) return 0;
+  const heal = Math.min(boss.maxHp - boss.hp, REGEN_MAX, Math.ceil(boss.maxHp * REGEN_RATIO));
+  boss.hp += heal;
+  return heal;
 }
 
 export function hpRatio(boss: BossState): number {
   return boss.hp / boss.maxHp;
 }
 
-/** 처치 보상 — 보물상자 (PRD 14장) */
-export function bossReward(boss: BossState): { gold: number; exp: number } {
-  return { gold: 40 + boss.index * 20, exp: 60 + boss.index * 30 };
+/** 처치 보상 — 보물상자 (PRD 14장). 대보스는 두 배다 */
+export function bossReward(boss: Pick<BossState, 'index' | 'giant'>): { gold: number; exp: number } {
+  const k = boss.giant ? 2 : 1;
+  return { gold: (40 + boss.index * 20) * k, exp: (60 + boss.index * 30) * k };
 }

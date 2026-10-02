@@ -7,6 +7,7 @@ import type { SessionSummary } from '../progress/stats';
 import { FAST_ANSWER_MS, HARD_DIFFICULTY } from '../progress/player';
 import { COMBO_TIERS, RULES, type StepStyle } from './balance';
 import { hitBoss, missBoss, spawnBoss, type BossHit, type BossState } from './boss';
+import { bossFor, type BossPick } from './bossRoster';
 import {
   SPEED_LIMIT_SEC,
   activate,
@@ -75,6 +76,8 @@ export type AnswerResult = {
   multiplier: number;
   /** 보스전이었다면 타격 결과 */
   bossHit: BossHit | null;
+  /** 오답에 보스가 회복한 HP (흡혈귀만, 그 밖에는 0) */
+  bossHeal: number;
 };
 
 export type SessionStats = {
@@ -107,6 +110,13 @@ export class Session {
   pendingEvent: EventDef | null = null;
   /** 판이 끝난 이유. 기본값은 영어 오답(REVIVE 실패) */
   failReason: FailReason = 'quiz';
+  /** 지금 싸우는 보스의 종·등급 — 연출이 같은 답을 쓰도록 여기서 정한다 */
+  bossPick: BossPick | null = null;
+  /**
+   * 장착한 무기의 추가 피해 (0~5). 판을 시작할 때 main 이 넣는다.
+   * Session 은 상점을 모른다 — 숫자만 받는다.
+   */
+  weaponBonus = 0;
 
   private readonly bank: WordBank;
   private readonly engine: LearningEngine;
@@ -170,7 +180,11 @@ export class Session {
    * 성립하지 않는다 (events.rollBossEvent 의 주석 참고).
    */
   startBoss(floor: number): BossState {
-    this.boss = spawnBoss(floor);
+    this.bossPick = bossFor(floor);
+    this.boss = spawnBoss(floor, {
+      giant: this.bossPick.giant,
+      regen: this.bossPick.kind.trait === 'regen',
+    });
     this.event = null;
 
     const decision = rollBossEvent({ floor, rng: this.rng, lastId: this.lastEventId });
@@ -277,7 +291,7 @@ export class Session {
       /* 보스전: 계단이 열리지 않는다. 정답이 보스 HP 를 깎고, 처치하면 계단이 다시 열린다.
          같은 문제를 푸는데 의미가 달라지는 구간이다 (PRD 18장). */
       if (this.boss) {
-        const hit = hitBoss(this.boss, quiz.difficulty, this.combo);
+        const hit = hitBoss(this.boss, quiz.difficulty, this.combo, this.weaponBonus);
         if (hit.defeated) {
           this.boss = null;
           this.phase = 'climbing';
@@ -295,6 +309,7 @@ export class Session {
           hp: this.hp,
           phase: this.phase,
           bossHit: hit,
+          bossHeal: 0,
         };
       }
 
@@ -312,6 +327,7 @@ export class Session {
         hp: this.hp,
         phase: this.phase,
         bossHit: null,
+        bossHeal: 0,
       };
     }
 
@@ -332,7 +348,7 @@ export class Session {
       // HP 가 남았으면 phase 는 'quiz' 그대로 — UI 가 피드백을 보여 준 뒤 next() 를 부른다
     }
 
-    if (this.boss) missBoss(this.boss);
+    const bossHeal = this.boss ? missBoss(this.boss) : 0;
 
     return {
       ...base,
@@ -344,6 +360,7 @@ export class Session {
       hp: this.hp,
       phase: this.phase,
       bossHit: null,
+      bossHeal,
     };
   }
 
